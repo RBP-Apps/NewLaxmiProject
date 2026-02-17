@@ -82,7 +82,8 @@ export default function FoundationPage() {
 
   const handleSelectAll = (checked) => {
     if (checked) {
-      setSelectedRows(filteredPendingItems.map((item) => item.id));
+      const items = activeTab === "history" ? filteredHistoryItems : filteredPendingItems;
+      setSelectedRows(items.map((item) => item.id));
     } else {
       setSelectedRows([]);
     }
@@ -95,6 +96,11 @@ export default function FoundationPage() {
       setSelectedRows((prev) => prev.filter((rid) => rid !== id));
     }
   };
+
+  useEffect(() => {
+    setSelectedRows([]);
+    setSelectedItem(null);
+  }, [activeTab]);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -264,8 +270,9 @@ export default function FoundationPage() {
         finalFileUrl = urlData.publicUrl;
       }
 
+      const currentItems = activeTab === "history" ? historyItems : pendingItems;
       const itemsToProcess = isBulk
-        ? pendingItems.filter((item) => selectedRows.includes(item.id))
+        ? currentItems.filter((item) => selectedRows.includes(item.id))
         : [selectedItem];
 
       const now = new Date();
@@ -354,6 +361,11 @@ export default function FoundationPage() {
 
   const renderHistoryRow = (item) => (
     <>
+      <TableCell className="px-4">
+        <div className="flex justify-center">
+          <Checkbox checked={selectedRows.includes(item.id)} onCheckedChange={(checked) => handleSelectRow(item.id, checked)} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out" />
+        </div>
+      </TableCell>
       <TableCell>
         <Button variant="ghost" size="sm" onClick={() => handleActionClick(item)} className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto">
           <Pencil className="h-3.5 w-3.5" /> Edit
@@ -397,7 +409,8 @@ export default function FoundationPage() {
   );
 
   const pendingColCount = pendingHeaders.length + 2; // +2 for checkbox + action
-  const historyColCount = historyHeaders.length;
+  const historyColCount = historyHeaders.length + 1; // +1 for checkbox (Action is included in historyHeaders?) Wait, let's look at historyHeaders array.
+  // historyHeaders[0] is "Action". So +1 for Checkbox.
 
   return (
     <div className="space-y-8 p-6 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
@@ -523,7 +536,14 @@ export default function FoundationPage() {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <Input placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200" />
                 </div>
-                <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 h-9 flex items-center whitespace-nowrap">{filteredHistoryItems.length} Records</Badge>
+                <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                  {selectedRows.length >= 2 && (
+                    <Button onClick={handleBulkClick} className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9" size="sm">
+                      <Pencil className="h-4 w-4 mr-2" /> Foundation Selected ({selectedRows.length})
+                    </Button>
+                  )}
+                  <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 h-9 flex items-center whitespace-nowrap">{filteredHistoryItems.length} Records</Badge>
+                </div>
               </div>
             </CardHeader>
 
@@ -548,6 +568,11 @@ export default function FoundationPage() {
                 <Table className="[&_th]:text-center [&_td]:text-center">
                   <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                     <TableRow className="border-b border-blue-100 hover:bg-transparent">
+                       <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
+                        <div className="flex justify-center">
+                          <Checkbox checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length} onCheckedChange={handleSelectAll} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out" />
+                        </div>
+                      </TableHead>
                       {historyHeaders.map((h) => (
                         <TableHead key={h} className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">{h}</TableHead>
                       ))}
@@ -610,7 +635,7 @@ export default function FoundationPage() {
               {(selectedItem || isBulk) && (
                 <>
                   <div className="p-6 space-y-6">
-                    {!isBulk && selectedItem && (
+                    {(isBulk || selectedItem) && (
                       <div className="rounded-xl border border-blue-100 bg-linear-to-br from-blue-50/50 to-cyan-50/30 p-5 shadow-sm">
                         <h3 className="text-sm font-bold text-blue-900 mb-4 flex items-center gap-2 border-b border-blue-100 pb-2">
                           <span className="bg-white p-1 rounded shadow-sm"><CheckCircle2 className="h-4 w-4 text-blue-500" /></span>
@@ -618,15 +643,16 @@ export default function FoundationPage() {
                         </h3>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-6">
                           {[
-                            { label: "Reg ID", value: selectedItem.regId, mono: true },
-                            { label: "Beneficiary Name", value: selectedItem.beneficiaryName },
-                            { label: "Village & Block", value: `${selectedItem.village}, ${selectedItem.block}` },
-                            { label: "District", value: selectedItem.district },
-                            { label: "Pump Capacity", value: selectedItem.pumpCapacity },
-                            { label: "Pump Head", value: selectedItem.pumpHead },
-                            { label: "IP Name", value: selectedItem.ipName },
-                            { label: "Mobile", value: selectedItem.mobileNumber, mono: true },
+                            { label: "Reg ID", value: isBulk ? "Multiple" : selectedItem?.regId, mono: true },
+                            { label: "Beneficiary Name", value: isBulk ? "Multiple" : selectedItem?.beneficiaryName },
+                            { label: "Village & Block", value: isBulk ? "Multiple" : `${selectedItem?.village}, ${selectedItem?.block}` },
+                            { label: "District", value: isBulk ? "Multiple" : selectedItem?.district },
+                            { label: "Pump Capacity", value: isBulk ? "Multiple" : selectedItem?.pumpCapacity },
+                            { label: "Pump Head", value: isBulk ? "Multiple" : selectedItem?.pumpHead },
+                            { label: "IP Name", value: isBulk ? "Multiple" : selectedItem?.ipName },
+                            { label: "Mobile", value: isBulk ? "Multiple" : selectedItem?.mobileNumber, mono: true },
                           ].map(({ label, value, mono }) => (
+
                             <div key={label} className="space-y-1">
                               <span className="text-[10px] uppercase font-bold text-blue-900/60 block mb-1">{label}</span>
                               <p className={`font-medium text-slate-700 ${mono ? "font-mono break-all" : ""}`}>{value || "-"}</p>

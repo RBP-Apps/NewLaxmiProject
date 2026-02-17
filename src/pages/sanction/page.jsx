@@ -62,7 +62,8 @@ export default function SanctionPage() {
 
   const handleSelectAll = (checked) => {
     if (checked) {
-      setSelectedRows(filteredPendingItems.map((item) => item.serialNo));
+      const items = activeTab === "history" ? filteredHistoryItems : filteredPendingItems;
+      setSelectedRows(items.map((item) => item.serialNo));
     } else {
       setSelectedRows([]);
     }
@@ -75,6 +76,12 @@ export default function SanctionPage() {
       setSelectedRows((prev) => prev.filter((id) => id !== serialNo));
     }
   };
+
+  // Clear selection when switching tabs
+  useEffect(() => {
+    setSelectedRows([]);
+    setSelectedItem(null);
+  }, [activeTab]);
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -348,7 +355,6 @@ export default function SanctionPage() {
       surveyRemarks: "",
       surveyorName: "",
       isApproved: false,
-      installer: "",
     });
     setIsDialogOpen(true);
   };
@@ -396,8 +402,9 @@ export default function SanctionPage() {
       }
 
       // Prepare items to process
+      const currentItems = activeTab === "history" ? historyItems : pendingItems;
       const itemsToProcess = isBulk
-        ? pendingItems.filter((item) => selectedRows.includes(item.serialNo))
+        ? currentItems.filter((item) => selectedRows.includes(item.serialNo))
         : [selectedItem];
 
       const updatePromises = itemsToProcess.map(async (item) => {
@@ -739,12 +746,24 @@ export default function SanctionPage() {
                       className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
                     />
                   </div>
-                  <Badge
-                    variant="outline"
-                    className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 h-9 flex items-center whitespace-nowrap"
-                  >
-                    {filteredHistoryItems.length} Completed
-                  </Badge>
+                  <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                    {selectedRows.length >= 2 && (
+                      <Button
+                        onClick={handleBulkClick}
+                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
+                        size="sm"
+                      >
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Sanction Selected ({selectedRows.length})
+                      </Button>
+                    )}
+                    <Badge
+                      variant="outline"
+                      className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 h-9 flex items-center whitespace-nowrap"
+                    >
+                      {filteredHistoryItems.length} Completed
+                    </Badge>
+                  </div>
                 </div>
               </div>
             </CardHeader>
@@ -804,6 +823,20 @@ export default function SanctionPage() {
                 <Table className="[&_th]:text-center [&_td]:text-center">
                   <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                     <TableRow className="border-b border-blue-100 hover:bg-transparent">
+                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
+                        <div className="flex justify-center">
+                          <Checkbox
+                            checked={
+                              filteredHistoryItems.length > 0 &&
+                              selectedRows.length ===
+                              filteredHistoryItems.length
+                            }
+                            onCheckedChange={handleSelectAll}
+                            aria-label="Select all rows"
+                            className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
+                          />
+                        </div>
+                      </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Action
                       </TableHead>
@@ -847,6 +880,12 @@ export default function SanctionPage() {
                         Planned Date
                       </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                        Survey Date
+                      </TableHead>
+                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                        Delay
+                      </TableHead>
+                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Survey Status
                       </TableHead>
                     </TableRow>
@@ -855,7 +894,7 @@ export default function SanctionPage() {
                     {filteredHistoryItems.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={22}
+                          colSpan={23}
                           className="h-48 text-center text-slate-500 bg-slate-50/30"
                         >
                           No survey history found.
@@ -867,6 +906,18 @@ export default function SanctionPage() {
                           key={item.serialNo}
                           className="hover:bg-blue-50/30 transition-colors"
                         >
+                          <TableCell className="px-4">
+                            <div className="flex justify-center">
+                              <Checkbox
+                                checked={selectedRows.includes(item.serialNo)}
+                                onCheckedChange={(checked) =>
+                                  handleSelectRow(item.serialNo, checked)
+                                }
+                                aria-label={`Select row ${item.serialNo}`}
+                                className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110"
+                              />
+                            </div>
+                          </TableCell>
                           <TableCell>
                             <Button
                               variant="ghost"
@@ -1073,6 +1124,61 @@ export default function SanctionPage() {
                       </div>
                     </div>
                   )}
+
+                  {/* READ ONLY INFO GRID FOR BULK OR SINGLE */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-2">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-slate-700">
+                        Beneficiary Name
+                      </Label>
+                      <Input
+                        value={isBulk ? "Multiple" : (selectedItem?.beneficiaryName || "")}
+                        readOnly
+                        className="bg-slate-100/50 border-slate-200 text-slate-500"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-slate-700">
+                        Mobile Number
+                      </Label>
+                      <Input
+                        value={isBulk ? "Multiple" : (selectedItem?.mobileNumber || "")}
+                        readOnly
+                        className="bg-slate-100/50 border-slate-200 text-slate-500"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-slate-700">
+                        Village
+                      </Label>
+                      <Input
+                        value={isBulk ? "Multiple" : (selectedItem?.village || "")}
+                        readOnly
+                        className="bg-slate-100/50 border-slate-200 text-slate-500"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-slate-700">
+                        Pump Capacity
+                      </Label>
+                      <Input
+                        value={isBulk ? "Multiple" : (selectedItem?.pumpCapacity || "")}
+                        readOnly
+                        className="bg-slate-100/50 border-slate-200 text-slate-500"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-slate-700">
+                        IP Name
+                      </Label>
+                      <Input
+                        value={isBulk ? "Multiple" : (selectedItem?.ipName || "")}
+                        readOnly
+                        className="bg-slate-100/50 border-slate-200 text-slate-500"
+                      />
+                    </div>
+
+                  </div>
 
                   {/* SURVEY INPUT FORM */}
                   <div className="space-y-6">

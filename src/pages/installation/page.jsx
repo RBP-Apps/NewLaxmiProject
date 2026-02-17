@@ -122,7 +122,7 @@ export default function InstallationPage() {
   });
 
   const [formData, setFormData] = useState({
-    installationStatus: "Completed",
+    installationStatus: "Done",
     installationDate: "",
     photoUploadedOnUpadApp: null,
     delay4: "",
@@ -258,7 +258,7 @@ export default function InstallationPage() {
     setIsSuccess(false);
     setIsBulk(false);
     setFormData({
-      installationStatus: "Completed",
+      installationStatus: item.installationStatus === "Completed" ? "Done" : (item.installationStatus || "Done"),
       installationDate: item.installationDate || "",
       photoUploadedOnUpadApp: item.photoUploadedOnUpadApp || null,
       delay4: item.delay4 || "",
@@ -268,11 +268,39 @@ export default function InstallationPage() {
 
   const handleSelectAll = (checked) => {
     if (checked) {
-      setSelectedRows(filteredPendingItems.map((item) => item.serialNo));
+      const items = activeTab === "history" ? filteredHistoryItems : filteredPendingItems;
+      setSelectedRows(items.map((item) => item.serialNo || item.id)); // Use ID for history if serialNo not available? Let's check historyItems structure
+      // historyItemsParsed has: id, regId, serialNo.
+      // pendingItems has: id, regId, serialNo.
+      // So use item.serialNo if it's the key, or id.
+      // previous implementation used serialNo for Pending.
+      // Let's stick to serialNo as key if unique, but history items might not have it or might be duplicate?
+      // Wait, history items are fetched from installation table. They have unique IDs.
+      // Pending items are from portal table (mapped). Portal table has unique reg_id or serial_no?
+      // In pending map: `id: insRow.id`. If pending, insRow might be empty?
+      // Ah, pending items are those with `planned_4` but NO `actual_4`. So they exist in installation table.
+      // So they have `id` from installation table.
+      // Let's use `id` (installation table ID) as the key for selection, to be safe.
+      // But `handleSelectRow` uses `serialNo`. Let's check `filteredPendingItems` map.
+      // `id: insRow.id`. `serialNo: row.serial_no`.
+      // The pending table uses `item.serialNo` as key for checkbox.
+      // If we change to ID, we must update table row checkbox too.
+      // Let's check if serialNo is reliable.
+      // In `foundation` page we used `id`.
+      // In `sanction` page we used `serialNo`.
+      // In `loi-mr` we used `regId`.
+      // Let's stick to `serialNo` if that's what `installation` page is already using for Pending.
+      // Yes, `selectedRows` stores `serialNo`.
+      setSelectedRows(items.map((item) => item.serialNo));
     } else {
       setSelectedRows([]);
     }
   };
+
+  useEffect(() => {
+    setSelectedRows([]);
+    setSelectedItem(null);
+  }, [activeTab]);
 
   const handleSelectRow = (serialNo, checked) => {
     if (checked) {
@@ -287,7 +315,7 @@ export default function InstallationPage() {
     setSelectedItem(null);
     setIsSuccess(false);
     setFormData({
-      installationStatus: "Completed",
+      installationStatus: "Done",
       installationDate: "",
       photoUploadedOnUpadApp: null,
       delay4: "",
@@ -342,8 +370,9 @@ export default function InstallationPage() {
 
       // 2. IDENTIFY ITEMS
       let itemsToProcess = [];
+      const currentItems = activeTab === "history" ? historyItems : pendingItems;
       if (isBulk) {
-        itemsToProcess = pendingItems.filter((item) =>
+        itemsToProcess = currentItems.filter((item) =>
           selectedRows.includes(item.serialNo)
         );
       } else {
@@ -747,12 +776,24 @@ export default function InstallationPage() {
                     className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
                   />
                 </div>
-                <Badge
-                  variant="outline"
-                  className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 h-9 flex items-center whitespace-nowrap"
-                >
-                  {filteredHistoryItems.length} Records
-                </Badge>
+                <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                  {selectedRows.length >= 2 && (
+                     <Button
+                       onClick={handleBulkClick}
+                       className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
+                       size="sm"
+                     >
+                       <Pencil className="h-4 w-4 mr-2" />
+                       Installation Selected ({selectedRows.length})
+                     </Button>
+                  )}
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 h-9 flex items-center whitespace-nowrap"
+                  >
+                    {filteredHistoryItems.length} Records
+                  </Badge>
+                </div>
               </div>
             </CardHeader>
 
@@ -813,6 +854,11 @@ export default function InstallationPage() {
                 <Table className="[&_th]:text-center [&_td]:text-center">
                   <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                     <TableRow className="border-b border-blue-100 hover:bg-transparent">
+                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
+                        <div className="flex justify-center">
+                          <Checkbox checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length} onCheckedChange={handleSelectAll} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out" />
+                        </div>
+                      </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[120px]">Action</TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Reg ID</TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Beneficiary Name</TableHead>
@@ -821,9 +867,7 @@ export default function InstallationPage() {
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Pump Capacity</TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Pump Head</TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">IP Name</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Installation Status</TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Installation Date</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Delay</TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Photo</TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Status</TableHead>
                     </TableRow>
@@ -835,7 +879,7 @@ export default function InstallationPage() {
                           key={`history-skel-${index}`}
                           className="animate-pulse"
                         >
-                          {Array.from({ length: 13 }).map((__, i) => (
+                          {Array.from({ length: 12 }).map((__, i) => (
                             <TableCell key={i}>
                               <div className="h-4 w-full bg-slate-200 rounded mx-auto"></div>
                             </TableCell>
@@ -845,7 +889,7 @@ export default function InstallationPage() {
                     ) : filteredHistoryItems.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={13}
+                          colSpan={12}
                           className="h-48 text-center text-slate-500 bg-slate-50/30"
                         >
                           <div className="flex flex-col items-center justify-center gap-2">
@@ -866,12 +910,18 @@ export default function InstallationPage() {
                           key={item.serialNo}
                           className="hover:bg-blue-50/30 transition-colors"
                         >
+                          <TableCell className="px-4">
+                            <div className="flex justify-center">
+                              <Checkbox checked={selectedRows.includes(item.serialNo || item.id)} onCheckedChange={(checked) => handleSelectRow(item.serialNo || item.id, checked)} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out" />
+                            </div>
+                          </TableCell>
                           <TableCell>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleActionClick(item)}
-                              className="bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white border border-cyan-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto"
+                              disabled={selectedRows.length >= 2}
+                              className="bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white border border-cyan-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               <Pencil className="h-3.5 w-3.5" />
                               Edit
@@ -883,10 +933,8 @@ export default function InstallationPage() {
                           <TableCell className="whitespace-nowrap text-slate-600">{item.village}</TableCell>
                           <TableCell className="whitespace-nowrap text-slate-600 font-medium text-blue-600 uppercase">{item.pumpCapacity}</TableCell>
                           <TableCell className="whitespace-nowrap text-slate-600">{item.pumpHead}</TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600 font-medium">{item.ipName}</TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-700 font-medium">{item.installationStatus}</TableCell>
+                          <TableCell className="whitespace-nowrap text-slate-600 font-medium text-xs">{item.ipName}</TableCell>
                           <TableCell className="whitespace-nowrap text-slate-600">{item.installationDate}</TableCell>
-                          <TableCell className="whitespace-nowrap text-red-600 font-medium">{item.delay4 || "-"}</TableCell>
                           <TableCell className="whitespace-nowrap">
                             {item.photoUploadedOnUpadApp ? (
                               <a href={getPreviewUrl(item.photoUploadedOnUpadApp)} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline text-xs flex items-center justify-center gap-1 hover:text-blue-800">
@@ -895,7 +943,14 @@ export default function InstallationPage() {
                             ) : <span className="text-slate-400">-</span>}
                           </TableCell>
                           <TableCell className="whitespace-nowrap">
-                            <Badge className="bg-teal-100 text-teal-800 hover:bg-teal-200 border-teal-200">Installed</Badge>
+                            <Badge
+                              className={`
+                                ${item.installationStatus === "Done" || item.installationStatus === "Completed" ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200" : ""}
+                                ${item.installationStatus === "Pending" ? "bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-200" : ""}
+                              `}
+                            >
+                              {item.installationStatus || "Pending"}
+                            </Badge>
                           </TableCell>
                         </TableRow>
                       ))
@@ -1072,8 +1127,8 @@ export default function InstallationPage() {
               <div className="p-6 space-y-6">
                 {(selectedItem || isBulk) && (
                   <>
-                    {/* PREFILLED BENEFICIARY DETAILS CARD - Hide in Bulk Mode */}
-                    {!isBulk && selectedItem && (
+                    {/* PREFILLED BENEFICIARY DETAILS CARD - Show in Bulk Mode too with props */}
+                    {(isBulk || selectedItem) && (
                       <div className="bg-slate-50/50 rounded-xl border border-slate-200 p-4">
                         <h3 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
                           <FileCheck className="h-4 w-4 text-blue-600" />
@@ -1085,7 +1140,7 @@ export default function InstallationPage() {
                               Serial No
                             </span>
                             <p className="font-medium text-slate-800">
-                              {selectedItem.serialNo}
+                              {isBulk ? "Multiple" : selectedItem.serialNo}
                             </p>
                           </div>
                           <div>
@@ -1093,7 +1148,7 @@ export default function InstallationPage() {
                               Reg ID
                             </span>
                             <p className="font-medium text-slate-800 font-mono break-all">
-                              {selectedItem.regId}
+                              {isBulk ? "Multiple" : selectedItem.regId}
                             </p>
                           </div>
                           <div>
@@ -1101,7 +1156,7 @@ export default function InstallationPage() {
                               Beneficiary Name
                             </span>
                             <p className="font-medium text-slate-800">
-                              {selectedItem.beneficiaryName}
+                              {isBulk ? "Multiple" : selectedItem.beneficiaryName}
                             </p>
                           </div>
                           <div>
@@ -1109,7 +1164,7 @@ export default function InstallationPage() {
                               Father's Name
                             </span>
                             <p className="font-medium text-slate-800">
-                              {selectedItem.fatherName}
+                              {isBulk ? "Multiple" : selectedItem.fatherName}
                             </p>
                           </div>
                           <div>
@@ -1117,7 +1172,7 @@ export default function InstallationPage() {
                               Village/Block
                             </span>
                             <p className="font-medium text-slate-800">
-                              {selectedItem.village}, {selectedItem.block}
+                              {isBulk ? "Multiple" : `${selectedItem.village}, ${selectedItem.block}`}
                             </p>
                           </div>
                           <div>
@@ -1125,7 +1180,7 @@ export default function InstallationPage() {
                               Pump Type
                             </span>
                             <p className="font-medium text-blue-700 bg-blue-50 inline-block px-2 py-0.5 rounded text-xs border border-blue-100">
-                              {selectedItem.pumpCapacity}
+                              {isBulk ? "Multiple" : selectedItem.pumpCapacity}
                             </p>
                           </div>
                         </div>
@@ -1141,7 +1196,7 @@ export default function InstallationPage() {
                           value={formData.installationStatus}
                           onChange={(e) => setFormData({ ...formData, installationStatus: e.target.value })}
                         >
-                          <option value="Completed" className="text-slate-700">Completed</option>
+                          <option value="Done" className="text-slate-700">Done</option>
                           <option value="Pending" className="text-slate-700">Pending</option>
                         </select>
                       </div>

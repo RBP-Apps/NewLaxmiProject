@@ -121,19 +121,27 @@ export default function LoiMrPage() {
 
   const handleSelectAll = (checked) => {
     if (checked) {
-      setSelectedRows(filteredPendingItems.map((item) => item.serialNo));
+      const items = activeTab === "history" ? filteredHistoryItems : filteredPendingItems;
+      const idField = activeTab === "history" ? "regId" : "serialNo"; // History uses regId as key, Pending uses serialNo
+      setSelectedRows(items.map((item) => item[idField]));
     } else {
       setSelectedRows([]);
     }
   };
 
-  const handleSelectRow = (serialNo, checked) => {
+  const handleSelectRow = (id, checked) => {
     if (checked) {
-      setSelectedRows((prev) => [...prev, serialNo]);
+      setSelectedRows((prev) => [...prev, id]);
     } else {
-      setSelectedRows((prev) => prev.filter((id) => id !== serialNo));
+      setSelectedRows((prev) => prev.filter((rowId) => rowId !== id));
     }
   };
+
+  // Clear selection when switching tabs
+  useEffect(() => {
+    setSelectedRows([]);
+    setSelectedItem(null);
+  }, [activeTab]);
 
   // Form state for processing
   const [formData, setFormData] = useState({
@@ -328,8 +336,11 @@ export default function LoiMrPage() {
       }
 
       // 2. Prepare Data Update for work_order table
+      const currentItems = activeTab === "history" ? historyItems : pendingItems;
+      const idField = activeTab === "history" ? "regId" : "serialNo";
+
       const itemsToProcess = isBulk
-        ? pendingItems.filter((item) => selectedRows.includes(item.serialNo))
+        ? currentItems.filter((item) => selectedRows.includes(item[idField]))
         : [selectedItem];
 
       const updatePromises = itemsToProcess.map(async (item) => {
@@ -722,13 +733,26 @@ export default function LoiMrPage() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
                   />
+                  </div>
+
+                <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                  {selectedRows.length >= 2 && (
+                    <Button
+                      onClick={handleBulkClick}
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
+                      size="sm"
+                    >
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Process Selected ({selectedRows.length})
+                    </Button>
+                  )}
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 h-9 flex items-center whitespace-nowrap"
+                  >
+                    {filteredHistoryItems.length} Records
+                  </Badge>
                 </div>
-                <Badge
-                  variant="outline"
-                  className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 h-9 flex items-center whitespace-nowrap"
-                >
-                  {filteredHistoryItems.length} Records
-                </Badge>
               </div>
             </CardHeader>
 
@@ -786,6 +810,20 @@ export default function LoiMrPage() {
                 <Table className="[&_th]:text-center [&_td]:text-center">
                   <TableHeader className="[&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-blue-50 shadow-sm">
                     <TableRow className="border-b border-blue-100 hover:bg-transparent">
+                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
+                        <div className="flex justify-center">
+                          <Checkbox
+                            checked={
+                              filteredHistoryItems.length > 0 &&
+                              selectedRows.length ===
+                              filteredHistoryItems.length
+                            }
+                            onCheckedChange={handleSelectAll}
+                            aria-label="Select all rows"
+                            className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
+                          />
+                        </div>
+                      </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Action
                       </TableHead>
@@ -851,7 +889,7 @@ export default function LoiMrPage() {
                     ) : filteredHistoryItems.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={11}
+                          colSpan={14} // Increased colspan for checkbox column
                           className="h-48 text-center text-slate-500 bg-slate-50/30"
                         >
                           {historyItems.length === 0
@@ -865,6 +903,18 @@ export default function LoiMrPage() {
                           key={item.regId}
                           className="hover:bg-blue-50/30 transition-colors"
                         >
+                          <TableCell className="px-4">
+                            <div className="flex justify-center">
+                              <Checkbox
+                                checked={selectedRows.includes(item.regId)}
+                                onCheckedChange={(checked) =>
+                                  handleSelectRow(item.regId, checked)
+                                }
+                                aria-label={`Select row ${item.regId}`}
+                                className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110"
+                              />
+                            </div>
+                          </TableCell>
                           <TableCell>
                             <Button
                               variant="outline"
@@ -1085,7 +1135,7 @@ export default function LoiMrPage() {
                           Beneficiary Name
                         </Label>
                         <Input
-                          value={formData.beneficiaryName}
+                          value={formData.beneficiaryName || ""}
                           readOnly
                           className="bg-slate-100/50 border-slate-200 text-slate-500"
                         />
@@ -1095,7 +1145,7 @@ export default function LoiMrPage() {
                           Mobile Number
                         </Label>
                         <Input
-                          value={selectedItem?.mobileNumber || "-"}
+                          value={isBulk ? "Multiple" : (selectedItem?.mobileNumber || "")}
                           readOnly
                           className="bg-slate-100/50 border-slate-200 text-slate-500"
                         />
@@ -1105,7 +1155,7 @@ export default function LoiMrPage() {
                           Village
                         </Label>
                         <Input
-                          value={selectedItem?.village || "-"}
+                          value={isBulk ? "Multiple" : (selectedItem?.village || "")}
                           readOnly
                           className="bg-slate-100/50 border-slate-200 text-slate-500"
                         />
@@ -1115,7 +1165,7 @@ export default function LoiMrPage() {
                           Pump Capacity
                         </Label>
                         <Input
-                          value={selectedItem?.pumpCapacity || "-"}
+                          value={isBulk ? "Multiple" : (selectedItem?.pumpCapacity || "")}
                           readOnly
                           className="bg-slate-100/50 border-slate-200 text-slate-500"
                         />
@@ -1125,7 +1175,7 @@ export default function LoiMrPage() {
                           Pump Head
                         </Label>
                         <Input
-                          value={selectedItem?.pumpHead || "-"}
+                          value={isBulk ? "Multiple" : (selectedItem?.pumpHead || "")}
                           readOnly
                           className="bg-slate-100/50 border-slate-200 text-slate-500"
                         />
@@ -1135,7 +1185,7 @@ export default function LoiMrPage() {
                           IP Name
                         </Label>
                         <Input
-                          value={formData.company}
+                          value={formData.company || ""}
                           readOnly
                           className="bg-slate-100/50 border-slate-200 text-slate-500"
                         />
