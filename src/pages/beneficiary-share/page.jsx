@@ -59,21 +59,10 @@ export default function BeneficiarySharePage() {
     });
 
     const [formData, setFormData] = useState({
-        planned_5: "",
-        actual_5: "",
-        delay_5: "",
-        photo_link: "",
-        photo_rms_data_pending: "",
-        longitude: "",
-        latitude: "",
-        supply_aapurti_date: "",
-        scadalot_creation: "",
-        lot_ref_no: "",
-        lot_name: "",
-        asset_mapping_by_ea: "",
-        days_7_verification: "",
-        rms_data_mail_to_rotommag: "",
-        serial_no: "",
+        state_share_amt: "",
+        state_share_dt: "",
+        farmer_share_amt: "",
+        farmer_share_dt: "",
         reg_id: "",
     });
 
@@ -126,7 +115,7 @@ export default function BeneficiarySharePage() {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            // 1. Fetch portal_update records where planned_5 is not null
+            // 1. Fetch portal_update records where planned_5 is not null (as trigger)
             const { data: updateData, error: updateError } = await supabase
                 .from("portal_update")
                 .select("*")
@@ -140,10 +129,24 @@ export default function BeneficiarySharePage() {
                 return;
             }
 
-            // 2. Fetch portal details for the reg_ids
             const regIds = [...new Set(updateData.map(d => d.reg_id))];
-            let portalData = [];
 
+            // 2. Fetch beneficiary_share data for these regIds
+            let shareData = [];
+            if (regIds.length > 0) {
+                const { data: sData, error: sError } = await supabase
+                    .from("beneficiary_share")
+                    .select("*")
+                    .in("reg_id", regIds);
+                if (sError) throw sError;
+                shareData = sData;
+            }
+            const shareMap = new Map();
+            shareData.forEach(s => shareMap.set(String(s.reg_id), s));
+
+
+            // 3. Fetch portal details for the reg_ids
+            let portalData = [];
             if (regIds.length > 0) {
                 const { data: pData, error: pError } = await supabase
                     .from("portal")
@@ -165,9 +168,10 @@ export default function BeneficiarySharePage() {
             const portalMap = new Map();
             portalData.forEach(p => portalMap.set(String(p["Reg ID"] || p.reg_id), p));
 
-            // 3. Map and Join
+            // 4. Map and Join
             const combined = updateData.map(upd => {
                 const portal = portalMap.get(String(upd.reg_id));
+                const share = shareMap.get(String(upd.reg_id));
                 if (!portal) return null;
 
                 return {
@@ -186,11 +190,33 @@ export default function BeneficiarySharePage() {
                     pumpHead: portal["Pump Head"] || portal.pump_head || "-",
                     ipName: portal["IP Name"] || portal.ip_name || portal.installer_name || "-",
                     amount: portal["Amount"] || portal.amount || "-",
+
+                    // Share Data
+                    state_share_amt: share?.state_share_amt || "",
+                    state_share_dt: share?.state_share_dt || "",
+                    farmer_share_amt: share?.farmer_share_amt || "",
+                    farmer_share_dt: share?.farmer_share_dt || "",
+
+                    // Logic for pending/history based on share data existence?
+                    // Original logic used actual_5 from portal_update. 
+                    // Let's assume valid share data means "Done" for this specific purpose?
+                    // Or keep using actual_5 from portal_update as the "status" tracker?
+                    // If the user removed actual_5 form inputs, maybe they want to check if share data exists?
+                    // For now, let's stick to the existing filter logic if possible, or assume 
+                    // if both amounts are filled, it's done? 
+                    // The previous code filtered by `!item.actual_5`.
+                    // Since actual_5 is in portal_update and we are not editing it anymore, 
+                    // we might need to rely on share values.
+                    // Let's check: if (farmer_share_amt && state_share_amt) -> history?
+                    // Or effectively, if we have a record in beneficiary_share, is it done?
+                    // Let's use `share?.farmer_share_amt` as a proxy for "done" if actual_5 is not being used/updated.
+                    isCompleted: !!share?.farmer_share_amt && !!share?.state_share_amt
                 };
             }).filter(Boolean);
 
-            setPendingItems(combined.filter(item => !item.actual_5));
-            setHistoryItems(combined.filter(item => item.actual_5));
+            setPendingItems(combined.filter(item => !item.isCompleted));
+            setHistoryItems(combined.filter(item => item.isCompleted));
+
         } catch (e) {
             console.error("Fetch Data Error:", e);
         } finally {
@@ -224,18 +250,10 @@ export default function BeneficiarySharePage() {
             planned_5: item.planned_5 || "",
             actual_5: item.actual_5 || new Date().toISOString().split('T')[0],
             delay_5: item.delay_5 || "",
-            photo_link: item.photo_link || "",
-            photo_rms_data_pending: item.photo_rms_data_pending || "",
-            longitude: item.longitude || "",
-            latitude: item.latitude || "",
-            supply_aapurti_date: item.supply_aapurti_date || "",
-            scadalot_creation: item.scadalot_creation || "",
-            lot_ref_no: item.lot_ref_no || "",
-            lot_name: item.lot_name || "",
-            asset_mapping_by_ea: item.asset_mapping_by_ea || "",
-            days_7_verification: item.days_7_verification || "",
-            rms_data_mail_to_rotommag: item.rms_data_mail_to_rotommag || "",
-            serial_no: item.serial_no || "",
+            state_share_amt: item.state_share_amt || "",
+            state_share_dt: item.state_share_dt || "",
+            farmer_share_amt: item.farmer_share_amt || "",
+            farmer_share_dt: item.farmer_share_dt || "",
             reg_id: item.reg_id || item.regId || "",
         });
         setIsDialogOpen(true);
@@ -265,18 +283,10 @@ export default function BeneficiarySharePage() {
             planned_5: "",
             actual_5: new Date().toISOString().split('T')[0],
             delay_5: "",
-            photo_link: "",
-            photo_rms_data_pending: "",
-            longitude: "",
-            latitude: "",
-            supply_aapurti_date: "",
-            scadalot_creation: "",
-            lot_ref_no: "",
-            lot_name: "",
-            asset_mapping_by_ea: "",
-            days_7_verification: "",
-            rms_data_mail_to_rotommag: "",
-            serial_no: "",
+            state_share_amt: "",
+            state_share_dt: "",
+            farmer_share_amt: "",
+            farmer_share_dt: "",
             reg_id: "",
         });
         setIsDialogOpen(true);
@@ -297,29 +307,38 @@ export default function BeneficiarySharePage() {
             }
 
             const updatePromises = itemsToProcess.map(async (item) => {
-                const rowUpdate = {
-                    actual_5: formData.actual_5 || new Date().toISOString().split('T')[0],
-                    delay_5: formData.delay_5 || null,
-                    photo_link: formData.photo_link || null,
-                    photo_rms_data_pending: formData.photo_rms_data_pending || null,
-                    longitude: formData.longitude ? parseFloat(formData.longitude) : null,
-                    latitude: formData.latitude ? parseFloat(formData.latitude) : null,
-                    supply_aapurti_date: formData.supply_aapurti_date || null,
-                    scadalot_creation: formData.scadalot_creation || null,
-                    lot_ref_no: formData.lot_ref_no || null,
-                    lot_name: formData.lot_name || null,
-                    asset_mapping_by_ea: formData.asset_mapping_by_ea || null,
-                    days_7_verification: formData.days_7_verification || null,
-                    rms_data_mail_to_rotommag: formData.rms_data_mail_to_rotommag || null,
+                const shareData = {
+                    state_share_amt: formData.state_share_amt || null,
+                    state_share_dt: formData.state_share_dt || null,
+                    farmer_share_amt: formData.farmer_share_amt || null,
+                    farmer_share_dt: formData.farmer_share_dt || null,
                     updated_at: new Date().toISOString(),
                 };
 
-                const { error } = await supabase
-                    .from("portal_update")
-                    .update(rowUpdate)
-                    .eq("reg_id", item.regId);
+                // Check if row exists in beneficiary_share
+                const { data: existingRows } = await supabase
+                    .from("beneficiary_share")
+                    .select("id")
+                    .eq("reg_id", item.regId)
+                    .maybeSingle();
 
-                if (error) throw error;
+                if (existingRows) {
+                    const { error } = await supabase
+                        .from("beneficiary_share")
+                        .update(shareData)
+                        .eq("id", existingRows.id);
+                    if (error) throw error;
+                } else {
+                    const newRow = {
+                        reg_id: item.regId,
+                        serial_no: item.serialNo, // Assuming serialNo is available in item
+                        ...shareData
+                    };
+                    const { error } = await supabase
+                        .from("beneficiary_share")
+                        .insert([newRow]);
+                    if (error) throw error;
+                }
             });
 
             await Promise.all(updatePromises);
@@ -808,6 +827,9 @@ export default function BeneficiarySharePage() {
                                     <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                                         <TableRow className="border-b border-blue-100 hover:bg-transparent">
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                                Action
+                                            </TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                                                 Reg ID
                                             </TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
@@ -817,19 +839,7 @@ export default function BeneficiarySharePage() {
                                                 District
                                             </TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                                                Installer
-                                            </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                                                Actual 5
-                                            </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                                                Delay 5
-                                            </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                                                Status
-                                            </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                                                Action
+                                                IP Name
                                             </TableHead>
                                         </TableRow>
                                     </TableHeader>
@@ -869,6 +879,17 @@ export default function BeneficiarySharePage() {
                                                     className="hover:bg-blue-50/30 transition-colors"
                                                 >
                                                     <TableCell>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 mx-auto"
+                                                            onClick={() => handleActionClick(item)}
+                                                            title="Edit Record"
+                                                        >
+                                                            <Pencil className="h-4 w-4" />Edit
+                                                        </Button>
+                                                    </TableCell>
+                                                    <TableCell>
                                                         <span className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md">
                                                             {item.regId}
                                                         </span>
@@ -881,28 +902,6 @@ export default function BeneficiarySharePage() {
                                                     </TableCell>
                                                     <TableCell className="text-slate-600 font-medium">
                                                         {item.ipName}
-                                                    </TableCell>
-                                                    <TableCell className="text-teal-700 font-semibold bg-teal-50/30">
-                                                        {item.actual_5 || "-"}
-                                                    </TableCell>
-                                                    <TableCell className="text-slate-600">
-                                                        {item.delay_5 || "0"}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Badge className="bg-green-100 text-green-800 border-green-200">
-                                                            Completed
-                                                        </Badge>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8 rounded-full text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 mx-auto"
-                                                            onClick={() => handleActionClick(item)}
-                                                            title="Edit Record"
-                                                        >
-                                                            <Pencil className="h-4 w-4" />
-                                                        </Button>
                                                     </TableCell>
                                                 </TableRow>
                                             ))
@@ -937,20 +936,6 @@ export default function BeneficiarySharePage() {
                                             </div>
 
                                             <div className="grid grid-cols-2 gap-2 text-xs border-t border-slate-100 pt-2 mt-2">
-                                                <div>
-                                                    <span className="font-medium text-slate-500">
-                                                        Actual 5:
-                                                    </span>{" "}
-                                                    {item.actual_5 || "-"}
-                                                </div>
-                                                <div>
-                                                    <span className="font-medium text-slate-500">
-                                                        Delay 5:
-                                                    </span>{" "}
-                                                    <span className={parseInt(item.delay_5) > 0 ? "text-red-500 font-semibold" : "text-slate-700"}>
-                                                        {item.delay_5 || "0"}
-                                                    </span>
-                                                </div>
                                             </div>
                                         </CardContent>
                                     </Card>
@@ -1096,131 +1081,56 @@ export default function BeneficiarySharePage() {
                                         </div>
                                     )}
 
-                                    {/* PORTAL UPDATE INPUT FORM */}
+                                    {/* BENEFICIARY SHARE INPUT FORM */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
                                         <div className="space-y-1.5">
-                                            <Label className="text-xs text-slate-700 font-medium">Actual Date (Actual 5)</Label>
+                                            <Label className="text-xs text-slate-700 font-medium">State Share Amt.</Label>
+                                            <Input
+                                                type="number"
+                                                value={formData.state_share_amt}
+                                                onChange={(e) => setFormData({ ...formData, state_share_amt: e.target.value })}
+                                                placeholder="0.00"
+                                                className="h-9 border-slate-200 focus:border-blue-400 focus-visible:ring-blue-100 bg-white"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <Label className="text-xs text-slate-700 font-medium">State Share Date</Label>
                                             <Input
                                                 type="date"
-                                                value={formData.actual_5}
-                                                onChange={(e) => setFormData({ ...formData, actual_5: e.target.value })}
+                                                value={formData.state_share_dt}
+                                                onChange={(e) => setFormData({ ...formData, state_share_dt: e.target.value })}
                                                 className="h-9 border-slate-200 focus:border-blue-400 focus-visible:ring-blue-100 bg-white"
                                             />
                                         </div>
 
                                         <div className="space-y-1.5">
-                                            <Label className="text-xs text-slate-700 font-medium">Delay (Days)</Label>
+                                            <Label className="text-xs text-slate-700 font-medium">Farmer Share Amt.</Label>
                                             <Input
-                                                type="text"
-                                                value={formData.delay_5}
-                                                onChange={(e) => setFormData({ ...formData, delay_5: e.target.value })}
-                                                placeholder="Enter delay"
+                                                type="number"
+                                                value={formData.farmer_share_amt}
+                                                onChange={(e) => setFormData({ ...formData, farmer_share_amt: e.target.value })}
+                                                placeholder="0.00"
                                                 className="h-9 border-slate-200 focus:border-blue-400 focus-visible:ring-blue-100 bg-white"
                                             />
                                         </div>
 
                                         <div className="space-y-1.5">
-                                            <Label className="text-xs text-slate-700 font-medium">Photo Link</Label>
-                                            <Input
-                                                value={formData.photo_link}
-                                                onChange={(e) => setFormData({ ...formData, photo_link: e.target.value })}
-                                                placeholder="Enter photo link"
-                                                className="h-9 border-slate-200 focus:border-blue-400 focus-visible:ring-blue-100 bg-white"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-1.5">
-                                            <Label className="text-xs text-slate-700 font-medium">RMS Data Pending</Label>
-                                            <Input
-                                                value={formData.photo_rms_data_pending}
-                                                onChange={(e) => setFormData({ ...formData, photo_rms_data_pending: e.target.value })}
-                                                placeholder="Enter RMS pending info"
-                                                className="h-9 border-slate-200 focus:border-blue-400 focus-visible:ring-blue-100 bg-white"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-1.5">
-                                            <Label className="text-xs text-slate-700 font-medium">Longitude</Label>
-                                            <Input
-                                                value={formData.longitude}
-                                                onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
-                                                placeholder="0.000000"
-                                                className="h-9 border-slate-200 focus:border-blue-400 focus-visible:ring-blue-100 bg-white"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-1.5">
-                                            <Label className="text-xs text-slate-700 font-medium">Latitude</Label>
-                                            <Input
-                                                value={formData.latitude}
-                                                onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
-                                                placeholder="0.000000"
-                                                className="h-9 border-slate-200 focus:border-blue-400 focus-visible:ring-blue-100 bg-white"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-1.5">
-                                            <Label className="text-xs text-slate-700 font-medium">Supply Aapurti Date</Label>
+                                            <Label className="text-xs text-slate-700 font-medium">Farmer Share Date</Label>
                                             <Input
                                                 type="date"
-                                                value={formData.supply_aapurti_date}
-                                                onChange={(e) => setFormData({ ...formData, supply_aapurti_date: e.target.value })}
+                                                value={formData.farmer_share_dt}
+                                                onChange={(e) => setFormData({ ...formData, farmer_share_dt: e.target.value })}
                                                 className="h-9 border-slate-200 focus:border-blue-400 focus-visible:ring-blue-100 bg-white"
                                             />
                                         </div>
 
                                         <div className="space-y-1.5">
-                                            <Label className="text-xs text-slate-700 font-medium">Scadalot Creation</Label>
-                                            <Input
-                                                value={formData.scadalot_creation}
-                                                onChange={(e) => setFormData({ ...formData, scadalot_creation: e.target.value })}
-                                                className="h-9 border-slate-200 focus:border-blue-400 focus-visible:ring-blue-100 bg-white"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-1.5">
-                                            <Label className="text-xs text-slate-700 font-medium">Lot Ref No</Label>
-                                            <Input
-                                                value={formData.lot_ref_no}
-                                                onChange={(e) => setFormData({ ...formData, lot_ref_no: e.target.value })}
-                                                className="h-9 border-slate-200 focus:border-blue-400 focus-visible:ring-blue-100 bg-white"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-1.5">
-                                            <Label className="text-xs text-slate-700 font-medium">Lot Name</Label>
-                                            <Input
-                                                value={formData.lot_name}
-                                                onChange={(e) => setFormData({ ...formData, lot_name: e.target.value })}
-                                                className="h-9 border-slate-200 focus:border-blue-400 focus-visible:ring-blue-100 bg-white"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-1.5">
-                                            <Label className="text-xs text-slate-700 font-medium">Asset Mapping By EA</Label>
-                                            <Input
-                                                value={formData.asset_mapping_by_ea}
-                                                onChange={(e) => setFormData({ ...formData, asset_mapping_by_ea: e.target.value })}
-                                                className="h-9 border-slate-200 focus:border-blue-400 focus-visible:ring-blue-100 bg-white"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-1.5">
-                                            <Label className="text-xs text-slate-700 font-medium">7 Days Verification</Label>
-                                            <Input
-                                                value={formData.days_7_verification}
-                                                onChange={(e) => setFormData({ ...formData, days_7_verification: e.target.value })}
-                                                className="h-9 border-slate-200 focus:border-blue-400 focus-visible:ring-blue-100 bg-white"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-1.5 md:col-span-2 lg:col-span-3">
-                                            <Label className="text-xs text-slate-700 font-medium">RMS Data Mail to Rotommag</Label>
-                                            <Input
-                                                value={formData.rms_data_mail_to_rotommag}
-                                                onChange={(e) => setFormData({ ...formData, rms_data_mail_to_rotommag: e.target.value })}
-                                                className="h-9 border-slate-200 focus:border-blue-400 focus-visible:ring-blue-100 bg-white"
-                                            />
+                                            <Label className="text-xs text-slate-700 font-medium">Total Share Amount</Label>
+                                            <div className="h-9 flex items-center px-3 border border-slate-200 rounded-md bg-slate-50 text-slate-600">
+                                                {((parseFloat(formData.state_share_amt) || 0) + (parseFloat(formData.farmer_share_amt) || 0)).toFixed(2)}
+                                            </div>
                                         </div>
                                     </div>
 
@@ -1230,7 +1140,7 @@ export default function BeneficiarySharePage() {
                                             variant="outline"
                                             onClick={() => setIsDialogOpen(false)}
                                             disabled={isSubmitting}
-                                            className="px-6 bg-white hover:bg-slate-50 text-slate-700 border-slate-200"
+                                            className="px-6 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200"
                                         >
                                             Cancel
                                         </Button>
@@ -1255,6 +1165,6 @@ export default function BeneficiarySharePage() {
                     )}
                 </DialogContent>
             </Dialog>
-        </div>
+        </div >
     );
 }

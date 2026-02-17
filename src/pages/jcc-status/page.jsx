@@ -106,6 +106,7 @@ export default function JccStatusPage() {
         jcrStatus: "",
         jcrSubmitDate: "",
         jcrLink: "",
+        file_jcrLink: null,
     });
 
     const fetchData = async () => {
@@ -207,16 +208,27 @@ export default function JccStatusPage() {
             }, 2000);
             return () => clearTimeout(timer);
         }
-    }, [isSuccess]);
+    });
+
+    const handleFileUpload = (e, fieldName) => {
+        if (e.target.files && e.target.files[0]) {
+            setFormData({
+                ...formData,
+                [fieldName]: e.target.files[0],
+                [fieldName.replace('file_', '')]: e.target.files[0].name
+            });
+        }
+    };
 
     const handleActionClick = (item) => {
         setIsBulk(false);
         setSelectedItem(item);
         setIsSuccess(false);
         setFormData({
-            jcrStatus: item.jcrStatus || "",
+            jcrStatus: item.jcrStatus || "Done",
             jcrSubmitDate: item.jcrSubmitDate || "",
             jcrLink: item.jcrLink || "",
+            file_jcrLink: null,
         });
         setIsDialogOpen(true);
     };
@@ -242,9 +254,10 @@ export default function JccStatusPage() {
         setSelectedItem(null);
         setIsSuccess(false);
         setFormData({
-            jcrStatus: "",
+            jcrStatus: "Done",
             jcrSubmitDate: "",
             jcrLink: "",
+            file_jcrLink: null,
         });
         setIsDialogOpen(true);
     };
@@ -1110,12 +1123,8 @@ export default function JccStatusPage() {
                                                 }
                                                 className="w-full h-10 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-400 bg-white"
                                             >
-                                                <option value="">Select Status</option>
+                                                <option value="Done">Done</option>
                                                 <option value="Pending">Pending</option>
-                                                <option value="Submitted">Submitted</option>
-                                                <option value="Approved">Approved</option>
-                                                <option value="Rejected">Rejected</option>
-                                                <option value="Completed">Completed</option>
                                             </select>
                                         </div>
 
@@ -1138,11 +1147,8 @@ export default function JccStatusPage() {
                                                 JCR Link
                                             </Label>
                                             <Input
-                                                value={formData.jcrLink}
-                                                onChange={(e) =>
-                                                    setFormData({ ...formData, jcrLink: e.target.value })
-                                                }
-                                                placeholder="Enter JCR Document Link"
+                                                type="file"
+                                                onChange={(e) => handleFileUpload(e, 'file_jcrLink')}
                                                 className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
                                             />
                                         </div>

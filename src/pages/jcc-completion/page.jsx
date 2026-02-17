@@ -895,9 +895,7 @@ export default function JccCompletionPage() {
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Payment Mode
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">
-                        Action
-                      </TableHead>
+
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -935,6 +933,16 @@ export default function JccCompletionPage() {
                           key={item.serialNo}
                           className="hover:bg-blue-50/30 transition-colors"
                         >
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              onClick={() => handleActionClick(item)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
                           <TableCell>
                             <span className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md">
                               {item.regId}
@@ -985,16 +993,7 @@ export default function JccCompletionPage() {
                           <TableCell>
                             <span className="text-xs">{item.paymentMode}</span>
                           </TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                              onClick={() => handleActionClick(item)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
+
                         </TableRow>
                       ))
                     )}

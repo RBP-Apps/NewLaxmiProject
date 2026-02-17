@@ -31,13 +31,14 @@ export default function InvoicingPage() {
   const [historyItems, setHistoryItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [formData, setFormData] = useState({
-    planned_6: "",
-    actual_6: "",
-    delay_6: "",
     raisoni_invoice_no: "",
     invoice_date: "",
     raisoni_invoice_link: "",
+    laxmi_invoice_no: "",
+    laxmi_invoice_date: "",
     laxmi_invoice_link: "",
+    file_raisoni_invoice_link: null, // For file object
+    file_laxmi_invoice_link: null, // For file object
     serial_no: "",
     reg_id: "",
   });
@@ -226,7 +227,11 @@ export default function InvoicingPage() {
       raisoni_invoice_no: item.raisoni_invoice_no || "",
       invoice_date: item.invoice_date || "",
       raisoni_invoice_link: item.raisoni_invoice_link || "",
+      laxmi_invoice_no: item.laxmi_invoice_no || "",
+      laxmi_invoice_date: item.laxmi_invoice_date || "",
       laxmi_invoice_link: item.laxmi_invoice_link || "",
+      file_raisoni_invoice_link: null,
+      file_laxmi_invoice_link: null,
       serial_no: item.serial_no || "",
       reg_id: item.reg_id || item.regId || "",
     });
@@ -260,16 +265,26 @@ export default function InvoicingPage() {
       raisoni_invoice_no: "",
       invoice_date: "",
       raisoni_invoice_link: "",
+      laxmi_invoice_no: "",
+      laxmi_invoice_date: "",
       laxmi_invoice_link: "",
+      file_raisoni_invoice_link: null,
+      file_laxmi_invoice_link: null,
       serial_no: "",
       reg_id: "",
     });
     setIsDialogOpen(true);
   };
 
-  const handleFileUpload = (e) => {
+
+
+  const handleFileUpload = (e, fieldName) => {
     if (e.target.files && e.target.files[0]) {
-      setFormData({ ...formData, insuranceForm: e.target.files[0].name });
+      setFormData({
+        ...formData,
+        [fieldName]: e.target.files[0],
+        [fieldName.replace('file_', '')]: e.target.files[0].name // Store filename as string representation for now
+      });
     }
   };
 
@@ -294,6 +309,8 @@ export default function InvoicingPage() {
           raisoni_invoice_no: formData.raisoni_invoice_no || null,
           invoice_date: formData.invoice_date || null,
           raisoni_invoice_link: formData.raisoni_invoice_link || null,
+          laxmi_invoice_no: formData.laxmi_invoice_no || null,
+          laxmi_invoice_date: formData.laxmi_invoice_date || null,
           laxmi_invoice_link: formData.laxmi_invoice_link || null,
           updated_at: new Date().toISOString(),
         };
@@ -766,6 +783,9 @@ export default function InvoicingPage() {
                   <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                     <TableRow className="border-b border-blue-100 hover:bg-transparent">
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                        Action
+                      </TableHead>
+                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Reg ID
                       </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
@@ -789,9 +809,7 @@ export default function InvoicingPage() {
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Status
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Action
-                      </TableHead>
+
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -833,6 +851,17 @@ export default function InvoicingPage() {
                           className="hover:bg-blue-50/30 transition-colors"
                         >
                           <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-full text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 mx-auto"
+                              onClick={() => handleActionClick(item)}
+                              title="Edit Record"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                          <TableCell>
                             <span className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md">
                               {item.regId}
                             </span>
@@ -871,17 +900,7 @@ export default function InvoicingPage() {
                               Invoiced
                             </Badge>
                           </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 rounded-full text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 mx-auto"
-                              onClick={() => handleActionClick(item)}
-                              title="Edit Record"
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
+
                         </TableRow>
                       ))
                     )}
@@ -1077,14 +1096,34 @@ export default function InvoicingPage() {
                         Raisoni Invoice Link
                       </Label>
                       <Input
-                        value={formData.raisoni_invoice_link}
+                        type="file"
+                        onChange={(e) => handleFileUpload(e, 'file_raisoni_invoice_link')}
+                        className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-slate-700 font-medium">
+                        Laxmi Invoice No
+                      </Label>
+                      <Input
+                        value={formData.laxmi_invoice_no}
                         onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            raisoni_invoice_link: e.target.value,
-                          })
+                          setFormData({ ...formData, laxmi_invoice_no: e.target.value })
                         }
-                        placeholder="Enter URL to Raisoni invoice"
+                        placeholder="Enter Laxmi invoice number"
+                        className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-slate-700 font-medium">
+                        Laxmi Invoice Date
+                      </Label>
+                      <Input
+                        type="date"
+                        value={formData.laxmi_invoice_date}
+                        onChange={(e) =>
+                          setFormData({ ...formData, laxmi_invoice_date: e.target.value })
+                        }
                         className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
                       />
                     </div>
@@ -1093,59 +1132,20 @@ export default function InvoicingPage() {
                         Laxmi Invoice Link
                       </Label>
                       <Input
-                        value={formData.laxmi_invoice_link}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            laxmi_invoice_link: e.target.value,
-                          })
-                        }
-                        placeholder="Enter URL to Laxmi invoice"
-                        className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-slate-700 font-medium">
-                        Actual Date
-                      </Label>
-                      <Input
-                        type="date"
-                        value={formData.actual_6}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            actual_6: e.target.value,
-                          })
-                        }
-                        className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-slate-700 font-medium">
-                        Delay (Days)
-                      </Label>
-                      <Input
-                        type="number"
-                        value={formData.delay_6}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            delay_6: e.target.value,
-                          })
-                        }
-                        placeholder="Days delayed"
+                        type="file"
+                        onChange={(e) => handleFileUpload(e, 'file_laxmi_invoice_link')}
                         className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
                       />
                     </div>
                   </div>
 
                   {/* Footer */}
-                  <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 pb-6 pr-6">
+                  <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-slate-100 pb-6 pr-6">
                     <Button
                       variant="outline"
                       onClick={() => setIsDialogOpen(false)}
                       disabled={isSubmitting}
-                      className="px-6 bg-white hover:bg-slate-50 text-slate-700 border-slate-200"
+                      className="px-6 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200"
                     >
                       Cancel
                     </Button>

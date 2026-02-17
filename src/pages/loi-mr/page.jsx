@@ -143,7 +143,6 @@ export default function LoiMrPage() {
     workOrderDate: "",
     workOrderFile: null,
     workOrderFileObj: null,
-    amount: "",
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -208,7 +207,6 @@ export default function LoiMrPage() {
           workOrderNo: wo.work_order_no || "",
           workOrderDate: wo.work_order_date || "",
           workOrderFile: wo.work_order_file || "",
-          amount: wo.amount || "",
           actual1: wo.actual_1 || "",
           planned1: wo.planned_1 || "",
         };
@@ -259,7 +257,6 @@ export default function LoiMrPage() {
       workOrderDate: item.workOrderDate || "",
       workOrderFile: item.workOrderFile || null,
       workOrderFileObj: null,
-      amount: item.amount || "",
     });
     setIsDialogOpen(true);
   };
@@ -276,7 +273,6 @@ export default function LoiMrPage() {
       workOrderDate: "",
       workOrderFile: null,
       workOrderFileObj: null,
-      amount: "",
     });
     setIsDialogOpen(true);
   };
@@ -340,7 +336,6 @@ export default function LoiMrPage() {
         const rowUpdate = {
           work_order_no: formData.workOrderNo,
           work_order_date: formData.workOrderDate || null,
-          amount: formData.amount ? parseInt(formData.amount) : null,
           actual_1: formatDateTime(new Date()),
         };
 
@@ -358,14 +353,6 @@ export default function LoiMrPage() {
           .eq("reg_id", item.regId);
 
         if (woError) throw woError;
-
-        // Also update portal table with ip_name if company was selected
-        if (formData.company) {
-          await supabase
-            .from("portal")
-            .update({ ip_name: formData.company })
-            .eq("reg_id", item.regId);
-        }
       });
 
       const results = await Promise.allSettled(updatePromises);
@@ -800,6 +787,9 @@ export default function LoiMrPage() {
                   <TableHeader className="[&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-blue-50 shadow-sm">
                     <TableRow className="border-b border-blue-100 hover:bg-transparent">
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                        Action
+                      </TableHead>
+                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Reg ID
                       </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
@@ -838,14 +828,9 @@ export default function LoiMrPage() {
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Work Order Date
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Amount
-                      </TableHead>
+
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Document
-                      </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Action
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -880,6 +865,29 @@ export default function LoiMrPage() {
                           key={item.regId}
                           className="hover:bg-blue-50/30 transition-colors"
                         >
+                          <TableCell>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-xs h-8 px-3 border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                              onClick={() => {
+                                setSelectedItem(item);
+                                setIsBulk(false);
+                                setFormData({
+                                  beneficiaryName: item.beneficiaryName,
+                                  company: item.ipName || "",
+                                  workOrderNo: item.workOrderNo || "",
+                                  workOrderDate: item.workOrderDate || "",
+                                  workOrderFile: item.workOrderFile || null,
+                                  workOrderFileObj: null,
+                                });
+                                setIsDialogOpen(true);
+                              }}
+                            >
+                              <Pencil className="h-3 w-3 mr-1" />
+                              Edit
+                            </Button>
+                          </TableCell>
                           <TableCell className="text-slate-600 font-mono text-xs">
                             {item.regId}
                           </TableCell>
@@ -913,9 +921,7 @@ export default function LoiMrPage() {
                           <TableCell className="text-slate-600">
                             {item.ipName}
                           </TableCell>
-                          <TableCell className="text-slate-600 font-semibold text-blue-700">
-                            {item.amount ? `₹${item.amount}` : "-"}
-                          </TableCell>
+
                           <TableCell className="text-slate-600">
                             {item.workOrderNo || "-"}
                           </TableCell>
@@ -943,30 +949,6 @@ export default function LoiMrPage() {
                             ) : (
                               "-"
                             )}
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-xs h-8 px-3 border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
-                              onClick={() => {
-                                setSelectedItem(item);
-                                setIsBulk(false);
-                                setFormData({
-                                  beneficiaryName: item.beneficiaryName,
-                                  company: item.ipName || "",
-                                  workOrderNo: item.workOrderNo || "",
-                                  workOrderDate: item.workOrderDate || "",
-                                  workOrderFile: item.workOrderFile || null,
-                                  workOrderFileObj: null,
-                                  amount: item.amount || "",
-                                });
-                                setIsDialogOpen(true);
-                              }}
-                            >
-                              <Pencil className="h-3 w-3 mr-1" />
-                              Edit
-                            </Button>
                           </TableCell>
                         </TableRow>
                       ))
@@ -1152,20 +1134,11 @@ export default function LoiMrPage() {
                         <Label className="text-sm font-medium text-slate-700">
                           IP Name
                         </Label>
-                        <select
+                        <Input
                           value={formData.company}
-                          onChange={(e) =>
-                            setFormData({ ...formData, company: e.target.value })
-                          }
-                          className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          <option value="">Select IP Name</option>
-                          {ipOptions.map((opt, idx) => (
-                            <option key={idx} value={opt}>
-                              {opt}
-                            </option>
-                          ))}
-                        </select>
+                          readOnly
+                          className="bg-slate-100/50 border-slate-200 text-slate-500"
+                        />
                       </div>
 
                       <div className="space-y-2">
@@ -1196,20 +1169,7 @@ export default function LoiMrPage() {
                         />
                       </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium text-slate-700">
-                          LOI Amount
-                        </Label>
-                        <Input
-                          type="number"
-                          value={formData.amount}
-                          onChange={(e) =>
-                            setFormData({ ...formData, amount: e.target.value })
-                          }
-                          placeholder="Enter Amount"
-                          className="border-slate-200 focus:border-cyan-400 focus:ring-cyan-100"
-                        />
-                      </div>
+
 
 
 

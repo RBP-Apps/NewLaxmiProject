@@ -104,15 +104,9 @@ export default function InsurancesPage() {
 
     const [formData, setFormData] = useState({
         insuranceNo: "",
-        insuranceCompany: "",
-        policyType: "",
-        coverageAmount: "",
-        premiumAmount: "",
-        policyStartDate: "",
-        policyEndDate: "",
-        renewalDate: "",
-        insuranceStatus: "",
-        remarks: "",
+        scadaInsuranceUpload: "Done",
+        insuranceFile: "",
+        file_insuranceFile: null,
     });
 
     const fetchData = async () => {
@@ -185,7 +179,8 @@ export default function InsurancesPage() {
                     policyEndDate: row.policy_end_date || "",
                     renewalDate: row.renewal_date || "",
                     insuranceStatus: row.insurance_status || "Pending",
-                    remarks: row.scada_insurance_upload || "", // Using scada_insurance_upload as remarks or extra field if needed, currently mapping to remarks for UI
+                    scadaInsuranceUpload: row.scada_insurance_upload || "Done",
+                    insuranceFile: row.insurance_file || "",
                 };
 
                 // Logic for Tab Separation based on Schema
@@ -227,21 +222,25 @@ export default function InsurancesPage() {
         }
     }, [isSuccess]);
 
+    const handleFileUpload = (e, fieldName) => {
+        if (e.target.files && e.target.files[0]) {
+            setFormData({
+                ...formData,
+                [fieldName]: e.target.files[0],
+                [fieldName.replace('file_', '')]: e.target.files[0].name
+            });
+        }
+    };
+
     const handleActionClick = (item) => {
         setIsBulk(false);
         setSelectedItem(item);
         setIsSuccess(false);
         setFormData({
             insuranceNo: item.insuranceNo || "",
-            insuranceCompany: item.insuranceCompany || "",
-            policyType: item.policyType || "",
-            coverageAmount: item.coverageAmount || "",
-            premiumAmount: item.premiumAmount || "",
-            policyStartDate: item.policyStartDate || "",
-            policyEndDate: item.policyEndDate || "",
-            renewalDate: item.renewalDate || "",
-            insuranceStatus: item.insuranceStatus || "Active", // Default Suggestion
-            remarks: item.remarks || "",
+            scadaInsuranceUpload: item.scadaInsuranceUpload || "Done",
+            insuranceFile: item.insuranceFile || "",
+            file_insuranceFile: null,
         });
         setIsDialogOpen(true);
     };
@@ -268,15 +267,9 @@ export default function InsurancesPage() {
         setIsSuccess(false);
         setFormData({
             insuranceNo: "",
-            insuranceCompany: "",
-            policyType: "",
-            coverageAmount: "",
-            premiumAmount: "",
-            policyStartDate: "",
-            policyEndDate: "",
-            renewalDate: "",
-            insuranceStatus: "Active",
-            remarks: "",
+            scadaInsuranceUpload: "Done",
+            insuranceFile: "",
+            file_insuranceFile: null,
         });
         setIsDialogOpen(true);
     };
@@ -303,19 +296,35 @@ export default function InsurancesPage() {
             }
 
             // Update insurance table for each item
-            // Since we are now operating on existing insurance rows (filtered by planned_10), we always UPDATE.
             const updatePromises = itemsToProcess.map(async (item) => {
+                let insuranceFileUrl = formData.insuranceFile || null;
+
+                // Handle File Upload for Single Item (or Bulk if applied to all - mostly single)
+                if (formData.file_insuranceFile) {
+                    const file = formData.file_insuranceFile;
+                    const fileExt = file.name.split(".").pop();
+                    const fileName = `${item.regId}_insurance_${Date.now()}.${fileExt}`;
+                    const filePath = `insurance/${fileName}`;
+
+                    const { error: uploadError } = await supabase.storage
+                        .from("Image_bucket")
+                        .upload(filePath, file);
+
+                    if (uploadError) {
+                        console.error("File upload error:", uploadError);
+                        // decide if we throw or continue. For now, log.
+                    } else {
+                        const { data: { publicUrl } } = supabase.storage
+                            .from("Image_bucket")
+                            .getPublicUrl(filePath);
+                        insuranceFileUrl = publicUrl;
+                    }
+                }
+
                 const updatePayload = {
                     insurance_no: formData.insuranceNo || null,
-                    insurance_company: formData.insuranceCompany || null,
-                    policy_type: formData.policyType || null,
-                    coverage_amount: formData.coverageAmount !== "" ? Number(formData.coverageAmount) : null,
-                    premium_amount: formData.premiumAmount !== "" ? Number(formData.premiumAmount) : null,
-                    policy_start_date: formData.policyStartDate || null,
-                    policy_end_date: formData.policyEndDate || null,
-                    renewal_date: formData.renewalDate || null,
-                    insurance_status: formData.insuranceStatus || null,
-                    scada_insurance_upload: formData.remarks || null,
+                    scada_insurance_upload: formData.scadaInsuranceUpload || null,
+                    insurance_file: insuranceFileUrl,
                     actual_10: timestamp, // Set actual date to now
                     updated_at: new Date().toISOString(),
                 };
@@ -822,6 +831,9 @@ export default function InsurancesPage() {
                                     <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                                         <TableRow className="border-b border-blue-100 hover:bg-transparent">
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                                Action
+                                            </TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                                                 Reg ID
                                             </TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
@@ -837,19 +849,10 @@ export default function InsurancesPage() {
                                                 Insurance No
                                             </TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                                                Company
+                                                SCADA Upload
                                             </TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                                                Start Date
-                                            </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                                                End Date
-                                            </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                                                Status
-                                            </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                                                Action
+                                                File
                                             </TableHead>
                                         </TableRow>
                                     </TableHeader>
@@ -857,7 +860,7 @@ export default function InsurancesPage() {
                                         {isLoading ? (
                                             Array.from({ length: 5 }).map((_, index) => (
                                                 <TableRow key={index} className="animate-pulse">
-                                                    {Array.from({ length: 12 }).map((_, i) => (
+                                                    {Array.from({ length: 8 }).map((_, i) => (
                                                         <TableCell key={i}>
                                                             <div className="h-4 w-full bg-slate-200 rounded" />
                                                         </TableCell>
@@ -867,7 +870,7 @@ export default function InsurancesPage() {
                                         ) : filteredHistoryItems.length === 0 ? (
                                             <TableRow>
                                                 <TableCell
-                                                    colSpan={12}
+                                                    colSpan={8}
                                                     className="h-48 text-center text-slate-500 bg-slate-50/30"
                                                 >
                                                     <div className="flex flex-col items-center justify-center gap-2">
@@ -889,6 +892,16 @@ export default function InsurancesPage() {
                                                     className="hover:bg-blue-50/30 transition-colors"
                                                 >
                                                     <TableCell>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            className="h-8 w-8 p-0 hover:bg-blue-100/50 hover:text-blue-700"
+                                                            onClick={() => handleActionClick(item)}
+                                                        >
+                                                            <Edit className="h-4 w-4" />
+                                                        </Button>
+                                                    </TableCell>
+                                                    <TableCell>
                                                         <span className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md">
                                                             {item.regId}
                                                         </span>
@@ -905,27 +918,24 @@ export default function InsurancesPage() {
                                                     <TableCell className="text-slate-700 font-mono text-xs">
                                                         {item.insuranceNo || "-"}
                                                     </TableCell>
-                                                    <TableCell className="text-slate-600 font-medium">
-                                                        {item.insuranceCompany || "-"}
-                                                    </TableCell>
-                                                    <TableCell className="text-slate-600 bg-blue-50/30">
-                                                        {item.policyStartDate || "-"}
-                                                    </TableCell>
-                                                    <TableCell className="text-slate-600 bg-orange-50/30">
-                                                        {item.policyEndDate || "-"}
-                                                    </TableCell>
-                                                    <TableCell className="text-slate-600">
-                                                        {item.insuranceStatus || "-"}
+                                                    <TableCell>
+                                                        <Badge variant={item.scadaInsuranceUpload === "Done" ? "default" : "secondary"} className={item.scadaInsuranceUpload === "Done" ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-800"}>
+                                                            {item.scadaInsuranceUpload || "Pending"}
+                                                        </Badge>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            className="h-8 w-8 p-0 hover:bg-blue-100/50 hover:text-blue-700"
-                                                            onClick={() => handleActionClick(item)}
-                                                        >
-                                                            <Edit className="h-4 w-4" />
-                                                        </Button>
+                                                        {item.insuranceFile ? (
+                                                            <a
+                                                                href={item.insuranceFile}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-blue-600 hover:text-blue-800 underline text-xs flex items-center justify-center gap-1"
+                                                            >
+                                                                <ShieldCheck className="h-3 w-3" /> View
+                                                            </a>
+                                                        ) : (
+                                                            <span className="text-slate-400 text-xs">-</span>
+                                                        )}
                                                     </TableCell>
                                                 </TableRow>
                                             ))
@@ -954,8 +964,8 @@ export default function InsurancesPage() {
                                                         {item.district} • {item.village}
                                                     </p>
                                                 </div>
-                                                <Badge className="bg-green-100 text-green-800 border-green-200">
-                                                    {item.insuranceStatus || "Insured"}
+                                                <Badge className={item.scadaInsuranceUpload === "Done" ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-800"}>
+                                                    {item.scadaInsuranceUpload || "Pending"}
                                                 </Badge>
                                             </div>
 
@@ -968,33 +978,11 @@ export default function InsurancesPage() {
                                                 </div>
                                                 <div>
                                                     <span className="font-medium text-slate-500">
-                                                        Company:
+                                                        File:
                                                     </span>{" "}
-                                                    {item.insuranceCompany || "-"}
-                                                </div>
-                                                <div>
-                                                    <span className="font-medium text-slate-500">
-                                                        Start Date:
-                                                    </span>{" "}
-                                                    {item.policyStartDate || "-"}
-                                                </div>
-                                                <div>
-                                                    <span className="font-medium text-slate-500">
-                                                        End Date:
-                                                    </span>{" "}
-                                                    {item.policyEndDate || "-"}
-                                                </div>
-                                                <div>
-                                                    <span className="font-medium text-slate-500">
-                                                        Premium:
-                                                    </span>{" "}
-                                                    {item.premiumAmount !== "-" ? `₹${item.premiumAmount}` : "-"}
-                                                </div>
-                                                <div>
-                                                    <span className="font-medium text-slate-500">
-                                                        Type:
-                                                    </span>{" "}
-                                                    {item.policyType || "-"}
+                                                    {item.insuranceFile ? (
+                                                        <a href={item.insuranceFile} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">View</a>
+                                                    ) : "-"}
                                                 </div>
                                             </div>
                                             <div className="flex justify-end pt-2">
@@ -1150,7 +1138,23 @@ export default function InsurancesPage() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
                                             <Label className="text-slate-700 font-medium">
-                                                Insurance Number
+                                                SCADA INSURANCE UPLOAD
+                                            </Label>
+                                            <select
+                                                value={formData.scadaInsuranceUpload}
+                                                onChange={(e) =>
+                                                    setFormData({ ...formData, scadaInsuranceUpload: e.target.value })
+                                                }
+                                                className="w-full h-10 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-400 bg-white"
+                                            >
+                                                <option value="Done">Done</option>
+                                                <option value="Pending">Pending</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label className="text-slate-700 font-medium">
+                                                Insurance No.
                                             </Label>
                                             <Input
                                                 value={formData.insuranceNo}
@@ -1162,143 +1166,32 @@ export default function InsurancesPage() {
                                             />
                                         </div>
 
-                                        <div className="space-y-2">
+                                        <div className="space-y-2 md:col-span-2">
                                             <Label className="text-slate-700 font-medium">
-                                                Insurance Company
+                                                Insurance File Upload
                                             </Label>
-                                            <Input
-                                                value={formData.insuranceCompany}
-                                                onChange={(e) =>
-                                                    setFormData({ ...formData, insuranceCompany: e.target.value })
-                                                }
-                                                placeholder="Enter insurance company"
-                                                className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label className="text-slate-700 font-medium">
-                                                Policy Start Date
-                                            </Label>
-                                            <Input
-                                                type="date"
-                                                value={formData.policyStartDate}
-                                                onChange={(e) =>
-                                                    setFormData({ ...formData, policyStartDate: e.target.value })
-                                                }
-                                                className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label className="text-slate-700 font-medium">
-                                                Policy End Date
-                                            </Label>
-                                            <Input
-                                                type="date"
-                                                value={formData.policyEndDate}
-                                                onChange={(e) =>
-                                                    setFormData({ ...formData, policyEndDate: e.target.value })
-                                                }
-                                                className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label className="text-slate-700 font-medium">
-                                                Renewal Date
-                                            </Label>
-                                            <Input
-                                                type="date"
-                                                value={formData.renewalDate}
-                                                onChange={(e) =>
-                                                    setFormData({ ...formData, renewalDate: e.target.value })
-                                                }
-                                                className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label className="text-slate-700 font-medium">
-                                                Premium Amount (₹)
-                                            </Label>
-                                            <Input
-                                                type="number"
-                                                value={formData.premiumAmount}
-                                                onChange={(e) =>
-                                                    setFormData({ ...formData, premiumAmount: e.target.value })
-                                                }
-                                                placeholder="Enter premium amount"
-                                                className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label className="text-slate-700 font-medium">
-                                                Coverage Amount (₹)
-                                            </Label>
-                                            <Input
-                                                type="number"
-                                                value={formData.coverageAmount}
-                                                onChange={(e) =>
-                                                    setFormData({ ...formData, coverageAmount: e.target.value })
-                                                }
-                                                placeholder="Enter coverage amount"
-                                                className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label className="text-slate-700 font-medium">
-                                                Policy Type
-                                            </Label>
-                                            <select
-                                                value={formData.policyType}
-                                                onChange={(e) =>
-                                                    setFormData({ ...formData, policyType: e.target.value })
-                                                }
-                                                className="w-full h-10 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-400 bg-white"
-                                            >
-                                                <option value="">Select Policy Type</option>
-                                                <option value="Comprehensive">Comprehensive</option>
-                                                <option value="Third Party">Third Party</option>
-                                                <option value="Fire">Fire</option>
-                                                <option value="Theft">Theft</option>
-                                                <option value="Other">Other</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label className="text-slate-700 font-medium">
-                                                Insurance Status
-                                            </Label>
-                                            <select
-                                                value={formData.insuranceStatus}
-                                                onChange={(e) =>
-                                                    setFormData({ ...formData, insuranceStatus: e.target.value })
-                                                }
-                                                className="w-full h-10 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-400 bg-white"
-                                            >
-                                                <option value="Pending">Pending</option>
-                                                <option value="Active">Active</option>
-                                                <option value="Expired">Expired</option>
-                                                <option value="Renewed">Renewed</option>
-                                                <option value="Cancelled">Cancelled</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label className="text-slate-700 font-medium">
-                                                Remarks
-                                            </Label>
-                                            <Input
-                                                value={formData.remarks}
-                                                onChange={(e) =>
-                                                    setFormData({ ...formData, remarks: e.target.value })
-                                                }
-                                                placeholder="Enter any remarks"
-                                                className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
-                                            />
+                                            <div className="space-y-2">
+                                                <Input
+                                                    type="file"
+                                                    onChange={(e) => handleFileUpload(e, 'file_insuranceFile')}
+                                                    className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                                />
+                                                {/* Show link if file already exists */}
+                                                {(formData.insuranceFile && typeof formData.insuranceFile === 'string' && formData.insuranceFile.trim() !== "") && (
+                                                    <div className="text-sm bg-blue-50 p-2 rounded border border-blue-100 text-blue-700 flex items-center gap-2">
+                                                        <ShieldCheck className="h-4 w-4" />
+                                                        <span>Existing File: </span>
+                                                        <a 
+                                                            href={formData.insuranceFile} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer" 
+                                                            className="font-medium underline hover:text-blue-900"
+                                                        >
+                                                            View Document
+                                                        </a>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
 
@@ -1308,7 +1201,7 @@ export default function InsurancesPage() {
                                             variant="outline"
                                             onClick={() => setIsDialogOpen(false)}
                                             disabled={isSubmitting}
-                                            className="px-6 bg-white hover:bg-slate-50 text-slate-700 border-slate-200"
+                                            className="px-6 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200"
                                         >
                                             Cancel
                                         </Button>

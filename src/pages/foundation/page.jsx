@@ -38,7 +38,7 @@ export default function FoundationPage() {
   });
 
   const [formData, setFormData] = useState({
-    dispatchedPlan: "", planDate: "", materialReceived: "", materialReceivedDate: "",
+    dispatchedPlan: "Done", planDate: "", materialReceived: "Done", materialReceivedDate: "",
     materialChalanLink: null, invoiceNo: "", wayBillNo: "", date: "",
   });
 
@@ -210,9 +210,9 @@ export default function FoundationPage() {
   const handleActionClick = (item) => {
     setSelectedItem(item); setIsBulk(false); setIsSuccess(false);
     setFormData({
-      dispatchedPlan: item.dispatchedPlan || "",
+      dispatchedPlan: item.dispatchedPlan || "Done",
       planDate: item.planDate || "",
-      materialReceived: item.materialReceived || "",
+      materialReceived: item.materialReceived || "Done",
       materialReceivedDate: item.materialReceivedDate || "",
       materialChalanLink: item.materialChalanLink || null,
       invoiceNo: item.invoiceNo || "",
@@ -226,7 +226,7 @@ export default function FoundationPage() {
     if (selectedRows.length < 2) return;
     setSelectedItem(null); setIsBulk(true); setIsSuccess(false);
     setFormData({
-      dispatchedPlan: "", planDate: "", materialReceived: "", materialReceivedDate: "",
+      dispatchedPlan: "Done", planDate: "", materialReceived: "Done", materialReceivedDate: "",
       materialChalanLink: null, invoiceNo: "", wayBillNo: "", date: "",
     });
     setIsDialogOpen(true);
@@ -323,12 +323,12 @@ export default function FoundationPage() {
   // History tab: portal columns + dispatch_material fields
   const historyHeaders = [
     "Action", "Reg ID", "Beneficiary Name", "Mobile Number", "Village", "Pump Cap", "Pump Head", "IP Name", "Invoice No", "Way Bill No", "Dispatched Plan",
-    "Plan Date", "Material Received", "Received Date", "Date", "Challan", "Status",
+    "Plan Date", "Material Received", "Received Date", "Date", "Challan", "Status"
   ];
 
   const renderPendingRow = (item) => (
     <>
-      <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">{item.regId}</TableCell>
+      <TableCell><div className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit max-w-[120px] truncate" title={item.regId}>{item.regId}</div></TableCell>
       <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
       <TableCell className="whitespace-nowrap text-slate-600">{item.fatherName}</TableCell>
       <TableCell className="whitespace-nowrap text-slate-600 font-mono">{item.mobileNumber}</TableCell>
@@ -359,7 +359,7 @@ export default function FoundationPage() {
           <Pencil className="h-3.5 w-3.5" /> Edit
         </Button>
       </TableCell>
-      <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">{item.regId}</TableCell>
+      <TableCell><div className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit max-w-[120px] truncate" title={item.regId}>{item.regId}</div></TableCell>
       <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
       <TableCell className="whitespace-nowrap text-slate-600 font-mono text-xs">{item.mobileNumber}</TableCell>
       <TableCell className="whitespace-nowrap text-slate-600">{item.village}</TableCell>
@@ -368,9 +368,25 @@ export default function FoundationPage() {
       <TableCell className="whitespace-nowrap text-slate-600 font-medium text-xs">{item.ipName}</TableCell>
       <TableCell className="whitespace-nowrap text-slate-600 text-xs">{item.invoiceNo || "-"}</TableCell>
       <TableCell className="whitespace-nowrap text-slate-600 text-xs">{item.wayBillNo || "-"}</TableCell>
-      <TableCell className="whitespace-nowrap text-slate-600 text-xs">{item.dispatchedPlan || "-"}</TableCell>
+      <TableCell className="whitespace-nowrap text-xs">
+        {item.dispatchedPlan === "Done" ? (
+          <Badge className="bg-green-100 text-green-700 border-green-200 shadow-none hover:bg-green-100">Done</Badge>
+        ) : item.dispatchedPlan === "Pending" ? (
+          <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200 shadow-none hover:bg-yellow-100">Pending</Badge>
+        ) : (
+          <span className="text-slate-600 text-xs">{item.dispatchedPlan || "-"}</span>
+        )}
+      </TableCell>
       <TableCell className="whitespace-nowrap text-slate-700 text-xs">{item.planDate || "-"}</TableCell>
-      <TableCell className="whitespace-nowrap text-slate-600 font-medium text-xs">{item.materialReceived || "-"}</TableCell>
+      <TableCell className="whitespace-nowrap text-xs">
+        {item.materialReceived === "Done" ? (
+          <Badge className="bg-green-100 text-green-700 border-green-200 shadow-none hover:bg-green-100">Done</Badge>
+        ) : item.materialReceived === "Pending" ? (
+          <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200 shadow-none hover:bg-yellow-100">Pending</Badge>
+        ) : (
+          <span className="text-slate-600 font-medium text-xs">{item.materialReceived || "-"}</span>
+        )}
+      </TableCell>
       <TableCell className="whitespace-nowrap text-slate-700 text-xs">{item.materialReceivedDate || "-"}</TableCell>
       <TableCell className="whitespace-nowrap text-slate-700 text-xs">{item.date || "-"}</TableCell>
       <TableCell className="whitespace-nowrap bg-blue-50/30">{renderChallanCell(item.materialChalanLink)}</TableCell>
@@ -613,7 +629,7 @@ export default function FoundationPage() {
                           ].map(({ label, value, mono }) => (
                             <div key={label} className="space-y-1">
                               <span className="text-[10px] uppercase font-bold text-blue-900/60 block mb-1">{label}</span>
-                              <p className={`font-medium text-slate-700 ${mono ? "font-mono" : ""}`}>{value || "-"}</p>
+                              <p className={`font-medium text-slate-700 ${mono ? "font-mono break-all" : ""}`}>{value || "-"}</p>
                             </div>
                           ))}
                         </div>
@@ -628,7 +644,10 @@ export default function FoundationPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                           <Label className="text-sm font-medium text-slate-700">Dispatched Plan</Label>
-                          <Input value={formData.dispatchedPlan} onChange={(e) => setFormData({ ...formData, dispatchedPlan: e.target.value })} placeholder="Enter dispatched plan" className="h-10 border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 transition-all bg-white" />
+                          <select value={formData.dispatchedPlan} onChange={(e) => setFormData({ ...formData, dispatchedPlan: e.target.value })} className="h-10 w-full border border-slate-200 rounded-md px-3 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-400 transition-all">
+                            <option value="Done">Done</option>
+                            <option value="Pending">Pending</option>
+                          </select>
                         </div>
                         <div className="space-y-2">
                           <Label className="text-sm font-medium text-slate-700">Plan Date</Label>
@@ -636,7 +655,10 @@ export default function FoundationPage() {
                         </div>
                         <div className="space-y-2">
                           <Label className="text-sm font-medium text-slate-700">Material Received Status</Label>
-                          <Input value={formData.materialReceived} onChange={(e) => setFormData({ ...formData, materialReceived: e.target.value })} placeholder="e.g. Received, Partial" className="h-10 border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 transition-all bg-white" />
+                          <select value={formData.materialReceived} onChange={(e) => setFormData({ ...formData, materialReceived: e.target.value })} className="h-10 w-full border border-slate-200 rounded-md px-3 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-400 transition-all">
+                            <option value="Done">Done</option>
+                            <option value="Pending">Pending</option>
+                          </select>
                         </div>
                         <div className="space-y-2">
                           <Label className="text-sm font-medium text-slate-700">Material Received Date</Label>

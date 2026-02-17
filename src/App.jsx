@@ -16,6 +16,8 @@ import PortalLayout from '@/pages/portal/layout';
 import SanctionLayout from '@/pages/sanction/layout';
 import SystemInfoLayout from '@/pages/system-info/layout';
 import SettingLayout from '@/pages/setting/layout';
+import PortalUpdateLayout from '@/pages/portal-update/layout';
+
 
 // Pages
 import DashboardPage from '@/pages/dashboard/page';
@@ -34,6 +36,7 @@ import SanctionPage from '@/pages/sanction/page';
 import SystemInfoPage from '@/pages/system-info/page';
 import SettingPage from '@/pages/setting/page';
 import LoiMrLayout from '@/pages/loi-mr/layout'; // Restored
+import PortalUpdatePage from '@/pages/portal-update/page';
 
 function App() {
      return (
@@ -84,6 +87,10 @@ function App() {
 
                     <Route path="/portal" element={<PortalLayout><Outlet /></PortalLayout>}>
                          <Route index element={<PortalPage />} />
+                    </Route>
+
+                    <Route path="/portal-update" element={<PortalUpdateLayout><Outlet /></PortalUpdateLayout>}>
+                         <Route index element={<PortalUpdatePage />} />
                     </Route>
 
                     <Route path="/sanction" element={<SanctionLayout><Outlet /></SanctionLayout>}>

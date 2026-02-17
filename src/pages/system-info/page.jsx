@@ -24,9 +24,10 @@ import {
 import {
     Cpu,
     CheckCircle2,
-    Edit,
+    Pencil,
     Loader2,
     Search,
+    Edit,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -111,10 +112,6 @@ export default function SystemInfoPage() {
         panel_no_4: "",
         panel_no_5: "",
         panel_no_6: "",
-        system_status: "Active",
-        commissioning_date: "",
-        warranty_expiry: "",
-        actual_7: "",
     });
 
     const fetchData = async () => {
@@ -220,10 +217,6 @@ export default function SystemInfoPage() {
             panel_no_4: item.panel_no_4 || "",
             panel_no_5: item.panel_no_5 || "",
             panel_no_6: item.panel_no_6 || "",
-            system_status: item.system_status || "Active",
-            commissioning_date: item.commissioning_date || "",
-            warranty_expiry: item.warranty_expiry || "",
-            actual_7: item.actual_7 || new Date().toISOString().split('T')[0],
         });
         setIsDialogOpen(true);
     };
@@ -261,9 +254,6 @@ export default function SystemInfoPage() {
             panel_no_5: "",
             panel_no_6: "",
             system_status: "Active",
-            commissioning_date: "",
-            warranty_expiry: "",
-            actual_7: new Date().toISOString().split('T')[0],
         });
         setIsDialogOpen(true);
     };
@@ -295,10 +285,6 @@ export default function SystemInfoPage() {
                     panel_no_4: formData.panel_no_4,
                     panel_no_5: formData.panel_no_5,
                     panel_no_6: formData.panel_no_6,
-                    system_status: formData.system_status,
-                    commissioning_date: formData.commissioning_date || null,
-                    warranty_expiry: formData.warranty_expiry || null,
-                    actual_7: formData.actual_7 || new Date().toISOString().split('T')[0],
                     updated_at: new Date().toISOString(),
                 };
 
@@ -568,42 +554,35 @@ export default function SystemInfoPage() {
                                 <Table className="[&_th]:text-center [&_td]:text-center">
                                     <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                                         <TableRow>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Action</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Reg ID</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Beneficiary Name</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Village</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">IMEI No</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">RID Number</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Commissioning Date</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Actual 7</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Status</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Action</TableHead>
+
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {filteredHistoryItems.map((item) => (
                                             <TableRow key={item.regId} className="hover:bg-blue-50/30 transition-colors">
+                                                <TableCell>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="text-xs h-8 px-3 border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                                                        onClick={() => handleActionClick(item)}
+                                                    >
+                                                        <Pencil className="h-3 w-3 mr-1" />
+                                                        Edit
+                                                    </Button>
+                                                </TableCell>
                                                 <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500">{item.regId}</TableCell>
                                                 <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
                                                 <TableCell className="whitespace-nowrap text-slate-600">{item.village}</TableCell>
                                                 <TableCell className="whitespace-nowrap text-slate-600">{item.imei_no || "-"}</TableCell>
                                                 <TableCell className="whitespace-nowrap text-slate-600">{item.rid_number || "-"}</TableCell>
-                                                <TableCell className="whitespace-nowrap text-slate-600">{item.commissioning_date || "-"}</TableCell>
-                                                <TableCell className="whitespace-nowrap text-slate-600 text-xs font-medium">{item.actual_7 || "-"}</TableCell>
-                                                <TableCell className="whitespace-nowrap">
-                                                    <Badge variant="outline" className={item.system_status === 'Active' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-slate-50 text-slate-700'}>
-                                                        {item.system_status}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => handleActionClick(item)}
-                                                        className="text-blue-600 hover:text-blue-700 h-8 w-8 p-0"
-                                                    >
-                                                        <Edit className="h-4 w-4" />
-                                                    </Button>
-                                                </TableCell>
+
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -651,43 +630,6 @@ export default function SystemInfoPage() {
                                                     placeholder="Enter RID Number"
                                                     value={formData.rid_number}
                                                     onChange={(e) => setFormData({ ...formData, rid_number: e.target.value })}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>System Status</Label>
-                                                <select
-                                                    value={formData.system_status}
-                                                    onChange={(e) => setFormData({ ...formData, system_status: e.target.value })}
-                                                    className="w-full h-10 px-3 text-sm border border-slate-200 rounded-md bg-white focus:ring-2 focus:ring-blue-500"
-                                                >
-                                                    <option value="Active">Active</option>
-                                                    <option value="InActive">InActive</option>
-                                                    <option value="Maintenance">Maintenance</option>
-                                                    <option value="Faulty">Faulty</option>
-                                                </select>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Commissioning Date</Label>
-                                                <Input
-                                                    type="date"
-                                                    value={formData.commissioning_date}
-                                                    onChange={(e) => setFormData({ ...formData, commissioning_date: e.target.value })}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Warranty Expiry</Label>
-                                                <Input
-                                                    type="date"
-                                                    value={formData.warranty_expiry}
-                                                    onChange={(e) => setFormData({ ...formData, warranty_expiry: e.target.value })}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Actual Date (Actual 7)</Label>
-                                                <Input
-                                                    type="date"
-                                                    value={formData.actual_7}
-                                                    onChange={(e) => setFormData({ ...formData, actual_7: e.target.value })}
                                                 />
                                             </div>
                                         </div>

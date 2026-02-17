@@ -34,7 +34,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function PaymentPage() {
-  const [activeTab, setActiveTab] = useState("pending");
+  const [activeTab, setActiveTab] = useState("Done");
   const [isSuccess, setIsSuccess] = useState(false);
   const [pendingItems, setPendingItems] = useState([]);
   const [historyItems, setHistoryItems] = useState([]);
@@ -116,11 +116,39 @@ export default function PaymentPage() {
 
   const [formData, setFormData] = useState({
     ipJcrCsrPayment: "",
-    installationPaymentToIp: "",
+    installationPaymentToIp: "Done", // Default
     ipPaymentPerInstallation: "",
     gst18Percent: "",
+    totalAmount: "",
     billSendDate: "",
   });
+
+  // Calculation Effect
+  // 1. Auto-Calculate GST when Base Amounts Change
+  useEffect(() => {
+    const jcr = parseFloat(formData.ipJcrCsrPayment) || 0;
+    const install = parseFloat(formData.ipPaymentPerInstallation) || 0;
+    const subtotal = jcr + install;
+    const calculatedGst = (subtotal * 0.18).toFixed(2);
+
+    // Only update GST if the base amount changes (to allow manual override if needed per session, 
+    // but typically we reset GST when base changes)
+    if (formData.gst18Percent !== calculatedGst) {
+      setFormData((prev) => ({ ...prev, gst18Percent: calculatedGst }));
+    }
+  }, [formData.ipJcrCsrPayment, formData.ipPaymentPerInstallation]);
+
+  // 2. Calculate Total Amount whenever Base Amounts OR GST Change
+  useEffect(() => {
+    const jcr = parseFloat(formData.ipJcrCsrPayment) || 0;
+    const install = parseFloat(formData.ipPaymentPerInstallation) || 0;
+    const gst = parseFloat(formData.gst18Percent) || 0;
+    const total = (jcr + install + gst).toFixed(2);
+
+    if (formData.totalAmount !== total) {
+      setFormData((prev) => ({ ...prev, totalAmount: total }));
+    }
+  }, [formData.ipJcrCsrPayment, formData.ipPaymentPerInstallation, formData.gst18Percent]);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -181,7 +209,11 @@ export default function PaymentPage() {
           ipPaymentPerInstallation: row.ip_payment_per_installation || "",
           gst18Percent: row.gst_18_percent || "",
           billSendDate: row.bill_send_date || "",
-          totalAmount: row.total_amount_payment_to_ip || "", // Generated
+          totalAmount: 
+            row.total_amount_payment_to_ip || 
+            ((parseFloat(row.ip_jcr_csr_payment) || 0) + 
+             (parseFloat(row.ip_payment_per_installation) || 0) + 
+             (parseFloat(row.gst_18_percent) || 0)).toFixed(2), // Fallback calculation
 
           // Trigger columns
           planned11: row.planned_11,
@@ -229,9 +261,10 @@ export default function PaymentPage() {
     setIsSuccess(false);
     setFormData({
       ipJcrCsrPayment: item.ipJcrCsrPayment || "",
-      installationPaymentToIp: item.installationPaymentToIp || "",
+      installationPaymentToIp: item.installationPaymentToIp || "Done",
       ipPaymentPerInstallation: item.ipPaymentPerInstallation || "",
       gst18Percent: item.gst18Percent || "",
+      totalAmount: item.totalAmount || "",
       billSendDate: item.billSendDate || "",
     });
     setIsDialogOpen(true);
@@ -259,9 +292,10 @@ export default function PaymentPage() {
     setIsSuccess(false);
     setFormData({
       ipJcrCsrPayment: "",
-      installationPaymentToIp: "",
+      installationPaymentToIp: "Done",
       ipPaymentPerInstallation: "",
       gst18Percent: "",
+      totalAmount: "",
       billSendDate: "",
     });
     setIsDialogOpen(true);
@@ -295,9 +329,12 @@ export default function PaymentPage() {
           installation_payment_to_ip: formData.installationPaymentToIp || null,
           ip_payment_per_installation: formData.ipPaymentPerInstallation || null,
           gst_18_percent: formData.gst18Percent || null,
+          total_amount_payment_to_ip: formData.totalAmount || null,
           bill_send_date: formData.billSendDate || null,
           actual_11: timestamp,
         };
+
+        console.log("Submitting payload for item:", item.id, rowUpdate);
 
         if (!item.id) {
           console.error("Item ID missing for update", item);
@@ -786,6 +823,9 @@ export default function PaymentPage() {
                   <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                     <TableRow className="border-b border-blue-100 hover:bg-transparent">
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                        Action
+                      </TableHead>
+                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Reg ID
                       </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
@@ -795,33 +835,31 @@ export default function PaymentPage() {
                         District
                       </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Pump Capacity
+                        IP JCR
                       </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        IP Name
+                        Install Payment
                       </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Planned Date
+                        IP Payment
                       </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Actual Date
+                        GST
                       </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Total Amount
+                        Total
                       </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Status
+                        Bill Date
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Action
-                      </TableHead>
+
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {isLoading ? (
                       Array.from({ length: 5 }).map((_, index) => (
                         <TableRow key={index} className="animate-pulse">
-                          {Array.from({ length: 10 }).map((_, i) => (
+                          {Array.from({ length: 11 }).map((_, i) => (
                             <TableCell key={i}>
                               <div className="h-4 w-full bg-slate-200 rounded" />
                             </TableCell>
@@ -831,7 +869,7 @@ export default function PaymentPage() {
                     ) : filteredHistoryItems.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={10}
+                          colSpan={11}
                           className="h-48 text-center text-slate-500 bg-slate-50/30"
                         >
                           <div className="flex flex-col items-center justify-center gap-2">
@@ -853,6 +891,16 @@ export default function PaymentPage() {
                           className="hover:bg-blue-50/30 transition-colors"
                         >
                           <TableCell>
+                             <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleActionClick(item)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                          </TableCell>
+                          <TableCell>
                             <span className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md">
                               {item.regId}
                             </span>
@@ -863,36 +911,27 @@ export default function PaymentPage() {
                           <TableCell className="text-slate-600">
                             {item.district}
                           </TableCell>
-                          <TableCell className="text-slate-600 bg-blue-50/30">
-                            {item.pumpCapacity}
+                          <TableCell className="text-slate-600 font-mono text-xs">
+                             ₹{item.ipJcrCsrPayment || "-"}
                           </TableCell>
-                          <TableCell className="text-slate-800 font-medium bg-blue-50/30">
-                            {item.ipName}
+                          <TableCell>
+                            <Badge variant={item.installationPaymentToIp === "Done" ? "default" : "secondary"} className={item.installationPaymentToIp === "Done" ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-800"}>
+                                {item.installationPaymentToIp || "Pending"}
+                            </Badge>
                           </TableCell>
-                          <TableCell className="text-slate-600 bg-blue-50/30">
-                            {item.planned11 || "-"}
+                          <TableCell className="text-slate-600 font-mono text-xs">
+                             ₹{item.ipPaymentPerInstallation || "-"}
                           </TableCell>
-                          <TableCell className="text-slate-600 bg-blue-50/30">
-                            {item.actual11 || "-"}
+                          <TableCell className="text-slate-600 font-mono text-xs">
+                             ₹{item.gst18Percent || "-"}
                           </TableCell>
                           <TableCell className="text-green-700 font-bold bg-green-50/50">
                             ₹{item.totalAmount || "0"}
                           </TableCell>
-                          <TableCell>
-                            <Badge className="bg-green-100 text-green-800 border-green-200">
-                              Paid
-                            </Badge>
+                          <TableCell className="text-slate-600 text-xs">
+                            {item.billSendDate || "-"}
                           </TableCell>
-                          <TableCell>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 w-8 p-0 hover:bg-blue-100/50 hover:text-blue-700"
-                              onClick={() => handleActionClick(item)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
+
                         </TableRow>
                       ))
                     )}
@@ -917,15 +956,15 @@ export default function PaymentPage() {
                             {item.beneficiaryName}
                           </p>
                         </div>
-                        <Badge className="bg-green-100 text-green-800 border-green-200">
-                          Paid
+                        <Badge className={item.installationPaymentToIp === "Done" ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-800"}>
+                            {item.installationPaymentToIp || "Pending"}
                         </Badge>
                       </div>
 
                       <div className="grid grid-cols-2 gap-2 text-xs border-t border-slate-100 pt-2 mt-2">
                         <div>
                           <span className="font-medium text-slate-500">
-                            Paid Amount:
+                            Amount:
                           </span>{" "}
                           ₹{item.totalAmount || "0"}
                         </div>
@@ -937,15 +976,15 @@ export default function PaymentPage() {
                         </div>
                         <div>
                           <span className="font-medium text-slate-500">
-                            Planned:
+                            GST:
                           </span>{" "}
-                          {item.planned11 || "-"}
+                          ₹{item.gst18Percent || "0"}
                         </div>
                         <div>
                           <span className="font-medium text-slate-500">
-                            Actual:
+                            IP JCR:
                           </span>{" "}
-                          {item.actual11 || "-"}
+                          ₹{item.ipJcrCsrPayment || "0"}
                         </div>
                         <div className="col-span-2 pt-2 flex justify-end">
                           <Button size="sm" variant="outline" onClick={() => handleActionClick(item)} className="h-8 gap-2">
@@ -1070,7 +1109,7 @@ export default function PaymentPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label className="text-slate-700 font-medium">
-                        IP JCR CSR Payment
+                        IP JCR (CSR) PAYMENT
                       </Label>
                       <Input
                         type="number"
@@ -1084,21 +1123,22 @@ export default function PaymentPage() {
                     </div>
                     <div className="space-y-2">
                       <Label className="text-slate-700 font-medium">
-                        Installation Payment to IP
+                        INSTALLATION PAYMENT TO IP
                       </Label>
-                      <Input
-                        type="number"
+                      <select
                         value={formData.installationPaymentToIp}
                         onChange={(e) =>
                           setFormData({ ...formData, installationPaymentToIp: e.target.value })
                         }
-                        placeholder="Enter Amount"
-                        className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100"
-                      />
+                        className="w-full h-10 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-400 bg-white"
+                      >
+                        <option value="Done">Done</option>
+                        <option value="Pending">Pending</option>
+                      </select>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-slate-700 font-medium">
-                        IP Payment Per Installation
+                        IP PAYMENT PER INSTALLATION
                       </Label>
                       <Input
                         type="number"
@@ -1118,13 +1158,22 @@ export default function PaymentPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, gst18Percent: e.target.value })
                         }
-                        placeholder="Enter GST"
-                        className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100"
+                        placeholder="Enter Amount"
+                        className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
                       />
                     </div>
-                    <div className="space-y-2 md:col-span-2">
+                    <div className="space-y-2">
+                      <Label className="text-slate-700 font-medium">TOTAL AMOUNT PAYMENT TO IP</Label>
+                      <Input
+                        type="number"
+                        value={formData.totalAmount}
+                        readOnly
+                        className="border-slate-200 bg-slate-50 focus:border-cyan-400 focus-visible:ring-cyan-100 font-bold text-green-700"
+                      />
+                    </div>
+                    <div className="space-y-2 md:col-span-1">
                       <Label className="text-slate-700 font-medium">
-                        Bill Send Date
+                        BILL SEND DATE
                       </Label>
                       <Input
                         type="date"
@@ -1137,12 +1186,12 @@ export default function PaymentPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 pb-6 pr-6">
+                  <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-slate-100 pb-6 pr-6">
                     <Button
                       variant="outline"
                       onClick={() => setIsDialogOpen(false)}
                       disabled={isSubmitting}
-                      className="px-6 bg-white hover:bg-slate-50 text-slate-700 border-slate-200"
+                      className="px-6 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200"
                     >
                       Cancel
                     </Button>
@@ -1167,6 +1216,6 @@ export default function PaymentPage() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </div >
   );
 }

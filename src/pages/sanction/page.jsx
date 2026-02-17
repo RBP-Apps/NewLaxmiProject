@@ -126,7 +126,7 @@ export default function SanctionPage() {
 
   const [formData, setFormData] = useState({
     actual2: "",
-    surveyStatus: "Pending",
+    surveyStatus: "Completed",
     surveyFile: null,
     surveyFileObj: null,
     surveyRemarks: "",
@@ -170,7 +170,7 @@ export default function SanctionPage() {
             planned2: row.planned_2 || "",
             actual2: row.actual_2 || "",
             delay2: row.delay_2 || 0,
-            surveyStatus: row.survey_status || "Pending",
+            surveyStatus: row.survey_status || "Completed",
             surveyRemarks: row.survey_remarks || "",
             surveyorName: row.surveyor_name || "",
             surveyFile: row.survey_file || "",
@@ -324,9 +324,9 @@ export default function SanctionPage() {
     setIsSuccess(false);
     setFormData({
       actual2: formatDateForInput(item.actual2) || "",
-      surveyStatus: item.surveyStatus || "Pending",
+      surveyStatus: "Completed",
       surveyFile: item.surveyFile ? item.surveyFile.split("/").pop() : null,
-      surveyFile: item.surveyFile || null,
+
       surveyFileObj: null,
       surveyRemarks: item.surveyRemarks || "",
       surveyorName: item.surveyorName || "",
@@ -342,7 +342,7 @@ export default function SanctionPage() {
     setIsSuccess(false);
     setFormData({
       actual2: "",
-      surveyStatus: "Pending",
+      surveyStatus: "Completed",
       surveyFile: null,
       surveyFileObj: null,
       surveyRemarks: "",
@@ -805,6 +805,9 @@ export default function SanctionPage() {
                   <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                     <TableRow className="border-b border-blue-100 hover:bg-transparent">
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                        Action
+                      </TableHead>
+                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Reg ID
                       </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
@@ -844,25 +847,7 @@ export default function SanctionPage() {
                         Planned Date
                       </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Actual Date
-                      </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Delay
-                      </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Survey Status
-                      </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Surveyor Name
-                      </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Survey Remarks
-                      </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Approved
-                      </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Action
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -882,6 +867,17 @@ export default function SanctionPage() {
                           key={item.serialNo}
                           className="hover:bg-blue-50/30 transition-colors"
                         >
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleActionClick(item)}
+                              className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                              Edit
+                            </Button>
+                          </TableCell>
                           <TableCell className="text-slate-600 font-mono text-xs">
                             {item.regId}
                           </TableCell>
@@ -944,45 +940,13 @@ export default function SanctionPage() {
                           <TableCell>
                             <Badge
                               variant="outline"
-                              className={`text-xs font-medium ${item.surveyStatus === "Approved"
+                              className={`text-xs font-medium ${item.surveyStatus === "Completed"
                                 ? "bg-green-50 text-green-700 border-green-200"
-                                : item.surveyStatus === "Completed"
-                                  ? "bg-blue-50 text-blue-700 border-blue-200"
-                                  : item.surveyStatus === "Rejected"
-                                    ? "bg-red-50 text-red-700 border-red-200"
-                                    : "bg-yellow-50 text-yellow-700 border-yellow-200"
+                                : item.surveyStatus === "Pending"
                                 }`}
                             >
                               {item.surveyStatus}
                             </Badge>
-                          </TableCell>
-                          <TableCell className="text-slate-600 text-sm">
-                            {item.surveyorName || "-"}
-                          </TableCell>
-                          <TableCell className="text-slate-600 text-sm max-w-xs truncate">
-                            {item.surveyRemarks || "-"}
-                          </TableCell>
-                          <TableCell>
-                            {item.isApproved ? (
-                              <Badge className="bg-green-100 text-green-800 border border-green-200">
-                                Yes
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-                                No
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleActionClick(item)}
-                              className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto"
-                            >
-                              <Pencil className="h-3.5 w-3.5" />
-                              Edit
-                            </Button>
                           </TableCell>
                         </TableRow>
                       ))
@@ -1054,12 +1018,12 @@ export default function SanctionPage() {
                         </span>
                         BENEFICIARY DETAILS
                       </h3>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-6">
                         <div className="space-y-1">
                           <span className="text-[10px] uppercase font-bold text-blue-900/60 block mb-1">
                             Reg ID
                           </span>
-                          <div className="font-medium text-slate-700 font-mono bg-white/50 px-2 py-1 rounded border border-blue-100/50 inline-block">
+                          <div className="font-medium text-slate-700 font-mono bg-white/50 px-2 py-1 rounded border border-blue-100/50 inline-block break-all">
                             {selectedItem.regId}
                           </div>
                         </div>
@@ -1093,17 +1057,17 @@ export default function SanctionPage() {
                           </span>
                           <Badge
                             variant="secondary"
-                            className="bg-white text-blue-700 border-blue-200 shadow-sm font-medium"
+                            className="whitespace-normal text-left h-auto leading-tight"
                           >
-                            {selectedItem.pumpType}
+                            {selectedItem.pumpCapacity}
                           </Badge>
                         </div>
                         <div className="space-y-1">
                           <span className="text-[10px] uppercase font-bold text-blue-900/60 block mb-1">
                             Company
                           </span>
-                          <p className="font-medium text-slate-700 font-mono text-xs">
-                            {selectedItem.company}
+                          <p className="font-medium text-slate-700">
+                            {selectedItem.ipName}
                           </p>
                         </div>
                       </div>
@@ -1137,20 +1101,6 @@ export default function SanctionPage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-sm font-medium text-slate-700">
-                          Surveyor Name
-                        </Label>
-                        <Input
-                          value={formData.surveyorName}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              surveyorName: e.target.value,
-                            })
-                          }
-                          placeholder="Enter surveyor name"
-                          className="h-10 border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 transition-all bg-white"
-                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium text-slate-700">
@@ -1167,43 +1117,12 @@ export default function SanctionPage() {
                           className="h-10 border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 transition-all bg-white border px-3 rounded-md"
                         >
                           <option value="Pending">Pending</option>
-                          <option value="In Progress">In Progress</option>
                           <option value="Completed">Completed</option>
-                          <option value="Approved">Approved</option>
-                          <option value="Rejected">Rejected</option>
                         </select>
                       </div>
                       <div className="space-y-2 flex items-end">
-                        <Label className="flex items-center gap-2 text-sm font-medium text-slate-700 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={formData.isApproved}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                isApproved: e.target.checked,
-                              })
-                            }
-                            className="w-5 h-5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
-                          />
-                          Mark as Approved
-                        </Label>
                       </div>
                       <div className="space-y-2 md:col-span-2">
-                        <Label className="text-sm font-medium text-slate-700">
-                          Survey Remarks
-                        </Label>
-                        <textarea
-                          value={formData.surveyRemarks}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              surveyRemarks: e.target.value,
-                            })
-                          }
-                          placeholder="Enter any remarks about the survey"
-                          className="h-20 border border-slate-200 rounded-md p-3 focus:border-cyan-400 focus:ring-cyan-100 transition-all bg-white resize-none"
-                        />
                       </div>
                       <div className="space-y-2 md:col-span-2">
                         <Label className="text-sm font-medium text-slate-700">

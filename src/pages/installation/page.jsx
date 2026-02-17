@@ -122,7 +122,7 @@ export default function InstallationPage() {
   });
 
   const [formData, setFormData] = useState({
-    installationStatus: "",
+    installationStatus: "Completed",
     installationDate: "",
     photoUploadedOnUpadApp: null,
     delay4: "",
@@ -258,7 +258,7 @@ export default function InstallationPage() {
     setIsSuccess(false);
     setIsBulk(false);
     setFormData({
-      installationStatus: item.installationStatus || "",
+      installationStatus: "Completed",
       installationDate: item.installationDate || "",
       photoUploadedOnUpadApp: item.photoUploadedOnUpadApp || null,
       delay4: item.delay4 || "",
@@ -287,7 +287,7 @@ export default function InstallationPage() {
     setSelectedItem(null);
     setIsSuccess(false);
     setFormData({
-      installationStatus: "",
+      installationStatus: "Completed",
       installationDate: "",
       photoUploadedOnUpadApp: null,
       delay4: "",
@@ -1092,7 +1092,7 @@ export default function InstallationPage() {
                             <span className="text-slate-500 text-xs block mb-1">
                               Reg ID
                             </span>
-                            <p className="font-medium text-slate-800 font-mono">
+                            <p className="font-medium text-slate-800 font-mono break-all">
                               {selectedItem.regId}
                             </p>
                           </div>
@@ -1125,7 +1125,7 @@ export default function InstallationPage() {
                               Pump Type
                             </span>
                             <p className="font-medium text-blue-700 bg-blue-50 inline-block px-2 py-0.5 rounded text-xs border border-blue-100">
-                              {selectedItem.pumpType}
+                              {selectedItem.pumpCapacity}
                             </p>
                           </div>
                         </div>
@@ -1136,27 +1136,19 @@ export default function InstallationPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label className="text-sm font-medium text-slate-700">Installation Status</Label>
-                        <Select value={formData.installationStatus} onValueChange={(value) => setFormData({ ...formData, installationStatus: value })}>
-                          <SelectTrigger className="h-10 border-slate-200 focus:border-cyan-400 focus:ring-cyan-100">
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Completed" className="text-green-600 font-medium">Completed</SelectItem>
-                            <SelectItem value="In Progress" className="text-blue-600 font-medium">In Progress</SelectItem>
-                            <SelectItem value="Pending" className="text-yellow-600 font-medium">Pending</SelectItem>
-                            <SelectItem value="On Hold" className="text-red-600 font-medium">On Hold</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <select
+                          className="h-10 w-full border border-slate-200 rounded-md px-3 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-400 transition-all font-medium text-slate-700 hover:border-cyan-200"
+                          value={formData.installationStatus}
+                          onChange={(e) => setFormData({ ...formData, installationStatus: e.target.value })}
+                        >
+                          <option value="Completed" className="text-slate-700">Completed</option>
+                          <option value="Pending" className="text-slate-700">Pending</option>
+                        </select>
                       </div>
 
                       <div className="space-y-2">
                         <Label className="text-sm font-medium text-slate-700">Installation Date</Label>
                         <Input type="date" value={formData.installationDate} onChange={(e) => setFormData({ ...formData, installationDate: e.target.value })} className="h-10 border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 transition-all" />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium text-slate-700">Delay</Label>
-                        <Input value={formData.delay4} onChange={(e) => setFormData({ ...formData, delay4: e.target.value })} placeholder="Enter delay details" className="h-10 border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 transition-all" />
                       </div>
 
                       <div className="space-y-2 md:col-span-2">

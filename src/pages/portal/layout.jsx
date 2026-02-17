@@ -16,5 +16,3 @@ export default function PortalLayout({ children, }) {
       </div>
     </AuthProvider>);
 }
-
-
