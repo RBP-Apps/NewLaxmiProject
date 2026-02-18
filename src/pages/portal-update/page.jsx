@@ -233,11 +233,17 @@ export default function PortalUpdatePage() {
 
     const handleSelectAll = (checked) => {
         if (checked) {
-            setSelectedRows(filteredPendingItems.map((item) => item.regId));
+            const items = activeTab === "history" ? filteredHistoryItems : filteredPendingItems;
+            setSelectedRows(items.map((item) => item.regId));
         } else {
             setSelectedRows([]);
         }
     };
+
+    useEffect(() => {
+        setSelectedRows([]);
+        setSelectedItem(null);
+    }, [activeTab]);
 
     const handleSelectRow = (regId, checked) => {
         if (checked) {
@@ -310,8 +316,9 @@ export default function PortalUpdatePage() {
             }
 
             let itemsToProcess = [];
+            const currentItems = activeTab === "history" ? historyItems : pendingItems;
             if (isBulk) {
-                itemsToProcess = pendingItems.filter((item) =>
+                itemsToProcess = currentItems.filter((item) =>
                     selectedRows.includes(item.regId)
                 );
             } else {
@@ -525,35 +532,63 @@ export default function PortalUpdatePage() {
                     value="history"
                     className="mt-6 focus-visible:ring-0 focus-visible:outline-none animate-in fade-in-0 slide-in-from-right-4 duration-500 ease-out"
                 >
-                     <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
+                    <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
                         <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
                             <CardTitle className="text-lg font-semibold text-blue-900">History & Records</CardTitle>
-                             <div className="relative w-full md:w-100">
+                            <div className="relative w-full md:w-100">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                 <Input placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9 bg-white" />
                             </div>
+                            <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                                {selectedRows.length >= 2 && (
+                                    <Button
+                                        onClick={handleBulkClick}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
+                                        size="sm"
+                                    >
+                                        <ClipboardCheck className="h-4 w-4 mr-2" />
+                                        Update Selected ({selectedRows.length})
+                                    </Button>
+                                )}
+                            </div>
                         </CardHeader>
-                         <CardContent className="p-0">
+                        <CardContent className="p-0">
                             <div className="overflow-x-auto">
                                 <Table className="[&_th]:text-center [&_td]:text-center">
                                     <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                                         <TableRow className="border-b border-blue-100 hover:bg-transparent">
+                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
+                                                <div className="flex justify-center"><Checkbox checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length} onCheckedChange={handleSelectAll} /></div>
+                                            </TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase">Action</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase">Reg ID</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase">Name</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase">District</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase">Supply Date</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase">Action</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                         {filteredHistoryItems.length === 0 ? <TableRow><TableCell colSpan={5} className="h-48 text-center text-slate-500">No history records.</TableCell></TableRow> :
+                                        {filteredHistoryItems.length === 0 ? <TableRow><TableCell colSpan={6} className="h-48 text-center text-slate-500">No history records.</TableCell></TableRow> :
                                             filteredHistoryItems.map((item) => (
                                                 <TableRow key={item.regId} className="hover:bg-blue-50/30">
+                                                    <TableCell><div className="flex justify-center"><Checkbox checked={selectedRows.includes(item.regId)} onCheckedChange={(c) => handleSelectRow(item.regId, c)} /></div></TableCell>
+                                                    <TableCell>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => handleActionClick(item)}
+                                                            className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            disabled={selectedRows.length >= 2}
+                                                        >
+                                                            <Pencil className="h-3.5 w-3.5" />
+                                                            Edit
+                                                        </Button>
+                                                    </TableCell>
                                                     <TableCell>{item.regId}</TableCell>
                                                     <TableCell>{item.beneficiaryName}</TableCell>
                                                     <TableCell>{item.district}</TableCell>
                                                     <TableCell>{item.supply_aapurti_date}</TableCell>
-                                                    <TableCell><Button variant="ghost" size="icon" onClick={() => handleActionClick(item)}><Pencil className="h-4 w-4" /></Button></TableCell>
+
                                                 </TableRow>
                                             ))}
                                     </TableBody>
@@ -581,15 +616,15 @@ export default function PortalUpdatePage() {
                             {(selectedItem || isBulk) && (
                                 <div className="grid gap-6 p-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        
+
                                         <div className="space-y-1.5">
                                             <Label className="text-xs text-slate-700 font-medium">Photo Link (Upload)</Label>
-                                           <div className="flex gap-2 items-center">
+                                            <div className="flex gap-2 items-center">
                                                 <Input type="file" onChange={(e) => handleFileUpload(e, 'photo_link')} className="file:mr-4 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 h-9" />
                                                 {formData.photo_link && typeof formData.photo_link === 'string' && (
                                                     <a href={formData.photo_link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline"><ExternalLink className="h-4 w-4" /></a>
                                                 )}
-                                           </div>
+                                            </div>
                                         </div>
 
                                         <div className="space-y-1.5">
@@ -636,9 +671,9 @@ export default function PortalUpdatePage() {
 
                                     <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-slate-100 pb-6 pr-6">
                                         <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isSubmitting} className="px-6 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200">Cancel</Button>
-                                        <Button 
-                                            onClick={handleSubmit} 
-                                            disabled={isSubmitting} 
+                                        <Button
+                                            onClick={handleSubmit}
+                                            disabled={isSubmitting}
                                             className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/20 px-8"
                                         >
                                             {isSubmitting ? (

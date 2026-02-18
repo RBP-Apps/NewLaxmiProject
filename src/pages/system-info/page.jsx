@@ -223,11 +223,17 @@ export default function SystemInfoPage() {
 
     const handleSelectAll = (checked) => {
         if (checked) {
-            setSelectedRows(filteredPendingItems.map((item) => item.regId));
+            const items = activeTab === "history" ? filteredHistoryItems : filteredPendingItems;
+            setSelectedRows(items.map((item) => item.regId));
         } else {
             setSelectedRows([]);
         }
     };
+
+    useEffect(() => {
+        setSelectedRows([]);
+        setSelectedItem(null);
+    }, [activeTab]);
 
     const handleSelectRow = (regId, checked) => {
         if (checked) {
@@ -264,8 +270,9 @@ export default function SystemInfoPage() {
 
         try {
             let itemsToProcess = [];
+            const currentItems = activeTab === "history" ? historyItems : pendingItems;
             if (isBulk) {
-                itemsToProcess = pendingItems.filter((item) =>
+                itemsToProcess = currentItems.filter((item) =>
                     selectedRows.includes(item.regId)
                 );
             } else {
@@ -546,14 +553,35 @@ export default function SystemInfoPage() {
                 {/* ====================== HISTORY TAB ====================== */}
                 <TabsContent value="history" className="mt-6 focus-visible:ring-0 focus-visible:outline-none animate-in fade-in-0 slide-in-from-right-4 duration-500 ease-out">
                     <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-                        <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3">
+                        <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
                             <CardTitle className="text-lg font-semibold text-blue-900">System Info History</CardTitle>
+                            <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                                {selectedRows.length >= 2 && (
+                                    <Button
+                                        onClick={handleBulkClick}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
+                                        size="sm"
+                                    >
+                                        <Edit className="h-4 w-4 mr-2" />
+                                        Update Selected ({selectedRows.length})
+                                    </Button>
+                                )}
+                            </div>
                         </CardHeader>
                         <CardContent className="p-0">
                             <div className="overflow-x-auto">
                                 <Table className="[&_th]:text-center [&_td]:text-center">
                                     <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                                         <TableRow>
+                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length}
+                                                        onCheckedChange={handleSelectAll}
+                                                        className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
+                                                    />
+                                                </div>
+                                            </TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Action</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Reg ID</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Beneficiary Name</TableHead>
@@ -564,16 +592,31 @@ export default function SystemInfoPage() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {filteredHistoryItems.map((item) => (
+                                        {filteredHistoryItems.length === 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={7} className="h-48 text-center text-slate-500">No history records.</TableCell>
+                                            </TableRow>
+                                        ) : (
+                                        filteredHistoryItems.map((item) => (
                                             <TableRow key={item.regId} className="hover:bg-blue-50/30 transition-colors">
+                                                <TableCell className="px-4">
+                                                    <div className="flex justify-center">
+                                                        <Checkbox
+                                                            checked={selectedRows.includes(item.regId)}
+                                                            onCheckedChange={(checked) => handleSelectRow(item.regId, checked)}
+                                                            className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
+                                                        />
+                                                    </div>
+                                                </TableCell>
                                                 <TableCell>
                                                     <Button
-                                                        variant="outline"
+                                                        variant="ghost"
                                                         size="sm"
-                                                        className="text-xs h-8 px-3 border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
                                                         onClick={() => handleActionClick(item)}
+                                                        disabled={selectedRows.length >= 2}
+                                                        className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                                                     >
-                                                        <Pencil className="h-3 w-3 mr-1" />
+                                                        <Pencil className="h-3.5 w-3.5" />
                                                         Edit
                                                     </Button>
                                                 </TableCell>
@@ -584,7 +627,7 @@ export default function SystemInfoPage() {
                                                 <TableCell className="whitespace-nowrap text-slate-600">{item.rid_number || "-"}</TableCell>
 
                                             </TableRow>
-                                        ))}
+                                        )))}
                                     </TableBody>
                                 </Table>
                             </div>

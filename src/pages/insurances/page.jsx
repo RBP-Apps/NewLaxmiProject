@@ -30,6 +30,7 @@ import {
     Search,
     ShieldCheck,
     Edit,
+    Pencil,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -247,11 +248,17 @@ export default function InsurancesPage() {
 
     const handleSelectAll = (checked) => {
         if (checked) {
-            setSelectedRows(filteredPendingItems.map((item) => item.regId));
+            const items = activeTab === "history" ? filteredHistoryItems : filteredPendingItems;
+            setSelectedRows(items.map((item) => item.regId));
         } else {
             setSelectedRows([]);
         }
     };
+
+    useEffect(() => {
+        setSelectedRows([]);
+        setSelectedItem(null);
+    }, [activeTab]);
 
     const handleSelectRow = (regId, checked) => {
         if (checked) {
@@ -287,8 +294,9 @@ export default function InsurancesPage() {
 
             // Identify Items to Process
             let itemsToProcess = [];
+            const currentItems = activeTab === "history" ? historyItems : pendingItems;
             if (isBulk) {
-                itemsToProcess = pendingItems.filter((item) =>
+                itemsToProcess = currentItems.filter((item) =>
                     selectedRows.includes(item.regId)
                 );
             } else {
@@ -765,12 +773,24 @@ export default function InsurancesPage() {
                                         className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
                                     />
                                 </div>
-                                <Badge
-                                    variant="outline"
-                                    className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 h-9 flex items-center whitespace-nowrap"
-                                >
-                                    {filteredHistoryItems.length} Records
-                                </Badge>
+                                <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                                    {selectedRows.length >= 2 && (
+                                        <Button
+                                            onClick={handleBulkClick}
+                                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
+                                            size="sm"
+                                        >
+                                            <ClipboardCheck className="h-4 w-4 mr-2" />
+                                            Update Selected ({selectedRows.length})
+                                        </Button>
+                                    )}
+                                    <Badge
+                                        variant="outline"
+                                        className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 h-9 flex items-center whitespace-nowrap"
+                                    >
+                                        {filteredHistoryItems.length} Records
+                                    </Badge>
+                                </div>
                             </div>
                         </CardHeader>
 
@@ -830,6 +850,15 @@ export default function InsurancesPage() {
                                 <Table className="[&_th]:text-center [&_td]:text-center">
                                     <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                                         <TableRow className="border-b border-blue-100 hover:bg-transparent">
+                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
+                                                <div className="flex justify-center">
+                                                    <Checkbox
+                                                        checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length}
+                                                        onCheckedChange={handleSelectAll}
+                                                        className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
+                                                    />
+                                                </div>
+                                            </TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                                                 Action
                                             </TableHead>
@@ -860,7 +889,7 @@ export default function InsurancesPage() {
                                         {isLoading ? (
                                             Array.from({ length: 5 }).map((_, index) => (
                                                 <TableRow key={index} className="animate-pulse">
-                                                    {Array.from({ length: 8 }).map((_, i) => (
+                                                    {Array.from({ length: 9 }).map((_, i) => (
                                                         <TableCell key={i}>
                                                             <div className="h-4 w-full bg-slate-200 rounded" />
                                                         </TableCell>
@@ -870,7 +899,7 @@ export default function InsurancesPage() {
                                         ) : filteredHistoryItems.length === 0 ? (
                                             <TableRow>
                                                 <TableCell
-                                                    colSpan={8}
+                                                    colSpan={9}
                                                     className="h-48 text-center text-slate-500 bg-slate-50/30"
                                                 >
                                                     <div className="flex flex-col items-center justify-center gap-2">
@@ -891,14 +920,25 @@ export default function InsurancesPage() {
                                                     key={item.regId}
                                                     className="hover:bg-blue-50/30 transition-colors"
                                                 >
+                                                    <TableCell className="px-4">
+                                                        <div className="flex justify-center">
+                                                            <Checkbox
+                                                                checked={selectedRows.includes(item.regId)}
+                                                                onCheckedChange={(checked) => handleSelectRow(item.regId, checked)}
+                                                                className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
+                                                            />
+                                                        </div>
+                                                    </TableCell>
                                                     <TableCell>
                                                         <Button
-                                                            size="sm"
                                                             variant="ghost"
-                                                            className="h-8 w-8 p-0 hover:bg-blue-100/50 hover:text-blue-700"
+                                                            size="sm"
                                                             onClick={() => handleActionClick(item)}
+                                                            disabled={selectedRows.length >= 2}
+                                                            className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
-                                                            <Edit className="h-4 w-4" />
+                                                            <Pencil className="h-3.5 w-3.5" />
+                                                            Edit
                                                         </Button>
                                                     </TableCell>
                                                     <TableCell>
