@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Activity, RefreshCw, AlertCircle, Clock, PlayCircle } from "lucide-react";
+import { Activity, RefreshCw, AlertCircle, Clock, PlayCircle, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
+import * as XLSX from "xlsx";
 import { dashboardColumns } from "./columns";
 
 export default function DashboardPage() {
@@ -13,6 +14,49 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportAll = async () => {
+    setIsExporting(true);
+    try {
+      const tables = [
+        { name: "portal", label: "Portal" },
+        { name: "survey", label: "Survey" },
+        { name: "dispatch_material", label: "Dispatch Material" },
+        { name: "installation", label: "Installation" },
+        { name: "portal_update", label: "Portal Update" },
+        { name: "invoicing", label: "Invoicing" },
+        { name: "beneficiary_share", label: "Beneficiary Share" },
+        { name: "insurance", label: "Insurance" },
+        { name: "ip_payment", label: "IP Payment" },
+        { name: "system_info", label: "System Info" },
+        { name: "work_order", label: "Work Order" },
+        { name: "jcr_status", label: "JCR Status" },
+        { name: "master_dropdown", label: "Master Dropdown" },
+      ];
+
+      const results = await Promise.all(
+        tables.map((t) => supabase.from(t.name).select("*"))
+      );
+
+      const wb = XLSX.utils.book_new();
+
+      results.forEach((result, index) => {
+        const tableData = result.data || [];
+        const ws = XLSX.utils.json_to_sheet(tableData);
+        XLSX.utils.book_append_sheet(wb, ws, tables[index].label);
+      });
+
+      const now = new Date();
+      const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+      XLSX.writeFile(wb, `LaxmiProject_AllData_${timestamp}.xlsx`);
+    } catch (err) {
+      console.error("Export failed:", err);
+      alert("Export failed: " + err.message);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -235,6 +279,14 @@ export default function DashboardPage() {
               <Clock className="h-3 w-3" /> Updated: {lastUpdated.toLocaleTimeString()}
             </span>
           )}
+          <Button
+            onClick={handleExportAll}
+            disabled={isExporting}
+            className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md shadow-emerald-500/20 transition-all"
+          >
+            <Download className={cn("h-4 w-4 mr-2", isExporting && "animate-bounce")} />
+            {isExporting ? "Exporting..." : "Export All Data"}
+          </Button>
           <Button
             onClick={fetchData}
             disabled={isLoading}
