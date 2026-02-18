@@ -123,32 +123,17 @@ export default function PaymentPage() {
     billSendDate: "",
   });
 
-  // Calculation Effect
-  // 1. Auto-Calculate GST when Base Amounts Change
+  // Calculate Total Amount: perInstallation + (perInstallation * gst% / 100)
   useEffect(() => {
-    const jcr = parseFloat(formData.ipJcrCsrPayment) || 0;
     const install = parseFloat(formData.ipPaymentPerInstallation) || 0;
-    const subtotal = jcr + install;
-    const calculatedGst = (subtotal * 0.18).toFixed(2);
-
-    // Only update GST if the base amount changes (to allow manual override if needed per session, 
-    // but typically we reset GST when base changes)
-    if (formData.gst18Percent !== calculatedGst) {
-      setFormData((prev) => ({ ...prev, gst18Percent: calculatedGst }));
-    }
-  }, [formData.ipJcrCsrPayment, formData.ipPaymentPerInstallation]);
-
-  // 2. Calculate Total Amount whenever Base Amounts OR GST Change
-  useEffect(() => {
-    const jcr = parseFloat(formData.ipJcrCsrPayment) || 0;
-    const install = parseFloat(formData.ipPaymentPerInstallation) || 0;
-    const gst = parseFloat(formData.gst18Percent) || 0;
-    const total = (jcr + install + gst).toFixed(2);
+    const gstPercent = parseFloat(formData.gst18Percent) || 0;
+    const gstAmount = (install * gstPercent) / 100;
+    const total = (install + gstAmount).toFixed(2);
 
     if (formData.totalAmount !== total) {
       setFormData((prev) => ({ ...prev, totalAmount: total }));
     }
-  }, [formData.ipJcrCsrPayment, formData.ipPaymentPerInstallation, formData.gst18Percent]);
+  }, [formData.ipPaymentPerInstallation, formData.gst18Percent]);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -211,8 +196,7 @@ export default function PaymentPage() {
           billSendDate: row.bill_send_date || "",
           totalAmount: 
             row.total_amount_payment_to_ip || 
-            ((parseFloat(row.ip_jcr_csr_payment) || 0) + 
-             (parseFloat(row.ip_payment_per_installation) || 0) + 
+            ((parseFloat(row.ip_payment_per_installation) || 0) + 
              (parseFloat(row.gst_18_percent) || 0)).toFixed(2), // Fallback calculation
 
           // Trigger columns
@@ -1188,14 +1172,14 @@ export default function PaymentPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-slate-700 font-medium">GST 18%</Label>
+                      <Label className="text-slate-700 font-medium">GST %</Label>
                       <Input
                         type="number"
                         value={formData.gst18Percent}
                         onChange={(e) =>
                           setFormData({ ...formData, gst18Percent: e.target.value })
                         }
-                        placeholder="Enter Amount"
+                        placeholder="Enter GST %"
                         className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
                       />
                     </div>
