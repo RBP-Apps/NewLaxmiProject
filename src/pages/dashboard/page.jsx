@@ -308,7 +308,10 @@ export default function DashboardPage() {
                       <TableCell className="text-center sticky left-0 bg-slate-100 z-20"></TableCell>
                       <TableCell className="sticky left-12 bg-slate-100 z-20">Total</TableCell>
                       <TableCell className="sticky left-[212px] bg-slate-100 z-20"></TableCell>
-                      {dashboardColumns.slice(3).map((col, i) => (
+                      <TableCell className="text-center sticky left-[362px] bg-slate-100 z-20 font-bold text-blue-900">
+                        {data.reduce((sum, row) => sum + (Number(row.target) || 0), 0)}
+                      </TableCell>
+                      {dashboardColumns.slice(4).map((col, i) => (
                         <TableCell key={i} className={cn("border-r border-slate-300 px-2 py-3", col.className?.includes("text-right") ? "text-right" : "text-center")}>
                            {formatValue(data.reduce((sum, row) => sum + (Number(row[col.accessor]) || 0), 0), col.format)}
                         </TableCell>

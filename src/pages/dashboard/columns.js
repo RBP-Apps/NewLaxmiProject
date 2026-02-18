@@ -2,7 +2,7 @@ export const dashboardColumns = [
   { header: "S.NO.", accessor: "sNo", className: "w-12 text-center sticky left-0 bg-white z-20" },
   { header: "IP", accessor: "ipName", className: "sticky left-12 bg-white z-20 min-w-[200px]" },
   { header: "District", accessor: "district", className: "sticky left-[212px] bg-white z-20 min-w-[150px]" },
-  { header: "TARGET", accessor: "target", className: "text-center bg-blue-50/50 text-blue-900 font-bold" },
+  { header: "TARGET", accessor: "target", className: "text-center bg-blue-50/50 text-blue-900 font-bold sticky left-[362px] bg-white z-20" },
   { header: "Survey Done", accessor: "surveyDone", className: "text-center text-green-600" },
   { header: "Survey Pending", accessor: "surveyPending", className: "text-center text-orange-600 bg-orange-50/30" },
   { header: "Nos Of Complete Set Dispatch Plan", accessor: "dispatchPlanDone", className: "text-center" },
