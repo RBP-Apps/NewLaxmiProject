@@ -498,26 +498,40 @@ export default function PortalUpdatePage() {
                                     <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                                         <TableRow className="border-b border-blue-100 hover:bg-transparent">
                                             <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
-                                                <div className="flex justify-center"><Checkbox checked={filteredPendingItems.length > 0 && selectedRows.length === filteredPendingItems.length} onCheckedChange={handleSelectAll} /></div>
+                                                <div className="flex justify-center"><Checkbox checked={filteredPendingItems.length > 0 && selectedRows.length === filteredPendingItems.length} onCheckedChange={handleSelectAll} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out" /></div>
                                             </TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[150px]">Action</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Reg ID</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Beneficiary Name</TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Father's Name</TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Mobile Number</TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Village</TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Block</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">District</TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Pincode</TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Pump Capacity</TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Pump Head</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">IP Name</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {isLoading ? Array.from({ length: 5 }).map((_, i) => <TableRow key={i} className="animate-pulse"><TableCell colSpan={6}><div className="h-8 bg-slate-200 rounded" /></TableCell></TableRow>) :
-                                            filteredPendingItems.length === 0 ? <TableRow><TableCell colSpan={6} className="h-48 text-center text-slate-500">No pending records.</TableCell></TableRow> :
+                                        {isLoading ? Array.from({ length: 5 }).map((_, i) => <TableRow key={i} className="animate-pulse">{Array.from({ length: 13 }).map((__, j) => <TableCell key={j}><div className="h-4 w-full bg-slate-200 rounded mx-auto"></div></TableCell>)}</TableRow>) :
+                                            filteredPendingItems.length === 0 ? <TableRow><TableCell colSpan={13} className="h-48 text-center text-slate-500">No pending records.</TableCell></TableRow> :
                                                 filteredPendingItems.map((item) => (
-                                                    <TableRow key={item.regId} className="hover:bg-blue-50/30">
-                                                        <TableCell><div className="flex justify-center"><Checkbox checked={selectedRows.includes(item.regId)} onCheckedChange={(c) => handleSelectRow(item.regId, c)} /></div></TableCell>
-                                                        <TableCell><Button variant="ghost" size="sm" onClick={() => handleActionClick(item)} className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200">Process</Button></TableCell>
-                                                        <TableCell>{item.regId}</TableCell>
-                                                        <TableCell>{item.beneficiaryName}</TableCell>
-                                                        <TableCell>{item.district}</TableCell>
-                                                        <TableCell>{item.ipName}</TableCell>
+                                                    <TableRow key={item.regId} className="hover:bg-blue-50/30 transition-colors">
+                                                        <TableCell className="px-4"><div className="flex justify-center"><Checkbox checked={selectedRows.includes(item.regId)} onCheckedChange={(c) => handleSelectRow(item.regId, c)} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110" /></div></TableCell>
+                                                        <TableCell><Button variant="ghost" size="sm" onClick={() => handleActionClick(item)} disabled={selectedRows.length >= 2} className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"><FileText className="h-3.5 w-3.5" />Process</Button></TableCell>
+                                                        <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">{item.regId}</TableCell>
+                                                        <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.fatherName}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-700">{item.mobileNumber}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.village}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.block}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.district}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.pincode}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600 font-medium text-blue-600 uppercase">{item.pumpCapacity}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.pumpHead}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600 font-medium">{item.ipName}</TableCell>
                                                     </TableRow>
                                                 ))}
                                     </TableBody>
@@ -558,37 +572,49 @@ export default function PortalUpdatePage() {
                                     <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                                         <TableRow className="border-b border-blue-100 hover:bg-transparent">
                                             <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
-                                                <div className="flex justify-center"><Checkbox checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length} onCheckedChange={handleSelectAll} /></div>
+                                                <div className="flex justify-center"><Checkbox checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length} onCheckedChange={handleSelectAll} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out" /></div>
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase">Action</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase">Reg ID</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase">Name</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase">District</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase">Supply Date</TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[120px]">Action</TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Reg ID</TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Beneficiary Name</TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Mobile Number</TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Village</TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Block</TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">District</TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Pump Capacity</TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Pump Head</TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">IP Name</TableHead>
+                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Supply Date</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {filteredHistoryItems.length === 0 ? <TableRow><TableCell colSpan={6} className="h-48 text-center text-slate-500">No history records.</TableCell></TableRow> :
+                                        {isLoading ? Array.from({ length: 5 }).map((_, i) => <TableRow key={i} className="animate-pulse">{Array.from({ length: 12 }).map((__, j) => <TableCell key={j}><div className="h-4 w-full bg-slate-200 rounded mx-auto"></div></TableCell>)}</TableRow>) :
+                                            filteredHistoryItems.length === 0 ? <TableRow><TableCell colSpan={12} className="h-48 text-center text-slate-500">No history records.</TableCell></TableRow> :
                                             filteredHistoryItems.map((item) => (
-                                                <TableRow key={item.regId} className="hover:bg-blue-50/30">
-                                                    <TableCell><div className="flex justify-center"><Checkbox checked={selectedRows.includes(item.regId)} onCheckedChange={(c) => handleSelectRow(item.regId, c)} /></div></TableCell>
+                                                <TableRow key={item.regId} className="hover:bg-blue-50/30 transition-colors">
+                                                    <TableCell className="px-4"><div className="flex justify-center"><Checkbox checked={selectedRows.includes(item.regId)} onCheckedChange={(c) => handleSelectRow(item.regId, c)} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110" /></div></TableCell>
                                                     <TableCell>
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
                                                             onClick={() => handleActionClick(item)}
-                                                            className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            className="bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white border border-cyan-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                                                             disabled={selectedRows.length >= 2}
                                                         >
                                                             <Pencil className="h-3.5 w-3.5" />
                                                             Edit
                                                         </Button>
                                                     </TableCell>
-                                                    <TableCell>{item.regId}</TableCell>
-                                                    <TableCell>{item.beneficiaryName}</TableCell>
-                                                    <TableCell>{item.district}</TableCell>
-                                                    <TableCell>{item.supply_aapurti_date}</TableCell>
-
+                                                    <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">{item.regId}</TableCell>
+                                                    <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
+                                                    <TableCell className="whitespace-nowrap text-slate-700">{item.mobileNumber}</TableCell>
+                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.village}</TableCell>
+                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.block}</TableCell>
+                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.district}</TableCell>
+                                                    <TableCell className="whitespace-nowrap text-slate-600 font-medium text-blue-600 uppercase">{item.pumpCapacity}</TableCell>
+                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.pumpHead}</TableCell>
+                                                    <TableCell className="whitespace-nowrap text-slate-600 font-medium">{item.ipName}</TableCell>
+                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.supply_aapurti_date}</TableCell>
                                                 </TableRow>
                                             ))}
                                     </TableBody>
