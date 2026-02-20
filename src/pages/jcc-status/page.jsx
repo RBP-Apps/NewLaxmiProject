@@ -469,6 +469,7 @@ export default function JccStatusPage() {
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
                                                 Action
                                             </TableHead>
+                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
 
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                                                 Reg ID
@@ -522,7 +523,7 @@ export default function JccStatusPage() {
                                         ) : filteredPendingItems.length === 0 ? (
                                             <TableRow>
                                                 <TableCell
-                                                    colSpan={12}
+                                                    colSpan={13}
                                                     className="h-48 text-center text-slate-500 bg-slate-50/30"
                                                 >
                                                     <div className="flex flex-col items-center justify-center gap-2">
@@ -537,7 +538,7 @@ export default function JccStatusPage() {
                                                 </TableCell>
                                             </TableRow>
                                         ) : (
-                                            filteredPendingItems.map((item) => (
+                                            filteredPendingItems.map((item, index) => (
                                                 <TableRow
                                                     key={item.regId}
                                                     className="hover:bg-blue-50/30 transition-colors"
@@ -566,6 +567,7 @@ export default function JccStatusPage() {
                                                             Status
                                                         </Button>
                                                     </TableCell>
+                                                    <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
 
 
                                                     <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500">{item.regId}</TableCell>
@@ -798,6 +800,7 @@ export default function JccStatusPage() {
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                                                 Action
                                             </TableHead>
+                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                                                 Reg ID
                                             </TableHead>
@@ -850,7 +853,7 @@ export default function JccStatusPage() {
                                         ) : filteredHistoryItems.length === 0 ? (
                                             <TableRow>
                                                 <TableCell
-                                                    colSpan={15}
+                                                    colSpan={16}
                                                     className="h-48 text-center text-slate-500 bg-slate-50/30"
                                                 >
                                                     <div className="flex flex-col items-center justify-center gap-2">
@@ -866,7 +869,7 @@ export default function JccStatusPage() {
                                                 </TableCell>
                                             </TableRow>
                                         ) : (
-                                            filteredHistoryItems.map((item) => (
+                                            filteredHistoryItems.map((item, index) => (
                                                 <TableRow
                                                     key={item.serialNo}
                                                     className="hover:bg-blue-50/30 transition-colors"
@@ -892,6 +895,7 @@ export default function JccStatusPage() {
                                                             Edit
                                                         </Button>
                                                     </TableCell>
+                                                    <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
                                                     <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500">
                                                         {item.regId}
                                                     </TableCell>

@@ -539,6 +539,7 @@ export default function LoiMrPage() {
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-32">
                         Action
                       </TableHead>
+                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
 
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Reg ID
@@ -627,7 +628,7 @@ export default function LoiMrPage() {
                     ) : filteredPendingItems.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={13}
+                          colSpan={14}
                           className="h-32 text-center text-muted-foreground"
                         >
                           No pending items found matching your search.
@@ -663,6 +664,7 @@ export default function LoiMrPage() {
                               Process
                             </Button>
                           </TableCell>
+                          <TableCell className="text-center font-medium text-slate-500 text-xs">{filteredPendingItems.indexOf(item) + 1}</TableCell>
 
                           <TableCell className="text-slate-600 font-mono text-xs">
                             {item.regId}
@@ -827,6 +829,7 @@ export default function LoiMrPage() {
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Action
                       </TableHead>
+                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Reg ID
                       </TableHead>
@@ -889,7 +892,7 @@ export default function LoiMrPage() {
                     ) : filteredHistoryItems.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={14} // Increased colspan for checkbox column
+                          colSpan={17} // Increased colspan for checkbox column
                           className="h-48 text-center text-slate-500 bg-slate-50/30"
                         >
                           {historyItems.length === 0
@@ -898,7 +901,7 @@ export default function LoiMrPage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredHistoryItems.map((item) => (
+                      filteredHistoryItems.map((item, index) => (
                         <TableRow
                           key={item.regId}
                           className="hover:bg-blue-50/30 transition-colors"
@@ -938,6 +941,7 @@ export default function LoiMrPage() {
                               Edit
                             </Button>
                           </TableCell>
+                          <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
                           <TableCell className="text-slate-600 font-mono text-xs">
                             {item.regId}
                           </TableCell>
@@ -1076,7 +1080,7 @@ export default function LoiMrPage() {
                           <span className="text-[10px] uppercase font-bold text-blue-900/60 block mb-1">
                             Reg ID
                           </span>
-                          <div className="font-medium text-slate-700 font-mono bg-white/50 px-2 py-1 rounded border border-blue-100/50 inline-block">
+                          <div className="font-medium text-slate-700 font-mono bg-white/50 px-2 py-1 rounded border border-blue-100/50 inline-block break-all max-w-full">
                             {selectedItem.regId}
                           </div>
                         </div>

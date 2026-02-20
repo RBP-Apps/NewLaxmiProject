@@ -603,6 +603,7 @@ export default function SanctionPage() {
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-32">
                         Action
                       </TableHead>
+                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Reg ID
                       </TableHead>
@@ -642,14 +643,14 @@ export default function SanctionPage() {
                     {filteredPendingItems.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={13}
+                          colSpan={14}
                           className="h-32 text-center text-muted-foreground"
                         >
                           No pending items found matching your search.
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredPendingItems.map((item) => (
+                      filteredPendingItems.map((item, index) => (
                         <TableRow
                           key={item.serialNo}
                           className="hover:bg-blue-50/50 transition-colors"
@@ -678,6 +679,7 @@ export default function SanctionPage() {
                               Submit
                             </Button>
                           </TableCell>
+                          <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
                           <TableCell className="text-slate-600 font-mono text-xs">
                             {item.regId}
                           </TableCell>
@@ -840,6 +842,7 @@ export default function SanctionPage() {
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Action
                       </TableHead>
+                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Reg ID
                       </TableHead>
@@ -894,14 +897,14 @@ export default function SanctionPage() {
                     {filteredHistoryItems.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={23}
+                          colSpan={24}
                           className="h-48 text-center text-slate-500 bg-slate-50/30"
                         >
                           No survey history found.
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredHistoryItems.map((item) => (
+                      filteredHistoryItems.map((item, index) => (
                         <TableRow
                           key={item.serialNo}
                           className="hover:bg-blue-50/30 transition-colors"
@@ -929,6 +932,7 @@ export default function SanctionPage() {
                               Edit
                             </Button>
                           </TableCell>
+                          <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
                           <TableCell className="text-slate-600 font-mono text-xs">
                             {item.regId}
                           </TableCell>

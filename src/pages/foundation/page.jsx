@@ -329,11 +329,11 @@ export default function FoundationPage() {
 
   // History tab: portal columns + dispatch_material fields
   const historyHeaders = [
-    "Action", "Reg ID", "Beneficiary Name", "Mobile Number", "Village", "Pump Cap", "Pump Head", "IP Name", "Invoice No", "Way Bill No", "Dispatched Plan",
+    "Action", "S.No", "Reg ID", "Beneficiary Name", "Mobile Number", "Village", "Pump Cap", "Pump Head", "IP Name", "Invoice No", "Way Bill No", "Dispatched Plan",
     "Plan Date", "Material Received", "Received Date", "Date", "Challan", "Status"
   ];
 
-  const renderPendingRow = (item) => (
+  const renderPendingRow = (item, index) => (
     <>
       <TableCell><div className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit max-w-[120px] truncate" title={item.regId}>{item.regId}</div></TableCell>
       <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
@@ -359,7 +359,7 @@ export default function FoundationPage() {
     return <span className="text-slate-600 text-xs">{link}</span>;
   };
 
-  const renderHistoryRow = (item) => (
+  const renderHistoryRow = (item, index) => (
     <>
       <TableCell className="px-4">
         <div className="flex justify-center">
@@ -371,6 +371,7 @@ export default function FoundationPage() {
           <Pencil className="h-3.5 w-3.5" /> Edit
         </Button>
       </TableCell>
+      <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
       <TableCell><div className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit max-w-[120px] truncate" title={item.regId}>{item.regId}</div></TableCell>
       <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
       <TableCell className="whitespace-nowrap text-slate-600 font-mono text-xs">{item.mobileNumber}</TableCell>
@@ -474,6 +475,7 @@ export default function FoundationPage() {
                         </div>
                       </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[150px]">Action</TableHead>
+                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
                       {pendingHeaders.map((h) => (
                         <TableHead key={h} className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">{h}</TableHead>
                       ))}
@@ -498,7 +500,7 @@ export default function FoundationPage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredPendingItems.map((item) => (
+                      filteredPendingItems.map((item, index) => (
                         <TableRow key={item.id} className="hover:bg-blue-50/30 transition-colors">
                           <TableCell className="px-4">
                             <div className="flex justify-center">
@@ -510,7 +512,8 @@ export default function FoundationPage() {
                               <Hammer className="h-3.5 w-3.5" /> Process
                             </Button>
                           </TableCell>
-                          {renderPendingRow(item)}
+                          <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                          {renderPendingRow(item, index)}
                         </TableRow>
                       ))
                     )}
@@ -594,8 +597,8 @@ export default function FoundationPage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredHistoryItems.map((item) => (
-                        <TableRow key={item.id} className="hover:bg-blue-50/30 transition-colors">{renderHistoryRow(item)}</TableRow>
+                      filteredHistoryItems.map((item, index) => (
+                        <TableRow key={item.id} className="hover:bg-blue-50/30 transition-colors">{renderHistoryRow(item, index)}</TableRow>
                       ))
                     )}
                   </TableBody>

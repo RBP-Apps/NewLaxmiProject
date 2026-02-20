@@ -574,6 +574,7 @@ export default function InstallationPage() {
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
                         Action
                       </TableHead>
+                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Reg ID</TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Beneficiary Name</TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Father's Name</TableHead>
@@ -594,7 +595,7 @@ export default function InstallationPage() {
                           key={`install-skel-${index}`}
                           className="animate-pulse"
                         >
-                          {Array.from({ length: 12 }).map((__, i) => (
+                          {Array.from({ length: 13 }).map((__, i) => (
                             <TableCell key={i}>
                               <div className="h-4 w-full bg-slate-200 rounded mx-auto"></div>
                             </TableCell>
@@ -604,7 +605,7 @@ export default function InstallationPage() {
                     ) : filteredPendingItems.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={12}
+                          colSpan={13}
                           className="h-48 text-center text-slate-500 bg-slate-50/30"
                         >
                           <div className="flex flex-col items-center justify-center gap-2">
@@ -619,18 +620,16 @@ export default function InstallationPage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredPendingItems.map((item) => (
+                      filteredPendingItems.map((item, index) => (
                         <TableRow
-                          key={item.serialNo}
+                          key={item.regId}
                           className="hover:bg-blue-50/30 transition-colors"
                         >
                           <TableCell className="px-4">
                             <div className="flex justify-center">
                               <Checkbox
                                 checked={selectedRows.includes(item.serialNo)}
-                                onCheckedChange={(checked) =>
-                                  handleSelectRow(item.serialNo, checked)
-                                }
+                                onCheckedChange={(checked) => handleSelectRow(item.serialNo, checked)}
                                 aria-label={`Select row ${item.serialNo}`}
                                 className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110"
                               />
@@ -640,7 +639,18 @@ export default function InstallationPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleActionClick(item)}
+                              onClick={() => {
+                                setSelectedItem(item);
+                                setIsBulk(false);
+                                setIsSuccess(false);
+                                setFormData({
+                                  installationStatus: "Done",
+                                  installationDate: "",
+                                  photoUploadedOnUpadApp: null,
+                                  delay4: "",
+                                });
+                                setIsDialogOpen(true);
+                              }}
                               disabled={selectedRows.length >= 2}
                               className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                             >
@@ -648,6 +658,7 @@ export default function InstallationPage() {
                               Install
                             </Button>
                           </TableCell>
+                          <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
 
                           <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">{item.regId}</TableCell>
                           <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
@@ -860,6 +871,7 @@ export default function InstallationPage() {
                         </div>
                       </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[120px]">Action</TableHead>
+                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Reg ID</TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Beneficiary Name</TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Mobile Number</TableHead>
@@ -879,7 +891,7 @@ export default function InstallationPage() {
                           key={`history-skel-${index}`}
                           className="animate-pulse"
                         >
-                          {Array.from({ length: 12 }).map((__, i) => (
+                          {Array.from({ length: 13 }).map((__, i) => (
                             <TableCell key={i}>
                               <div className="h-4 w-full bg-slate-200 rounded mx-auto"></div>
                             </TableCell>
@@ -889,7 +901,7 @@ export default function InstallationPage() {
                     ) : filteredHistoryItems.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={12}
+                          colSpan={13}
                           className="h-48 text-center text-slate-500 bg-slate-50/30"
                         >
                           <div className="flex flex-col items-center justify-center gap-2">
@@ -905,7 +917,7 @@ export default function InstallationPage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredHistoryItems.map((item) => (
+                      filteredHistoryItems.map((item, index) => (
                         <TableRow
                           key={item.serialNo}
                           className="hover:bg-blue-50/30 transition-colors"
@@ -927,6 +939,7 @@ export default function InstallationPage() {
                               Edit
                             </Button>
                           </TableCell>
+                          <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
                           <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">{item.regId}</TableCell>
                           <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
                           <TableCell className="whitespace-nowrap text-slate-700">{item.mobileNumber}</TableCell>

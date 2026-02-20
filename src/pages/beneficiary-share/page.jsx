@@ -510,6 +510,7 @@ export default function BeneficiarySharePage() {
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
                                                 Action
                                             </TableHead>
+                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                                                 Reg ID
                                             </TableHead>
@@ -562,7 +563,7 @@ export default function BeneficiarySharePage() {
                                         ) : filteredPendingItems.length === 0 ? (
                                             <TableRow>
                                                 <TableCell
-                                                    colSpan={13}
+                                                    colSpan={14}
                                                     className="h-48 text-center text-slate-500 bg-slate-50/30"
                                                 >
                                                     <div className="flex flex-col items-center justify-center gap-2">
@@ -576,7 +577,7 @@ export default function BeneficiarySharePage() {
                                                 </TableCell>
                                             </TableRow>
                                         ) : (
-                                            filteredPendingItems.map((item) => (
+                                            filteredPendingItems.map((item, index) => (
                                                 <TableRow
                                                     key={item.regId}
                                                     className="hover:bg-blue-50/30 transition-colors"
@@ -605,6 +606,7 @@ export default function BeneficiarySharePage() {
                                                             Process Update
                                                         </Button>
                                                     </TableCell>
+                                                    <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
                                                     <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">
                                                         {item.regId}
                                                     </TableCell>
@@ -857,6 +859,7 @@ export default function BeneficiarySharePage() {
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                                                 Action
                                             </TableHead>
+                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                                                 Reg ID
                                             </TableHead>
@@ -885,7 +888,7 @@ export default function BeneficiarySharePage() {
                                         ) : filteredHistoryItems.length === 0 ? (
                                             <TableRow>
                                                 <TableCell
-                                                    colSpan={7}
+                                                    colSpan={8}
                                                     className="h-48 text-center text-slate-500 bg-slate-50/30"
                                                 >
                                                     <div className="flex flex-col items-center justify-center gap-2">
@@ -901,7 +904,7 @@ export default function BeneficiarySharePage() {
                                                 </TableCell>
                                             </TableRow>
                                         ) : (
-                                            filteredHistoryItems.map((item) => (
+                                            filteredHistoryItems.map((item, index) => (
                                                 <TableRow
                                                     key={item.regId}
                                                     className="hover:bg-blue-50/30 transition-colors"
@@ -927,6 +930,7 @@ export default function BeneficiarySharePage() {
                                                             Edit
                                                         </Button>
                                                     </TableCell>
+                                                    <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
                                                     <TableCell>
                                                         <span className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md">
                                                             {item.regId}

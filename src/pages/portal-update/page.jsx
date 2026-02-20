@@ -501,6 +501,7 @@ export default function PortalUpdatePage() {
                                                 <div className="flex justify-center"><Checkbox checked={filteredPendingItems.length > 0 && selectedRows.length === filteredPendingItems.length} onCheckedChange={handleSelectAll} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out" /></div>
                                             </TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[150px]">Action</TableHead>
+                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Reg ID</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Beneficiary Name</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Father's Name</TableHead>
@@ -515,12 +516,13 @@ export default function PortalUpdatePage() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {isLoading ? Array.from({ length: 5 }).map((_, i) => <TableRow key={i} className="animate-pulse">{Array.from({ length: 13 }).map((__, j) => <TableCell key={j}><div className="h-4 w-full bg-slate-200 rounded mx-auto"></div></TableCell>)}</TableRow>) :
-                                            filteredPendingItems.length === 0 ? <TableRow><TableCell colSpan={13} className="h-48 text-center text-slate-500">No pending records.</TableCell></TableRow> :
-                                                filteredPendingItems.map((item) => (
+                                        {isLoading ? Array.from({ length: 5 }).map((_, i) => <TableRow key={i} className="animate-pulse">{Array.from({ length: 14 }).map((__, j) => <TableCell key={j}><div className="h-4 w-full bg-slate-200 rounded mx-auto"></div></TableCell>)}</TableRow>) :
+                                            filteredPendingItems.length === 0 ? <TableRow><TableCell colSpan={14} className="h-48 text-center text-slate-500">No pending records.</TableCell></TableRow> :
+                                                filteredPendingItems.map((item, index) => (
                                                     <TableRow key={item.regId} className="hover:bg-blue-50/30 transition-colors">
                                                         <TableCell className="px-4"><div className="flex justify-center"><Checkbox checked={selectedRows.includes(item.regId)} onCheckedChange={(c) => handleSelectRow(item.regId, c)} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110" /></div></TableCell>
                                                         <TableCell><Button variant="ghost" size="sm" onClick={() => handleActionClick(item)} disabled={selectedRows.length >= 2} className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"><FileText className="h-3.5 w-3.5" />Process</Button></TableCell>
+                                                        <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
                                                         <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">{item.regId}</TableCell>
                                                         <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
                                                         <TableCell className="whitespace-nowrap text-slate-600">{item.fatherName}</TableCell>
@@ -575,6 +577,7 @@ export default function PortalUpdatePage() {
                                                 <div className="flex justify-center"><Checkbox checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length} onCheckedChange={handleSelectAll} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out" /></div>
                                             </TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[120px]">Action</TableHead>
+                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Reg ID</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Beneficiary Name</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Mobile Number</TableHead>
@@ -588,23 +591,19 @@ export default function PortalUpdatePage() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {isLoading ? Array.from({ length: 5 }).map((_, i) => <TableRow key={i} className="animate-pulse">{Array.from({ length: 12 }).map((__, j) => <TableCell key={j}><div className="h-4 w-full bg-slate-200 rounded mx-auto"></div></TableCell>)}</TableRow>) :
-                                            filteredHistoryItems.length === 0 ? <TableRow><TableCell colSpan={12} className="h-48 text-center text-slate-500">No history records.</TableCell></TableRow> :
-                                            filteredHistoryItems.map((item) => (
+                                        {isLoading ? Array.from({ length: 5 }).map((_, i) => <TableRow key={i} className="animate-pulse">{Array.from({ length: 13 }).map((__, j) => <TableCell key={j}><div className="h-4 w-full bg-slate-200 rounded mx-auto"></div></TableCell>)}</TableRow>) :
+                                            filteredHistoryItems.length === 0 ? <TableRow><TableCell colSpan={13} className="h-48 text-center text-slate-500">No history records.</TableCell></TableRow> :
+                                            filteredHistoryItems.map((item, index) => (
                                                 <TableRow key={item.regId} className="hover:bg-blue-50/30 transition-colors">
                                                     <TableCell className="px-4"><div className="flex justify-center"><Checkbox checked={selectedRows.includes(item.regId)} onCheckedChange={(c) => handleSelectRow(item.regId, c)} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110" /></div></TableCell>
                                                     <TableCell>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            onClick={() => handleActionClick(item)}
-                                                            className="bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white border border-cyan-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
-                                                            disabled={selectedRows.length >= 2}
-                                                        >
+                                                        <Button variant="ghost" size="sm" onClick={() => handleActionClick(item)} disabled={selectedRows.length >= 2} className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed">
                                                             <Pencil className="h-3.5 w-3.5" />
                                                             Edit
                                                         </Button>
                                                     </TableCell>
+                                                    <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+
                                                     <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">{item.regId}</TableCell>
                                                     <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
                                                     <TableCell className="whitespace-nowrap text-slate-700">{item.mobileNumber}</TableCell>
@@ -641,6 +640,40 @@ export default function PortalUpdatePage() {
 
                             {(selectedItem || isBulk) && (
                                 <div className="grid gap-6 p-6">
+                                    {/* Beneficiary Details Card */}
+                                    <div className="bg-slate-50/50 rounded-xl border border-slate-200 p-4">
+                                        <h3 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                                            <FileCheck className="h-4 w-4 text-blue-600" />
+                                            Beneficiary Details
+                                        </h3>
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8 text-sm">
+                                            <div>
+                                                <span className="text-slate-500 text-xs block mb-1">Serial No</span>
+                                                <p className="font-medium text-slate-800">{isBulk ? "Multiple" : selectedItem?.serialNo}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-500 text-xs block mb-1">Reg ID</span>
+                                                <p className="font-medium text-slate-800 font-mono break-all">{isBulk ? "Multiple" : selectedItem?.regId}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-500 text-xs block mb-1">Beneficiary Name</span>
+                                                <p className="font-medium text-slate-800">{isBulk ? "Multiple" : selectedItem?.beneficiaryName}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-500 text-xs block mb-1">Father's Name</span>
+                                                <p className="font-medium text-slate-800">{isBulk ? "Multiple" : selectedItem?.fatherName}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-500 text-xs block mb-1">Village/Block</span>
+                                                <p className="font-medium text-slate-800">{isBulk ? "Multiple" : `${selectedItem?.village}, ${selectedItem?.block}`}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-500 text-xs block mb-1">Pump Type</span>
+                                                <p className="font-medium text-blue-700 bg-blue-50 inline-block px-2 py-0.5 rounded text-xs border border-blue-100">{isBulk ? "Multiple" : selectedItem?.pumpCapacity}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
                                         <div className="space-y-1.5">

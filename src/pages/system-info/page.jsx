@@ -28,6 +28,7 @@ import {
     Loader2,
     Search,
     Edit,
+    FileCheck,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -464,6 +465,7 @@ export default function SystemInfoPage() {
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
                                                 Action
                                             </TableHead>
+                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
                                             {/* Common Columns */}
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Reg ID</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Beneficiary Name</TableHead>
@@ -495,7 +497,7 @@ export default function SystemInfoPage() {
                                             ))
                                         ) : filteredPendingItems.length === 0 ? (
                                             <TableRow>
-                                                <TableCell colSpan={14} className="h-48 text-center text-slate-500 bg-slate-50/30">
+                                                <TableCell colSpan={15} className="h-48 text-center text-slate-500 bg-slate-50/30">
                                                     <div className="flex flex-col items-center justify-center gap-2">
                                                         <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center">
                                                             <Cpu className="h-6 w-6 text-slate-400" />
@@ -505,7 +507,7 @@ export default function SystemInfoPage() {
                                                 </TableCell>
                                             </TableRow>
                                         ) : (
-                                            filteredPendingItems.map((item) => (
+                                            filteredPendingItems.map((item, index) => (
                                                 <TableRow key={item.regId} className="hover:bg-blue-50/30 transition-colors">
                                                     <TableCell className="px-4">
                                                         <div className="flex justify-center">
@@ -528,6 +530,7 @@ export default function SystemInfoPage() {
                                                             Update
                                                         </Button>
                                                     </TableCell>
+                                                    <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
                                                     <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500">{item.regId}</TableCell>
                                                     <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
                                                     <TableCell className="whitespace-nowrap text-slate-600">{item.fatherName}</TableCell>
@@ -583,6 +586,7 @@ export default function SystemInfoPage() {
                                                 </div>
                                             </TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Action</TableHead>
+                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Reg ID</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Beneficiary Name</TableHead>
                                             <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Village</TableHead>
@@ -594,10 +598,10 @@ export default function SystemInfoPage() {
                                     <TableBody>
                                         {filteredHistoryItems.length === 0 ? (
                                             <TableRow>
-                                                <TableCell colSpan={7} className="h-48 text-center text-slate-500">No history records.</TableCell>
+                                                <TableCell colSpan={8} className="h-48 text-center text-slate-500">No history records.</TableCell>
                                             </TableRow>
                                         ) : (
-                                        filteredHistoryItems.map((item) => (
+                                        filteredHistoryItems.map((item, index) => (
                                             <TableRow key={item.regId} className="hover:bg-blue-50/30 transition-colors">
                                                 <TableCell className="px-4">
                                                     <div className="flex justify-center">
@@ -620,6 +624,7 @@ export default function SystemInfoPage() {
                                                         Edit
                                                     </Button>
                                                 </TableCell>
+                                                <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
                                                 <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500">{item.regId}</TableCell>
                                                 <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
                                                 <TableCell className="whitespace-nowrap text-slate-600">{item.village}</TableCell>
@@ -654,6 +659,40 @@ export default function SystemInfoPage() {
                             </DialogHeader>
 
                             <div className="grid gap-6 p-6">
+                                {/* Beneficiary Details Card */}
+                                <div className="bg-slate-50/50 rounded-xl border border-slate-200 p-4">
+                                    <h3 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                                        <FileCheck className="h-4 w-4 text-blue-600" />
+                                        Beneficiary Details
+                                    </h3>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8 text-sm">
+                                        <div>
+                                            <span className="text-slate-500 text-xs block mb-1">Serial No</span>
+                                            <p className="font-medium text-slate-800">{isBulk ? "Multiple" : selectedItem?.serialNo}</p>
+                                        </div>
+                                        <div>
+                                            <span className="text-slate-500 text-xs block mb-1">Reg ID</span>
+                                            <p className="font-medium text-slate-800 font-mono break-all">{isBulk ? "Multiple" : selectedItem?.regId}</p>
+                                        </div>
+                                        <div>
+                                            <span className="text-slate-500 text-xs block mb-1">Beneficiary Name</span>
+                                            <p className="font-medium text-slate-800">{isBulk ? "Multiple" : selectedItem?.beneficiaryName}</p>
+                                        </div>
+                                        <div>
+                                            <span className="text-slate-500 text-xs block mb-1">Father's Name</span>
+                                            <p className="font-medium text-slate-800">{isBulk ? "Multiple" : selectedItem?.fatherName}</p>
+                                        </div>
+                                        <div>
+                                            <span className="text-slate-500 text-xs block mb-1">Village/Block</span>
+                                            <p className="font-medium text-slate-800">{isBulk ? "Multiple" : `${selectedItem?.village}, ${selectedItem?.block}`}</p>
+                                        </div>
+                                        <div>
+                                            <span className="text-slate-500 text-xs block mb-1">Pump Type</span>
+                                            <p className="font-medium text-blue-700 bg-blue-50 inline-block px-2 py-0.5 rounded text-xs border border-blue-100">{isBulk ? "Multiple" : selectedItem?.pumpCapacity}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {/* General System Info */}
                                     <div className="space-y-4 col-span-full">

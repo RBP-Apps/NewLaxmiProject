@@ -502,6 +502,7 @@ export default function PaymentPage() {
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                         Action
                       </TableHead>
+                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
 
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Reg ID
@@ -555,7 +556,7 @@ export default function PaymentPage() {
                     ) : filteredPendingItems.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={13}
+                          colSpan={14}
                           className="h-48 text-center text-slate-500 bg-slate-50/30"
                         >
                           <div className="flex flex-col items-center justify-center gap-2">
@@ -570,7 +571,7 @@ export default function PaymentPage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredPendingItems.map((item) => (
+                      filteredPendingItems.map((item, index) => (
                         <TableRow
                           key={item.serialNo}
                           className="hover:bg-blue-50/30 transition-colors"
@@ -597,6 +598,7 @@ export default function PaymentPage() {
                               Pay
                             </Button>
                           </TableCell>
+                          <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
 
                           <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">
                             {item.regId}
@@ -835,6 +837,7 @@ export default function PaymentPage() {
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Action
                       </TableHead>
+                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Reg ID
                       </TableHead>
@@ -869,7 +872,7 @@ export default function PaymentPage() {
                     {isLoading ? (
                       Array.from({ length: 5 }).map((_, index) => (
                         <TableRow key={index} className="animate-pulse">
-                          {Array.from({ length: 11 }).map((_, i) => (
+                          {Array.from({ length: 12 }).map((_, i) => (
                             <TableCell key={i}>
                               <div className="h-4 w-full bg-slate-200 rounded" />
                             </TableCell>
@@ -879,7 +882,7 @@ export default function PaymentPage() {
                     ) : filteredHistoryItems.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={12}
+                          colSpan={13}
                           className="h-48 text-center text-slate-500 bg-slate-50/30"
                         >
                           <div className="flex flex-col items-center justify-center gap-2">
@@ -895,7 +898,7 @@ export default function PaymentPage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredHistoryItems.map((item) => (
+                      filteredHistoryItems.map((item, index) => (
                         <TableRow
                           key={item.serialNo}
                           className="hover:bg-blue-50/30 transition-colors"
@@ -921,6 +924,7 @@ export default function PaymentPage() {
                               Edit
                             </Button>
                           </TableCell>
+                          <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
                           <TableCell>
                             <span className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md">
                               {item.regId}
