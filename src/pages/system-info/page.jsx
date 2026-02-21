@@ -296,6 +296,12 @@ export default function SystemInfoPage() {
                     updated_at: new Date().toISOString(),
                 };
 
+                if (!item.actual_7) {
+                    const now = new Date();
+                    const pad = (n) => String(n).padStart(2, "0");
+                    updatePayload.actual_7 = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+                }
+
                 const { error } = await supabase
                     .from("system_info")
                     .update(updatePayload)
