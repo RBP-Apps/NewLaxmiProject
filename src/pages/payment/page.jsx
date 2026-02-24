@@ -121,6 +121,10 @@ export default function PaymentPage() {
     gst18Percent: "",
     totalAmount: "",
     billSendDate: "",
+    hoCsr60Percent: "",
+    hoCsr75Percent: "",
+    transportExpense: "",
+    remarks: "",
   });
 
   // Calculate Total Amount: perInstallation + (perInstallation * gst% / 100)
@@ -198,6 +202,10 @@ export default function PaymentPage() {
             row.total_amount_payment_to_ip || 
             ((parseFloat(row.ip_payment_per_installation) || 0) + 
              (parseFloat(row.gst_18_percent) || 0)).toFixed(2), // Fallback calculation
+          hoCsr60Percent: row.ho_csr_60_percent || "",
+          hoCsr75Percent: row.ho_csr_75_percent || "",
+          transportExpense: row.transport_expense || "",
+          remarks: row.remarks || "",
 
           // Trigger columns
           planned11: row.planned_11,
@@ -250,6 +258,10 @@ export default function PaymentPage() {
       gst18Percent: item.gst18Percent || "",
       totalAmount: item.totalAmount || "",
       billSendDate: item.billSendDate || "",
+      hoCsr60Percent: item.hoCsr60Percent || "",
+      hoCsr75Percent: item.hoCsr75Percent || "",
+      transportExpense: item.transportExpense || "",
+      remarks: item.remarks || "",
     });
     setIsDialogOpen(true);
   };
@@ -287,6 +299,10 @@ export default function PaymentPage() {
       gst18Percent: "",
       totalAmount: "",
       billSendDate: "",
+      hoCsr60Percent: "",
+      hoCsr75Percent: "",
+      transportExpense: "",
+      remarks: "",
     });
     setIsDialogOpen(true);
   };
@@ -322,6 +338,10 @@ export default function PaymentPage() {
           gst_18_percent: formData.gst18Percent || null,
           total_amount_payment_to_ip: formData.totalAmount || null,
           bill_send_date: formData.billSendDate || null,
+          ho_csr_60_percent: formData.hoCsr60Percent || null,
+          ho_csr_75_percent: formData.hoCsr75Percent || null,
+          transport_expense: formData.transportExpense || null,
+          remarks: formData.remarks || null,
           actual_11: timestamp,
         };
 
@@ -865,6 +885,18 @@ export default function PaymentPage() {
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Bill Date
                       </TableHead>
+                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                        HO(CSR) 60%
+                      </TableHead>
+                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                        HO(CSR) 75%
+                      </TableHead>
+                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                        Transport Expense
+                      </TableHead>
+                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                        Remarks
+                      </TableHead>
 
                     </TableRow>
                   </TableHeader>
@@ -882,7 +914,7 @@ export default function PaymentPage() {
                     ) : filteredHistoryItems.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={13}
+                          colSpan={17}
                           className="h-48 text-center text-slate-500 bg-slate-50/30"
                         >
                           <div className="flex flex-col items-center justify-center gap-2">
@@ -956,6 +988,18 @@ export default function PaymentPage() {
                           <TableCell className="text-slate-600 text-xs">
                             {item.billSendDate || "-"}
                           </TableCell>
+                          <TableCell className="text-slate-600 font-mono text-xs">
+                            {item.hoCsr60Percent ? `₹${item.hoCsr60Percent}` : "-"}
+                          </TableCell>
+                          <TableCell className="text-slate-600 font-mono text-xs">
+                            {item.hoCsr75Percent ? `₹${item.hoCsr75Percent}` : "-"}
+                          </TableCell>
+                          <TableCell className="text-slate-600 font-mono text-xs">
+                            {item.transportExpense ? `₹${item.transportExpense}` : "-"}
+                          </TableCell>
+                          <TableCell className="text-slate-600 text-xs">
+                            {item.remarks || "-"}
+                          </TableCell>
 
                         </TableRow>
                       ))
@@ -1010,6 +1054,30 @@ export default function PaymentPage() {
                             IP JCR:
                           </span>{" "}
                           ₹{item.ipJcrCsrPayment || "0"}
+                        </div>
+                        <div>
+                          <span className="font-medium text-slate-500">
+                            HO(CSR) 60%:
+                          </span>{" "}
+                          ₹{item.hoCsr60Percent || "0"}
+                        </div>
+                        <div>
+                          <span className="font-medium text-slate-500">
+                            HO(CSR) 75%:
+                          </span>{" "}
+                          ₹{item.hoCsr75Percent || "0"}
+                        </div>
+                        <div>
+                          <span className="font-medium text-slate-500">
+                            Transport:
+                          </span>{" "}
+                          ₹{item.transportExpense || "0"}
+                        </div>
+                        <div className="col-span-2">
+                          <span className="font-medium text-slate-500">
+                            Remarks:
+                          </span>{" "}
+                          {item.remarks || "-"}
                         </div>
                         <div className="col-span-2 pt-2 flex justify-end">
                           <Button size="sm" variant="outline" onClick={() => handleActionClick(item)} className="h-8 gap-2">
@@ -1206,6 +1274,66 @@ export default function PaymentPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, billSendDate: e.target.value })
                         }
+                        className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100"
+                      />
+                    </div>
+                  </div>
+
+                  {/* ADDITIONAL FIELDS */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label className="text-slate-700 font-medium">
+                        HO(CSR) 60%
+                      </Label>
+                      <Input
+                        type="number"
+                        value={formData.hoCsr60Percent}
+                        onChange={(e) =>
+                          setFormData({ ...formData, hoCsr60Percent: e.target.value })
+                        }
+                        placeholder="Enter Amount"
+                        className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-slate-700 font-medium">
+                        HO(CSR) 75%
+                      </Label>
+                      <Input
+                        type="number"
+                        value={formData.hoCsr75Percent}
+                        onChange={(e) =>
+                          setFormData({ ...formData, hoCsr75Percent: e.target.value })
+                        }
+                        placeholder="Enter Amount"
+                        className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-slate-700 font-medium">
+                        TRANSPORT EXPENSE
+                      </Label>
+                      <Input
+                        type="number"
+                        value={formData.transportExpense}
+                        onChange={(e) =>
+                          setFormData({ ...formData, transportExpense: e.target.value })
+                        }
+                        placeholder="Enter Amount"
+                        className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-slate-700 font-medium">
+                        REMARKS
+                      </Label>
+                      <Input
+                        type="text"
+                        value={formData.remarks}
+                        onChange={(e) =>
+                          setFormData({ ...formData, remarks: e.target.value })
+                        }
+                        placeholder="Enter Remarks"
                         className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100"
                       />
                     </div>
