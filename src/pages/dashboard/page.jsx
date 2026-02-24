@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Activity, RefreshCw, AlertCircle, Clock, PlayCircle, Download } from "lucide-react";
+import { Activity, RefreshCw, AlertCircle, Clock, PlayCircle, Download, IndianRupee } from "lucide-react";
 import { cn } from "@/lib/utils";
 import * as XLSX from "xlsx";
 import { dashboardColumns } from "./columns";
@@ -15,6 +15,7 @@ export default function DashboardPage() {
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [expenseSummary, setExpenseSummary] = useState([]);
 
   const handleExportAll = async () => {
     setIsExporting(true);
@@ -82,7 +83,7 @@ export default function DashboardPage() {
         supabase.from("invoicing").select("*"),
         supabase.from("beneficiary_share").select("reg_id, actual_9, farmer_share_amt, state_share_amt"),
         supabase.from("insurance").select("reg_id, scada_insurance_upload"),
-        supabase.from("ip_payment").select("reg_id, bill_send_date"),
+        supabase.from("ip_payment").select("reg_id, bill_send_date, ip_jcr_csr_payment, ho_csr_60_percent, ho_csr_75_percent, transport_expense, ip_payment_per_installation, gst_18_percent, total_amount_payment_to_ip"),
       ]);
 
       if (portalError) throw portalError;
@@ -239,6 +240,47 @@ export default function DashboardPage() {
           jcrPending: item.installationDone - item.jcrCompleted,
         }));
 
+      // 5. Build IP-wise Expense Summary from ip_payment data
+      const expenseMap = new Map();
+      (paymentData || []).forEach((row) => {
+        const regId = String(row.reg_id || "").trim();
+        if (!regId) return;
+        const portalItem = portalData?.find(
+          (p) => String(p.reg_id || p["Reg ID"] || "").trim() === regId
+        );
+        const ipName = (portalItem?.ip_name || portalItem?.["IP Name"] || portalItem?.installer_name || "Unknown").trim();
+
+        if (!expenseMap.has(ipName)) {
+          expenseMap.set(ipName, {
+            ipName,
+            ipCsr: 0,
+            hoCsr60: 0,
+            hoCsr75: 0,
+            transportExpense: 0,
+            ipPaymentTotal: 0,
+            netTotal: 0,
+          });
+        }
+        const entry = expenseMap.get(ipName);
+        const ipCsr = parseFloat(row.ip_jcr_csr_payment) || 0;
+        const ho60 = parseFloat(row.ho_csr_60_percent) || 0;
+        const ho75 = parseFloat(row.ho_csr_75_percent) || 0;
+        const transport = parseFloat(row.transport_expense) || 0;
+        const ipTotal = parseFloat(row.total_amount_payment_to_ip) || 0;
+
+        entry.ipCsr += ipCsr;
+        entry.hoCsr60 += ho60;
+        entry.hoCsr75 += ho75;
+        entry.transportExpense += transport;
+        entry.ipPaymentTotal += ipTotal;
+        entry.netTotal += ipCsr + ho60 + ho75 + transport + ipTotal;
+      });
+
+      const expenseData = Array.from(expenseMap.values())
+        .sort((a, b) => a.ipName.localeCompare(b.ipName))
+        .map((item, index) => ({ ...item, sNo: index + 1 }));
+
+      setExpenseSummary(expenseData);
       setData(processedData);
       setLastUpdated(new Date());
 
@@ -385,6 +427,96 @@ export default function DashboardPage() {
                             {formatValue(row[col.accessor], col.format)}
                           </TableCell>
                         ))}
+                      </TableRow>
+                    ))}
+                  </>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ====================== EXPENSE SUMMARY ====================== */}
+      <Card className="border border-emerald-200 shadow-lg shadow-emerald-100/30 bg-white overflow-hidden">
+        <CardHeader className="border-b border-emerald-100 bg-emerald-50/30 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg font-semibold text-emerald-900 flex items-center gap-2">
+              <div className="p-1 bg-emerald-100 rounded-lg">
+                <IndianRupee className="h-4 w-4 text-emerald-600" />
+              </div>
+              IP Wise Payment Summary
+            </CardTitle>
+            <Badge variant="secondary" className="bg-white border-emerald-200 text-emerald-700">
+              {expenseSummary.length} IPs
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table className="w-full text-sm border-collapse">
+              <TableHeader className="bg-emerald-50/50">
+                <TableRow className="border-b border-emerald-200 hover:bg-transparent">
+                  <TableHead className="h-12 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap text-center w-14">S.No</TableHead>
+                  <TableHead className="h-12 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[200px]">IP</TableHead>
+                  <TableHead className="h-12 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">IP (CSR)</TableHead>
+                  <TableHead className="h-12 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">HO(CSR) 60%</TableHead>
+                  <TableHead className="h-12 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">HO(CSR) 75%</TableHead>
+                  <TableHead className="h-12 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">Transport Expense</TableHead>
+                  <TableHead className="h-12 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">IP Payment Total</TableHead>
+                  <TableHead className="h-12 px-4 text-xs font-bold text-emerald-700 uppercase tracking-wider whitespace-nowrap text-right bg-emerald-50">Net Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <TableRow key={i} className="animate-pulse">
+                      {Array.from({ length: 8 }).map((_, j) => (
+                        <TableCell key={j} className="p-3"><div className="h-4 bg-slate-100 rounded w-full"></div></TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : expenseSummary.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="h-32 text-center text-slate-400">No expense data found.</TableCell>
+                  </TableRow>
+                ) : (
+                  <>
+                    {/* Totals Row */}
+                    <TableRow className="bg-emerald-50/80 font-bold border-b-2 border-emerald-300 hover:bg-emerald-100/50">
+                      <TableCell className="text-center"></TableCell>
+                      <TableCell className="font-bold text-emerald-900">Total</TableCell>
+                      <TableCell className="text-right font-mono">
+                        {formatValue(expenseSummary.reduce((s, r) => s + r.ipCsr, 0), "currency")}
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        {formatValue(expenseSummary.reduce((s, r) => s + r.hoCsr60, 0), "currency")}
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        {formatValue(expenseSummary.reduce((s, r) => s + r.hoCsr75, 0), "currency")}
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        {formatValue(expenseSummary.reduce((s, r) => s + r.transportExpense, 0), "currency")}
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        {formatValue(expenseSummary.reduce((s, r) => s + r.ipPaymentTotal, 0), "currency")}
+                      </TableCell>
+                      <TableCell className="text-right font-mono font-bold text-emerald-700 bg-emerald-50">
+                        {formatValue(expenseSummary.reduce((s, r) => s + r.netTotal, 0), "currency")}
+                      </TableCell>
+                    </TableRow>
+
+                    {/* Data Rows */}
+                    {expenseSummary.map((row) => (
+                      <TableRow key={row.ipName} className="hover:bg-emerald-50/30 transition-colors border-b border-slate-100">
+                        <TableCell className="text-center text-slate-500 font-medium">{row.sNo}</TableCell>
+                        <TableCell className="font-medium text-slate-800">{row.ipName}</TableCell>
+                        <TableCell className="text-right font-mono text-slate-600">{formatValue(row.ipCsr, "currency")}</TableCell>
+                        <TableCell className="text-right font-mono text-slate-600">{formatValue(row.hoCsr60, "currency")}</TableCell>
+                        <TableCell className="text-right font-mono text-slate-600">{formatValue(row.hoCsr75, "currency")}</TableCell>
+                        <TableCell className="text-right font-mono text-slate-600">{formatValue(row.transportExpense, "currency")}</TableCell>
+                        <TableCell className="text-right font-mono text-slate-600">{formatValue(row.ipPaymentTotal, "currency")}</TableCell>
+                        <TableCell className="text-right font-mono font-bold text-emerald-700 bg-emerald-50/30">{formatValue(row.netTotal, "currency")}</TableCell>
                       </TableRow>
                     ))}
                   </>
