@@ -59,6 +59,43 @@ export default function DashboardPage() {
     }
   };
 
+  const handleExportSummary = () => {
+    if (data.length === 0) return alert("No summary data to export.");
+    const exportRows = data.map((row) => {
+      const obj = {};
+      dashboardColumns.forEach((col) => {
+        obj[col.header] = row[col.accessor] ?? "";
+      });
+      return obj;
+    });
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(exportRows);
+    XLSX.utils.book_append_sheet(wb, ws, "Summary Report");
+    const now = new Date();
+    const ts = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    XLSX.writeFile(wb, `Summary_Report_${ts}.xlsx`);
+  };
+
+  const handleExportIPPayment = () => {
+    if (expenseSummary.length === 0) return alert("No payment data to export.");
+    const exportRows = expenseSummary.map((row) => ({
+      "S.No": row.sNo,
+      "IP Name": row.ipName,
+      "IP (CSR)": row.ipCsr,
+      "HO(CSR) 60%": row.hoCsr60,
+      "HO(CSR) 75%": row.hoCsr75,
+      "Transport Expense": row.transportExpense,
+      "IP Payment Total": row.ipPaymentTotal,
+      "Net Total": row.netTotal,
+    }));
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(exportRows);
+    XLSX.utils.book_append_sheet(wb, ws, "IP Wise Payment");
+    const now = new Date();
+    const ts = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    XLSX.writeFile(wb, `IP_Wise_Payment_Summary_${ts}.xlsx`);
+  };
+
   const fetchData = async () => {
     setIsLoading(true);
     setError(null);
@@ -345,9 +382,19 @@ export default function DashboardPage() {
         <CardHeader className="border-b border-slate-100 bg-slate-50/50 px-6 py-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold text-slate-800">Summary Report</CardTitle>
-            <Badge variant="secondary" className="bg-white border-slate-200 text-slate-600">
-              <PlayCircle className="h-3 w-3 mr-1 text-green-500" /> {data.length} Records
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handleExportSummary}
+                size="sm"
+                className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-sm text-xs h-8"
+              >
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                Download Summary
+              </Button>
+              <Badge variant="secondary" className="bg-white border-slate-200 text-slate-600">
+                <PlayCircle className="h-3 w-3 mr-1 text-green-500" /> {data.length} Records
+              </Badge>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -447,9 +494,19 @@ export default function DashboardPage() {
               </div>
               IP Wise Payment Summary
             </CardTitle>
-            <Badge variant="secondary" className="bg-white border-emerald-200 text-emerald-700">
-              {expenseSummary.length} IPs
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handleExportIPPayment}
+                size="sm"
+                className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-sm text-xs h-8"
+              >
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                Download IP Payment
+              </Button>
+              <Badge variant="secondary" className="bg-white border-emerald-200 text-emerald-700">
+                {expenseSummary.length} IPs
+              </Badge>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
