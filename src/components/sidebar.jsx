@@ -30,8 +30,8 @@ import { useState, useEffect } from "react";
 const menuItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Portal", href: "/portal", icon: Globe },
-  { name: "Work order", href: "/loi-mr", icon: FileText },
-  { name: "Survey", href: "/sanction", icon: ShieldCheck },
+  { name: "Work order", href: "/work-order", icon: FileText },
+  { name: "Survey", href: "/survey", icon: ShieldCheck },
   { name: "Dispatch & Receiving", href: "/foundation", icon: Building2 },
   { name: "Installation", href: "/installation", icon: Wrench },
   { name: "Portal Update", href: "/portal-update", icon: Info },
@@ -57,9 +57,22 @@ function SidebarContent({ className, onLinkClick }) {
     }
   }, []);
 
+  // Get user role and allowed pages
+  const userRole = localStorage.getItem("userRole") || "User";
+  const pageAccessStr = localStorage.getItem("pageAccess") || "";
+  const allowedPages = pageAccessStr.split(",").map((s) => s.trim()).filter(Boolean);
+
+  // Filter menu items: Admin sees all, User sees only allowed pages
+  // Fallback: if pageAccess is empty (not yet set), show all pages
+  const filteredMenuItems = userRole === "Admin" || allowedPages.length === 0
+    ? menuItems
+    : menuItems.filter((item) => allowedPages.includes(item.name));
+
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
     localStorage.removeItem("username");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("pageAccess");
     navigate("/login");
   };
 
@@ -73,7 +86,7 @@ function SidebarContent({ className, onLinkClick }) {
       </div>
 
       <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-        {menuItems.map((item) => {
+        {filteredMenuItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.href;
           return (

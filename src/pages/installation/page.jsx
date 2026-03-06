@@ -287,8 +287,8 @@ export default function InstallationPage() {
       // If we change to ID, we must update table row checkbox too.
       // Let's check if serialNo is reliable.
       // In `foundation` page we used `id`.
-      // In `sanction` page we used `serialNo`.
-      // In `loi-mr` we used `regId`.
+      // In `survey` page we used `serialNo`.
+      // In `work-order` we used `regId`.
       // Let's stick to `serialNo` if that's what `installation` page is already using for Pending.
       // Yes, `selectedRows` stores `serialNo`.
       setSelectedRows(items.map((item) => item.serialNo));
@@ -736,10 +736,10 @@ export default function InstallationPage() {
                         </div>
                         <div className="flex flex-col gap-1">
                           <span className="text-slate-400 text-[10px] uppercase font-semibold">
-                            Sanction No
+                            survey No
                           </span>
                           <span className="font-medium text-orange-600 font-mono">
-                            {item.sanctionNo || "-"}
+                            {item.surveyNo || "-"}
                           </span>
                         </div>
                       </div>
@@ -789,14 +789,14 @@ export default function InstallationPage() {
                 </div>
                 <div className="flex items-center gap-3 w-full md:w-auto justify-end">
                   {selectedRows.length >= 2 && (
-                     <Button
-                       onClick={handleBulkClick}
-                       className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
-                       size="sm"
-                     >
-                       <Pencil className="h-4 w-4 mr-2" />
-                       Installation Selected ({selectedRows.length})
-                     </Button>
+                    <Button
+                      onClick={handleBulkClick}
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
+                      size="sm"
+                    >
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Installation Selected ({selectedRows.length})
+                    </Button>
                   )}
                   <Badge
                     variant="outline"

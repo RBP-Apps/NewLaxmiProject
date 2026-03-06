@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -26,17 +26,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Users, UserPlus, Check, ChevronsUpDown, Loader2, ShieldAlert, KeyRound, Search, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Hardcoded page options from sidebar menu
 const PAGE_OPTIONS = [
     "Dashboard",
     "Portal",
@@ -46,9 +41,9 @@ const PAGE_OPTIONS = [
     "Installation",
     "Portal Update",
     "Invoicing",
-    "Benificiary Share",
-    "JCR Status",
     "System Info",
+    "JCR Status",
+    "Beneficiary Share",
     "Insurance",
     "IP payment",
     "Settings",
@@ -69,6 +64,21 @@ export default function SettingPage() {
     });
 
     const [searchTerm, setSearchTerm] = useState("");
+    const [pageAccessOpen, setPageAccessOpen] = useState(false);
+    const pageAccessRef = useRef(null);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (pageAccessRef.current && !pageAccessRef.current.contains(e.target)) {
+                setPageAccessOpen(false);
+            }
+        };
+        if (pageAccessOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [pageAccessOpen]);
 
     const filteredUsers = users.filter((user) =>
         Object.values(user).some((value) =>
@@ -389,60 +399,54 @@ export default function SettingPage() {
 
                         <div className="space-y-2">
                             <Label>Page Access</Label>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        className="w-full justify-between text-left font-normal bg-white border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 active:scale-100 hover:border-blue-300 hover:bg-slate-50 hover:text-slate-900 transition-all"
-                                    >
-                                        <span className={cn("truncate", formData.pageAccess.length === 0 && "text-muted-foreground")}>
-                                            {formData.pageAccess.length > 0
-                                                ? `${formData.pageAccess.length} Selected`
-                                                : "Select Pages"}
-                                        </span>
-                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-slate-500" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[300px] p-0 shadow-lg border-blue-50" align="start">
-                                    <div className="h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent">
-                                        <div className="p-2 grid gap-1">
-                                            {PAGE_OPTIONS.map((page) => (
-                                                <div
-                                                    key={page}
-                                                    className="
-                                                flex items-center space-x-2 p-2
-                                                hover:bg-blue-50
-                                                rounded-md cursor-pointer
-                                                transition-colors
-                                            "
-                                                    onClick={() => handlePageAccessToggle(page)}
-                                                >
-                                                    <Checkbox
-                                                        id={`page-${page}`}
-                                                        checked={formData.pageAccess.includes(page)}
-                                                        onCheckedChange={() => handlePageAccessToggle(page)}
-                                                        className="
-                                                    border-slate-300
-                                                    data-[state=checked]:bg-blue-600
-                                                    data-[state=checked]:border-blue-600
-                                                    focus-visible:ring-2
-                                                    focus-visible:ring-blue-500
-                                                    focus-visible:ring-offset-2
-                                                    hover:border-blue-400
-                                                "
-                                                    />
-                                                    <label
-                                                        htmlFor={`page-${page}`}
-                                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
+                            <div className="relative" ref={pageAccessRef}>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="w-full justify-between text-left font-normal bg-white border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 active:scale-100 hover:border-blue-300 hover:bg-slate-50 hover:text-slate-900 transition-all"
+                                    onClick={() => setPageAccessOpen(!pageAccessOpen)}
+                                >
+                                    <span className={cn("truncate", formData.pageAccess.length === 0 && "text-muted-foreground")}>
+                                        {formData.pageAccess.length > 0
+                                            ? `${formData.pageAccess.length} page(s) selected`
+                                            : "Select Pages"}
+                                    </span>
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-slate-500" />
+                                </Button>
+                                {pageAccessOpen && (
+                                    <div className="absolute z-50 bottom-full mb-1 w-full bg-white border border-slate-200 rounded-lg shadow-xl max-h-[220px] overflow-y-auto">
+                                        <div className="p-1.5">
+                                            {PAGE_OPTIONS.map((page) => {
+                                                const isChecked = formData.pageAccess.includes(page);
+                                                return (
+                                                    <div
+                                                        key={page}
+                                                        className={cn(
+                                                            "flex items-center gap-2.5 px-3 py-2 rounded-md cursor-pointer transition-colors text-sm font-medium",
+                                                            isChecked
+                                                                ? "bg-blue-50 text-blue-700"
+                                                                : "hover:bg-slate-50 text-slate-700"
+                                                        )}
+                                                        onClick={() => handlePageAccessToggle(page)}
                                                     >
+                                                        <div className={cn(
+                                                            "flex items-center justify-center w-4 h-4 rounded border transition-colors",
+                                                            isChecked
+                                                                ? "bg-blue-600 border-blue-600"
+                                                                : "border-slate-300"
+                                                        )}>
+                                                            {isChecked && (
+                                                                <Check className="h-3 w-3 text-white" />
+                                                            )}
+                                                        </div>
                                                         {page}
-                                                    </label>
-                                                </div>
-                                            ))}
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     </div>
-                                </PopoverContent>
-                            </Popover>
+                                )}
+                            </div>
                             {formData.pageAccess.length > 0 && (
                                 <div className="flex flex-wrap gap-1 mt-2">
                                     {formData.pageAccess.map(p => (

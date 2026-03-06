@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { format } from "date-fns";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -314,12 +315,14 @@ export default function BeneficiarySharePage() {
             }
 
             const updatePromises = itemsToProcess.map(async (item) => {
+                const timestamp = format(new Date(), "yyyy-MM-dd HH:mm:ss");
                 const shareData = {
                     state_share_amt: formData.state_share_amt || null,
                     state_share_dt: formData.state_share_dt || null,
                     farmer_share_amt: formData.farmer_share_amt || null,
                     farmer_share_dt: formData.farmer_share_dt || null,
-                    updated_at: new Date().toISOString(),
+                    actual_9: timestamp,
+                    updated_at: timestamp,
                 };
 
                 // Check if row exists in beneficiary_share

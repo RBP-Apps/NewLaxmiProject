@@ -13,7 +13,7 @@ import BeneficiaryShareLayout from '@/pages/beneficiary-share/layout';
 import InsurancesLayout from '@/pages/insurances/layout';
 import PaymentLayout from '@/pages/payment/layout';
 import PortalLayout from '@/pages/portal/layout';
-import SanctionLayout from '@/pages/sanction/layout';
+import SurveyLayout from '@/pages/survey/layout';
 import SystemInfoLayout from '@/pages/system-info/layout';
 import SettingLayout from '@/pages/setting/layout';
 import PortalUpdateLayout from '@/pages/portal-update/layout';
@@ -29,13 +29,13 @@ import JccStatusPage from '@/pages/jcc-status/page';
 import BeneficiarySharePage from '@/pages/beneficiary-share/page';
 import InsurancesPage from '@/pages/insurances/page';
 import LoginPage from '@/pages/login/page';
-import LoiMrPage from '@/pages/loi-mr/page'; // Restored
+import LoiMrPage from '@/pages/work-order/page'; // Restored
 import PaymentPage from '@/pages/payment/page';
 import PortalPage from '@/pages/portal/page';
-import SanctionPage from '@/pages/sanction/page';
+import SurveyPage from '@/pages/survey/page';
 import SystemInfoPage from '@/pages/system-info/page';
 import SettingPage from '@/pages/setting/page';
-import LoiMrLayout from '@/pages/loi-mr/layout'; // Restored
+import LoiMrLayout from '@/pages/work-order/layout'; // Restored
 import PortalUpdatePage from '@/pages/portal-update/page';
 
 function App() {
@@ -77,7 +77,7 @@ function App() {
                          <Route index element={<InsurancesPage />} />
                     </Route>
 
-                    <Route path="/loi-mr" element={<LoiMrLayout><Outlet /></LoiMrLayout>}>
+                    <Route path="/work-order" element={<LoiMrLayout><Outlet /></LoiMrLayout>}>
                          <Route index element={<LoiMrPage />} />
                     </Route>
 
@@ -93,8 +93,8 @@ function App() {
                          <Route index element={<PortalUpdatePage />} />
                     </Route>
 
-                    <Route path="/sanction" element={<SanctionLayout><Outlet /></SanctionLayout>}>
-                         <Route index element={<SanctionPage />} />
+                    <Route path="/survey" element={<SurveyLayout><Outlet /></SurveyLayout>}>
+                         <Route index element={<SurveyPage />} />
                     </Route>
 
                     <Route path="/system-info" element={<SystemInfoLayout><Outlet /></SystemInfoLayout>}>

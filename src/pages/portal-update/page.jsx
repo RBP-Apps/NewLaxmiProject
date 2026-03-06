@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { format } from "date-fns";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -308,6 +309,7 @@ export default function PortalUpdatePage() {
             let photoLinkUrl = formData.photo_link;
             let rmsDataUrl = formData.photo_rms_data_pending;
 
+            // 1. Upload files if present
             if (formData.photo_link_file) {
                 photoLinkUrl = await uploadFile(formData.photo_link_file);
             }
@@ -315,6 +317,7 @@ export default function PortalUpdatePage() {
                 rmsDataUrl = await uploadFile(formData.photo_rms_data_pending_file);
             }
 
+            // 2. Determine items to process
             let itemsToProcess = [];
             const currentItems = activeTab === "history" ? historyItems : pendingItems;
             if (isBulk) {
@@ -325,7 +328,13 @@ export default function PortalUpdatePage() {
                 itemsToProcess = [selectedItem];
             }
 
+            if (itemsToProcess.length === 0) {
+                throw new Error("No items selected for processing.");
+            }
+
+            // 3. Process updates
             const updatePromises = itemsToProcess.map(async (item) => {
+                const localTimestamp = format(new Date(), "yyyy-MM-dd HH:mm:ss");
                 const rowUpdate = {
                     photo_link: photoLinkUrl,
                     photo_rms_data_pending: rmsDataUrl,
@@ -338,24 +347,48 @@ export default function PortalUpdatePage() {
                     asset_mapping_by_ea: formData.asset_mapping_by_ea,
                     days_7_verification: formData.days_7_verification,
                     rms_data_mail_to_rotommag: formData.rms_data_mail_to_rotommag,
-                    updated_at: new Date().toISOString(),
+                    actual_5: localTimestamp,
+                    updated_at: localTimestamp,
                 };
+
+                // Pre-submission check for VARCHAR(100) limits (common cause for error 22001)
+                const limits = {
+                    photo_link: 100,
+                    photo_rms_data_pending: 100,
+                    lot_ref_no: 100,
+                    lot_name: 100
+                };
+
+                for (const [key, limit] of Object.entries(limits)) {
+                    if (rowUpdate[key] && String(rowUpdate[key]).length > limit) {
+                        throw new Error(`Value for "${key}" is too long (${String(rowUpdate[key]).length} characters). The database limit is ${limit}. Please shorten it or change the database column to TEXT.`);
+                    }
+                }
 
                 const { error } = await supabase
                     .from("portal_update")
                     .update(rowUpdate)
                     .eq("reg_id", item.regId);
 
-                if (error) throw error;
+                if (error) {
+                    console.error(`Update failed for reg_id ${item.regId}:`, error);
+                    throw error;
+                }
             });
 
-            await Promise.all(updatePromises);
+            const results = await Promise.allSettled(updatePromises);
+            const failed = results.filter((r) => r.status === "rejected");
 
-            await fetchData();
-            setSelectedItem(null);
-            setIsBulk(false);
-            setSelectedRows([]);
-            setIsSuccess(true);
+            if (failed.length > 0) {
+                const errorMessages = failed.map((f) => f.reason.message || "Unknown error").join("\n");
+                alert(`Failed to update ${failed.length} record(s):\n\n${errorMessages}`);
+            } else {
+                await fetchData();
+                setSelectedItem(null);
+                setIsBulk(false);
+                setSelectedRows([]);
+                setIsSuccess(true);
+            }
         } catch (error) {
             console.error("Submission Error:", error);
             alert("Error submitting form: " + error.message);
@@ -593,29 +626,29 @@ export default function PortalUpdatePage() {
                                     <TableBody>
                                         {isLoading ? Array.from({ length: 5 }).map((_, i) => <TableRow key={i} className="animate-pulse">{Array.from({ length: 13 }).map((__, j) => <TableCell key={j}><div className="h-4 w-full bg-slate-200 rounded mx-auto"></div></TableCell>)}</TableRow>) :
                                             filteredHistoryItems.length === 0 ? <TableRow><TableCell colSpan={13} className="h-48 text-center text-slate-500">No history records.</TableCell></TableRow> :
-                                            filteredHistoryItems.map((item, index) => (
-                                                <TableRow key={item.regId} className="hover:bg-blue-50/30 transition-colors">
-                                                    <TableCell className="px-4"><div className="flex justify-center"><Checkbox checked={selectedRows.includes(item.regId)} onCheckedChange={(c) => handleSelectRow(item.regId, c)} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110" /></div></TableCell>
-                                                    <TableCell>
-                                                        <Button variant="ghost" size="sm" onClick={() => handleActionClick(item)} disabled={selectedRows.length >= 2} className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed">
-                                                            <Pencil className="h-3.5 w-3.5" />
-                                                            Edit
-                                                        </Button>
-                                                    </TableCell>
-                                                    <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                                                filteredHistoryItems.map((item, index) => (
+                                                    <TableRow key={item.regId} className="hover:bg-blue-50/30 transition-colors">
+                                                        <TableCell className="px-4"><div className="flex justify-center"><Checkbox checked={selectedRows.includes(item.regId)} onCheckedChange={(c) => handleSelectRow(item.regId, c)} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110" /></div></TableCell>
+                                                        <TableCell>
+                                                            <Button variant="ghost" size="sm" onClick={() => handleActionClick(item)} disabled={selectedRows.length >= 2} className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed">
+                                                                <Pencil className="h-3.5 w-3.5" />
+                                                                Edit
+                                                            </Button>
+                                                        </TableCell>
+                                                        <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
 
-                                                    <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">{item.regId}</TableCell>
-                                                    <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-700">{item.mobileNumber}</TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.village}</TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.block}</TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.district}</TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600 font-medium text-blue-600 uppercase">{item.pumpCapacity}</TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.pumpHead}</TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600 font-medium">{item.ipName}</TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.supply_aapurti_date}</TableCell>
-                                                </TableRow>
-                                            ))}
+                                                        <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">{item.regId}</TableCell>
+                                                        <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-700">{item.mobileNumber}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.village}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.block}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.district}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600 font-medium text-blue-600 uppercase">{item.pumpCapacity}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.pumpHead}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600 font-medium">{item.ipName}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.supply_aapurti_date}</TableCell>
+                                                    </TableRow>
+                                                ))}
                                     </TableBody>
                                 </Table>
                             </div>

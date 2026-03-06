@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
 import {
   Dialog,
   DialogContent,
@@ -21,29 +22,43 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FileCheck, Upload, CheckCircle2, Pencil, Search } from "lucide-react";
+import { Pencil, FileCheck, Upload, CheckCircle2, Search } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
-export default function SanctionPage() {
+export default function LoiMrPage() {
   const [pendingItems, setPendingItems] = useState([]);
   const [historyItems, setHistoryItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("pending");
   const [isSuccess, setIsSuccess] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [isBulk, setIsBulk] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [ipOptions, setIpOptions] = useState([]); // Master dropdown options
+
+  // Format date/timestamp to DD/MM/YYYY
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const year = d.getFullYear();
+      return `${day}/${month}/${year}`;
+    } catch {
+      return dateStr;
+    }
+  };
 
   const [filters, setFilters] = useState({
     regId: "",
     village: "",
     block: "",
     district: "",
-    pumpSource: "",
-    pumpCapacity: "",
-    ipName: "",
+    pumpType: "",
+    company: "",
   });
 
   const getUniquePendingValues = (field) => {
@@ -60,42 +75,17 @@ export default function SanctionPage() {
     return [...new Set(values)].sort();
   };
 
-  const handleSelectAll = (checked) => {
-    if (checked) {
-      const items = activeTab === "history" ? filteredHistoryItems : filteredPendingItems;
-      setSelectedRows(items.map((item) => item.serialNo));
-    } else {
-      setSelectedRows([]);
-    }
-  };
-
-  const handleSelectRow = (serialNo, checked) => {
-    if (checked) {
-      setSelectedRows((prev) => [...prev, serialNo]);
-    } else {
-      setSelectedRows((prev) => prev.filter((id) => id !== serialNo));
-    }
-  };
-
-  // Clear selection when switching tabs
-  useEffect(() => {
-    setSelectedRows([]);
-    setSelectedItem(null);
-  }, [activeTab]);
-
-  const [searchTerm, setSearchTerm] = useState("");
-
   // const filteredPendingItems = pendingItems.filter((item) =>
   //   Object.values(item).some((value) =>
   //     String(value).toLowerCase().includes(searchTerm.toLowerCase())
   //   )
-  // );
+  // )
 
   // const filteredHistoryItems = historyItems.filter((item) =>
   //   Object.values(item).some((value) =>
   //     String(value).toLowerCase().includes(searchTerm.toLowerCase())
   //   )
-  // );
+  // )
 
   const filteredPendingItems = pendingItems.filter((item) => {
     const matchesSearch = Object.values(item).some((value) =>
@@ -107,9 +97,8 @@ export default function SanctionPage() {
       (!filters.village || item.village === filters.village) &&
       (!filters.block || item.block === filters.block) &&
       (!filters.district || item.district === filters.district) &&
-      (!filters.pumpSource || item.pumpSource === filters.pumpSource) &&
-      (!filters.pumpCapacity || item.pumpCapacity === filters.pumpCapacity) &&
-      (!filters.ipName || item.ipName === filters.ipName);
+      (!filters.pumpType || item.pumpType === filters.pumpType) &&
+      (!filters.company || item.company === filters.company);
 
     return matchesSearch && matchesFilters;
   });
@@ -124,185 +113,135 @@ export default function SanctionPage() {
       (!filters.village || item.village === filters.village) &&
       (!filters.block || item.block === filters.block) &&
       (!filters.district || item.district === filters.district) &&
-      (!filters.pumpSource || item.pumpSource === filters.pumpSource) &&
-      (!filters.pumpCapacity || item.pumpCapacity === filters.pumpCapacity) &&
-      (!filters.ipName || item.ipName === filters.ipName);
+      (!filters.pumpType || item.pumpType === filters.pumpType) &&
+      (!filters.company || item.company === filters.company);
 
     return matchesSearch && matchesFilters;
   });
 
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      const items = activeTab === "history" ? filteredHistoryItems : filteredPendingItems;
+      const idField = activeTab === "history" ? "regId" : "serialNo"; // History uses regId as key, Pending uses serialNo
+      setSelectedRows(items.map((item) => item[idField]));
+    } else {
+      setSelectedRows([]);
+    }
+  };
+
+  const handleSelectRow = (id, checked) => {
+    if (checked) {
+      setSelectedRows((prev) => [...prev, id]);
+    } else {
+      setSelectedRows((prev) => prev.filter((rowId) => rowId !== id));
+    }
+  };
+
+  // Clear selection when switching tabs
+  useEffect(() => {
+    setSelectedRows([]);
+    setSelectedItem(null);
+  }, [activeTab]);
+
+  // Form state for processing
   const [formData, setFormData] = useState({
-    actual2: "",
-    surveyStatus: "Completed",
-    surveyFile: null,
-    surveyFileObj: null,
-    surveyRemarks: "",
-    surveyorName: "",
-    isApproved: false,
+    beneficiaryName: "",
+    company: "",
+    workOrderNo: "",
+    workOrderDate: "",
+    workOrderFile: null,
+    workOrderFileObj: null,
   });
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // Fetch data from Supabase
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // Fetch portal and survey tables
-      const [
-        { data: portalData, error: portalError },
-        { data: surveyData, error: surveyError },
-      ] = await Promise.all([
+      // Fetch from portal, work_order, and master_dropdown tables
+      const [portalRes, workOrderRes, masterRes] = await Promise.all([
         supabase.from("portal").select("*"),
-        supabase.from("survey").select("*"),
+        supabase.from("work_order").select("*"),
+        supabase.from("master_dropdown").select("*"),
       ]);
 
-      if (portalError || surveyError) {
-        console.error("Supabase fetch error:", portalError || surveyError);
-        throw portalError || surveyError;
-      }
+      if (portalRes.error) throw portalRes.error;
+      if (workOrderRes.error) throw workOrderRes.error;
 
-      console.log("Portal data fetched:", portalData?.length);
-      console.log("Survey data fetched:", surveyData?.length);
+      const portalData = portalRes.data || [];
+      const workOrderData = workOrderRes.data || [];
+      const masterData = masterRes.data || [];
 
-      if (!portalData || portalData.length === 0) {
-        console.log("No data found in portal table");
-        setPendingItems([]);
-        setHistoryItems([]);
-        return;
-      }
+      // Extract IP Name options from master_dropdown
+      const extractedIpOptions = masterData
+        .map((m) => m.installer_name || m.name || m.value || m.label)
+        .filter(Boolean);
+      const uniqueIpOptions = [...new Set(extractedIpOptions)].sort();
+      setIpOptions(uniqueIpOptions);
 
-      // Create a map of survey data for quick lookup
-      const surveyMap = {};
-      if (surveyData) {
-        surveyData.forEach((row) => {
-          surveyMap[row.reg_id] = {
-            planned2: row.planned_2 || "",
-            actual2: row.actual_2 || "",
-            delay2: row.delay_2 || 0,
-            surveyStatus: row.survey_status || "Completed",
-            surveyRemarks: row.survey_remarks || "",
-            surveyorName: row.surveyor_name || "",
-            surveyFile: row.survey_file || "",
-            isApproved: row.is_approved || false,
-          };
-        });
-      }
+      // Create a lookup map from portal by reg_id for enrichment
+      const portalMap = {};
+      portalData.forEach((p) => {
+        if (p.reg_id) portalMap[p.reg_id] = p;
+      });
 
       const parsedPending = [];
       const parsedHistory = [];
 
-      portalData.forEach((row) => {
-        const item = {
-          regId: row.reg_id || "-",
-          serialNo: row.serial_no || "-",
-          beneficiaryName: row.beneficiary_name || "-",
-          mobileNumber: row.mobile_number || "-",
-          fatherName: row.fathers_name || "-",
-          village: row.village || "-",
-          block: row.block || "-",
-          district: row.district || "-",
-          category: row.category || "-",
-          pincode: row.pincode || "-",
-          pumpSource: row.pump_source || "-",
-          pumpCapacity: row.pump_capacity || "-",
-          pumpHead: row.pump_head || "-",
-          ipName: row.ip_name || row.company || "-",
-          otherRemark: row.other_remark || "",
-          loiFileName: row.loi_file_name || "",
-          loiDocument: row.loi_file_name || "",
-          mrNo: row.mr_no || "-",
-          mrDate: row.mr_date || "-",
-          amount: row.amount || "-",
-          paidBy: row.paid_by || "-",
-          beneficiaryShare: row.beneficiary_share || "-",
+      // Pending & History both come from work_order table
+      workOrderData.forEach((wo) => {
+        const portal = portalMap[wo.reg_id] || {};
 
-          sanctionNo: row.sanction_no || "",
-          sanctionDate: row.sanction_date || "",
-          sanctionFile: row.sanction_file || "",
+        const item = {
+          regId: wo.reg_id || "-",
+          serialNo: wo.serial_no || portal.serial_no || "-",
+          beneficiaryName: portal.beneficiary_name || "-",
+          fatherName: portal.fathers_name || "-",
+          mobileNumber: portal.mobile_number || "-",
+          village: portal.village || "-",
+          block: portal.block || "-",
+          district: portal.district || "-",
+          pumpCapacity: portal.pump_capacity || "-",
+          pumpHead: portal.pump_head || "-",
+          pumpType: portal.pump_capacity || "-",
+          company: portal.ip_name || "-",
+          ipName: portal.ip_name || "-",
+          pincode: portal.pincode || "-", // Mapped from portal data
+          installer: portal.installer || portal.installer_name || portal["Installer Name"] || "-",
+          // Fields from work_order
+          workOrderNo: wo.work_order_no || "",
+          workOrderDate: wo.work_order_date || "",
+          workOrderFile: wo.work_order_file || "",
+          actual1: wo.actual_1 || "",
+          planned1: wo.planned_1 || "",
         };
 
-        // Get survey data for this reg_id
-        const surveyInfo = surveyMap[item.regId];
+        const isPlannedFilled = item.planned1 && String(item.planned1).trim() !== "";
+        const isActualFilled = item.actual1 && String(item.actual1).trim() !== "";
 
-        if (surveyInfo) {
-          // Add survey data to item
-          item.planned2 = surveyInfo.planned2;
-          item.actual2 = surveyInfo.actual2;
-          item.delay2 = surveyInfo.delay2;
-          item.surveyStatus = surveyInfo.surveyStatus;
-          item.surveyRemarks = surveyInfo.surveyRemarks;
-          item.surveyorName = surveyInfo.surveyorName;
-          item.surveyFile = surveyInfo.surveyFile;
-          item.isApproved = surveyInfo.isApproved;
-
-          const isPlanned2Filled =
-            surveyInfo.planned2 && String(surveyInfo.planned2).trim() !== "";
-          const isActual2Filled =
-            surveyInfo.actual2 && String(surveyInfo.actual2).trim() !== "";
-
-          // Pending: planned_2 filled, actual_2 empty
-          // History: planned_2 filled and actual_2 filled
-          if (isPlanned2Filled && !isActual2Filled) {
-            parsedPending.push(item);
-          } else if (isPlanned2Filled && isActual2Filled) {
-            parsedHistory.push(item);
-          }
+        // Pending: planned_1 NOT NULL, actual_1 NULL (in work_order)
+        // History: planned_1 NOT NULL AND actual_1 NOT NULL (in work_order)
+        if (isPlannedFilled && !isActualFilled) {
+          parsedPending.push(item);
+        } else if (isPlannedFilled && isActualFilled) {
+          parsedHistory.push(item);
         }
       });
 
-      console.log("Parsed pending items:", parsedPending);
-      console.log("Parsed history items:", parsedHistory);
-
       setPendingItems(parsedPending);
       setHistoryItems(parsedHistory);
+      setIsLoaded(true);
     } catch (e) {
       console.error("Error fetching data:", e);
-      setPendingItems([]);
-      setHistoryItems([]);
     } finally {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
     fetchData();
-
-    // Subscribe to real-time changes on both portal and survey tables
-    const portalSubscription = supabase
-      .channel("portal_changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "portal",
-        },
-        (payload) => {
-          console.log("Portal table changed:", payload);
-          fetchData();
-        }
-      )
-      .subscribe();
-
-    const surveySubscription = supabase
-      .channel("survey_changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "survey",
-        },
-        (payload) => {
-          console.log("Survey table changed:", payload);
-          fetchData();
-        }
-      )
-      .subscribe();
-
-    // Cleanup subscriptions on unmount
-    return () => {
-      portalSubscription.unsubscribe();
-      surveySubscription.unsubscribe();
-    };
   }, []);
 
   useEffect(() => {
@@ -315,29 +254,17 @@ export default function SanctionPage() {
     }
   }, [isSuccess]);
 
-  // Format date for input field
-  const formatDateForInput = (dateValue) => {
-    if (!dateValue) return "";
-    if (typeof dateValue === "string") return dateValue;
-    if (dateValue instanceof Date) {
-      return dateValue.toISOString().split("T")[0];
-    }
-    return "";
-  };
-
   const handleActionClick = (item) => {
     setSelectedItem(item);
     setIsBulk(false);
     setIsSuccess(false);
     setFormData({
-      actual2: formatDateForInput(item.actual2) || "",
-      surveyStatus: "Completed",
-      surveyFile: item.surveyFile ? item.surveyFile.split("/").pop() : null,
-
-      surveyFileObj: null,
-      surveyRemarks: item.surveyRemarks || "",
-      surveyorName: item.surveyorName || "",
-      isApproved: item.isApproved || false,
+      beneficiaryName: item.beneficiaryName,
+      company: item.company || item.ipName || "",
+      workOrderNo: item.workOrderNo || "",
+      workOrderDate: item.workOrderDate || "",
+      workOrderFile: item.workOrderFile || null,
+      workOrderFileObj: null,
     });
     setIsDialogOpen(true);
   };
@@ -348,32 +275,39 @@ export default function SanctionPage() {
     setIsBulk(true);
     setIsSuccess(false);
     setFormData({
-      actual2: "",
-      surveyStatus: "Completed",
-      surveyFile: null,
-      surveyFileObj: null,
-      surveyRemarks: "",
-      surveyorName: "",
-      isApproved: false,
+      beneficiaryName: "Multiple Beneficiaries",
+      company: "Multiple Companies",
+      workOrderNo: "",
+      workOrderDate: "",
+      workOrderFile: null,
+      workOrderFileObj: null,
     });
     setIsDialogOpen(true);
   };
 
   const handleFileUpload = (e) => {
     if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
       setFormData({
         ...formData,
-        surveyFile: e.target.files[0].name,
-        surveyFileObj: e.target.files[0],
+        workOrderFile: file.name,
+        workOrderFileObj: file,
       });
     }
   };
 
-  // Supabase Storage public URL helper
-  const getPreviewUrl = (url) => {
-    if (!url) return url;
-    // If it's already a full URL (Supabase or Drive), return as-is
-    return url;
+  // Format date as YYYY-MM-DD HH:mm:ss
+  const formatDateTime = (date) => {
+    const pad = (n) => String(n).padStart(2, "0");
+
+    return (
+      `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+        date.getDate()
+      )} ` +
+      `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(
+        date.getSeconds()
+      )}`
+    );
   };
 
   const handleSubmit = async () => {
@@ -383,10 +317,10 @@ export default function SanctionPage() {
     try {
       let finalFileUrl = "";
 
-      // Upload Survey File to Supabase Storage
-      if (formData.surveyFileObj) {
-        const file = formData.surveyFileObj;
-        const filePath = `survey-documents/${Date.now()}_${file.name}`;
+      // 1. Upload File to Supabase Storage
+      if (formData.workOrderFileObj) {
+        const file = formData.workOrderFileObj;
+        const filePath = `work-order-documents/${Date.now()}_${file.name}`;
 
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("Image_bucket")
@@ -401,56 +335,58 @@ export default function SanctionPage() {
         finalFileUrl = urlData?.publicUrl || "";
       }
 
-      // Prepare items to process
+      // 2. Prepare Data Update for work_order table
       const currentItems = activeTab === "history" ? historyItems : pendingItems;
+      const idField = activeTab === "history" ? "regId" : "serialNo";
+
       const itemsToProcess = isBulk
-        ? currentItems.filter((item) => selectedRows.includes(item.serialNo))
+        ? currentItems.filter((item) => selectedRows.includes(item[idField]))
         : [selectedItem];
 
       const updatePromises = itemsToProcess.map(async (item) => {
         const rowUpdate = {
-          actual_2: formData.actual2 || null,
-          survey_dt: formData.actual2 || null,
-          survey_status: formData.surveyStatus,
-          survey_remarks: formData.surveyRemarks,
-          surveyor_name: formData.surveyorName,
-          is_approved: formData.isApproved,
+          work_order_no: formData.workOrderNo,
+          work_order_date: formData.workOrderDate || null,
+          actual_1: formatDateTime(new Date()),
         };
 
-        if (formData.actual2 && item.planned2) {
-          const actual = new Date(formData.actual2);
-          const planned = new Date(item.planned2);
-          const diffTime = actual.getTime() - planned.getTime();
-          const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-          rowUpdate.delay_2 = diffDays > 0 ? diffDays : 0;
-        }
-
-        if (finalFileUrl) {
-          rowUpdate.survey_file = finalFileUrl;
-        } else if (item.surveyFile) {
-          rowUpdate.survey_file = item.surveyFile;
-        }
+        if (finalFileUrl) rowUpdate.work_order_file = finalFileUrl;
 
         if (!item.regId || item.regId === "-") {
           console.error("Item reg_id missing for update", item);
           return;
         }
 
-        const { error } = await supabase
-          .from("survey")
+        // Update work_order table
+        const { error: woError } = await supabase
+          .from("work_order")
           .update(rowUpdate)
           .eq("reg_id", item.regId);
 
-        if (error) throw error;
+        if (woError) throw woError;
       });
 
-      await Promise.all(updatePromises);
-      await fetchData();
-      setIsSuccess(true);
-      if (isBulk) setSelectedRows([]);
+      const results = await Promise.allSettled(updatePromises);
+
+      const failed = results.filter(r => r.status === 'rejected');
+      if (failed.length > 0) {
+        const firstError = failed[0].reason;
+        console.error("Bulk update failed:", firstError);
+
+        if (firstError?.code === '23505' || firstError?.message?.includes('duplicate key')) {
+          alert("Error: Work Order Number already exists.\n\nIt seems 'Work Order No' must be unique in your database.\nTo assign the SAME Work Order No to multiple beneficiaries, please remove the UNIQUE constraint from the 'work_order_no' column in your Supabase table settings.");
+        } else {
+          alert(`Error updating records: ${firstError.message || "Unknown error"}`);
+        }
+      } else {
+        setIsSuccess(true);
+        fetchData();
+        if (isBulk) setSelectedRows([]); // Clear selection after bulk process
+      }
+
     } catch (error) {
-      console.error("Submission error:", error);
-      alert("Failed to submit data.");
+      console.error(error);
+      alert("An unexpected error occurred: " + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -473,63 +409,64 @@ export default function SanctionPage() {
             value="pending"
             className="z-10 h-full data-[state=active]:bg-transparent data-[state=active]:text-blue-700 data-[state=active]:shadow-none transition-colors duration-200 text-base font-medium text-slate-500"
           >
-            Pending Surveys
+            Pending LOI & MR
           </TabsTrigger>
           <TabsTrigger
             value="history"
             className="z-10 h-full data-[state=active]:bg-transparent data-[state=active]:text-blue-700 data-[state=active]:shadow-none transition-colors duration-200 text-base font-medium text-slate-500"
           >
-            Survey History
+            Processed History
           </TabsTrigger>
         </TabsList>
 
         {/* PENDING TAB */}
         <TabsContent
           value="pending"
-          className="mt-6 focus-visible:outline-hidden animate-in fade-in-0 slide-in-from-left-4 duration-500 ease-out"
+          className="mt-6 focus-visible:outline-hidden"
         >
           <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-            <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-0.5 h-10 flex items-center">
-              <div className="flex flex-col md:flex-row items-center gap-4 w-full justify-between">
+            <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
+              <div className="flex items-center gap-2 w-full md:w-auto justify-between">
                 <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
                   <div className="p-1 bg-blue-100 rounded-lg">
                     <FileCheck className="h-4 w-4 text-blue-600" />
                   </div>
-                  Pending for Survey
+                  Pending LOI & MR
                 </CardTitle>
+              </div>
 
-                <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                  <div className="relative w-full md:w-100">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                      placeholder="Search..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
-                    />
-                  </div>
+              <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+                <div className="relative w-full md:w-100">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input
+                    placeholder="Search..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
+                  />
+                </div>
 
-                  <div className="flex items-center gap-3 justify-end w-full md:w-auto">
-                    {selectedRows.length >= 2 && (
-                      <Button
-                        onClick={handleBulkClick}
-                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
-                        size="sm"
-                      >
-                        <Pencil className="h-4 w-4 mr-2" />
-                        Sanction Selected ({selectedRows.length})
-                      </Button>
-                    )}
-                    <Badge
-                      variant="outline"
-                      className="bg-yellow-100 text-yellow-700 border-yellow-200 px-3 py-1 h-9 flex items-center"
+                <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                  {selectedRows.length >= 2 && (
+                    <Button
+                      onClick={handleBulkClick}
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
+                      size="sm"
                     >
-                      {filteredPendingItems.length} Pending
-                    </Badge>
-                  </div>
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Process Selected ({selectedRows.length})
+                    </Button>
+                  )}
+                  <Badge
+                    variant="outline"
+                    className="bg-yellow-100 text-yellow-700 border-yellow-200 px-3 py-1 h-9 flex items-center"
+                  >
+                    {filteredPendingItems.length} Pending
+                  </Badge>
                 </div>
               </div>
             </CardHeader>
+
             {/* Filter Dropdowns */}
             <div className="px-6 py-4 bg-slate-50/50 border-b border-blue-50">
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
@@ -538,9 +475,8 @@ export default function SanctionPage() {
                   { key: "village", label: "Village" },
                   { key: "block", label: "Block" },
                   { key: "district", label: "District" },
-                  { key: "pumpSource", label: "Pump Source" },
-                  { key: "pumpCapacity", label: "Pump Capacity" },
-                  { key: "ipName", label: "IP Name" },
+                  { key: "pumpType", label: "Pump Type" },
+                  { key: "company", label: "Company" },
                 ].map(({ key, label }) => (
                   <div key={key} className="space-y-1.5">
                     <Label className="text-xs text-slate-600">{label}</Label>
@@ -571,9 +507,8 @@ export default function SanctionPage() {
                     village: "",
                     block: "",
                     district: "",
-                    pumpSource: "",
-                    pumpCapacity: "",
-                    ipName: "",
+                    pumpType: "",
+                    company: "",
                   })
                 }
                 className="mt-3 text-xs"
@@ -581,10 +516,11 @@ export default function SanctionPage() {
                 Clear All Filters
               </Button>
             </div>
+
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto max-h-[70vh] overflow-y-auto relative [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <Table className="[&_th]:text-center [&_td]:text-center">
-                  <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
+                  <TableHeader className="[&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-blue-50 shadow-sm">
                     <TableRow className="border-b border-blue-100 hover:bg-transparent">
                       <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
                         <div className="flex justify-center">
@@ -604,6 +540,7 @@ export default function SanctionPage() {
                         Action
                       </TableHead>
                       <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
+
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         Reg ID
                       </TableHead>
@@ -637,10 +574,58 @@ export default function SanctionPage() {
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
                         IP Name
                       </TableHead>
+
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredPendingItems.length === 0 ? (
+                    {isLoading ? (
+                      Array.from({ length: 8 }).map((_, index) => (
+                        <TableRow
+                          key={`skeleton-${index}`}
+                          className="animate-pulse"
+                        >
+                          <TableCell>
+                            <div className="h-4 w-20 bg-slate-200 rounded mx-auto"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-12 bg-slate-200 rounded mx-auto"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-24 bg-slate-200 rounded mx-auto"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-32 bg-slate-200 rounded mx-auto"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-28 bg-slate-200 rounded mx-auto"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-24 bg-slate-200 rounded mx-auto"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-24 bg-slate-200 rounded mx-auto"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-24 bg-slate-200 rounded mx-auto"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-16 bg-slate-200 rounded mx-auto"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-20 bg-slate-200 rounded mx-auto"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-20 bg-slate-200 rounded mx-auto"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-24 bg-slate-200 rounded mx-auto"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-20 bg-slate-200 rounded mx-auto"></div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : filteredPendingItems.length === 0 ? (
                       <TableRow>
                         <TableCell
                           colSpan={14}
@@ -650,7 +635,7 @@ export default function SanctionPage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredPendingItems.map((item, index) => (
+                      filteredPendingItems.map((item) => (
                         <TableRow
                           key={item.serialNo}
                           className="hover:bg-blue-50/50 transition-colors"
@@ -675,11 +660,12 @@ export default function SanctionPage() {
                               disabled={selectedRows.length >= 2}
                               className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              <FileCheck className="h-3.5 w-3.5" />
-                              Submit
+                              <Pencil className="h-3.5 w-3.5" />
+                              Process
                             </Button>
                           </TableCell>
-                          <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                          <TableCell className="text-center font-medium text-slate-500 text-xs">{filteredPendingItems.indexOf(item) + 1}</TableCell>
+
                           <TableCell className="text-slate-600 font-mono text-xs">
                             {item.regId}
                           </TableCell>
@@ -710,9 +696,10 @@ export default function SanctionPage() {
                           <TableCell className="text-slate-600">
                             {item.pumpHead}
                           </TableCell>
-                          <TableCell className="text-slate-600">
-                            {item.ipName}
+                          <TableCell className="text-slate-600 font-medium">
+                            {item.company}
                           </TableCell>
+
                         </TableRow>
                       ))
                     )}
@@ -726,49 +713,51 @@ export default function SanctionPage() {
         {/* HISTORY TAB */}
         <TabsContent
           value="history"
-          className="mt-6 focus-visible:outline-hidden animate-in fade-in-0 slide-in-from-right-4 duration-500 ease-out"
+          className="mt-6 focus-visible:outline-hidden"
         >
           <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-            <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-0.5 h-10 flex items-center">
-              <div className="flex flex-col md:flex-row items-center gap-4 w-full justify-between">
+            <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
+              <div className="flex items-center gap-2 w-full md:w-auto">
                 <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
                   <div className="p-1 bg-blue-100 rounded-lg">
                     <CheckCircle2 className="h-4 w-4 text-blue-600" />
                   </div>
-                  Completed Survey History
+                  Processed History
                 </CardTitle>
+              </div>
 
-                <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                  <div className="relative w-full md:w-100">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                      placeholder="Search..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
-                    />
-                  </div>
-                  <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-                    {selectedRows.length >= 2 && (
-                      <Button
-                        onClick={handleBulkClick}
-                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
-                        size="sm"
-                      >
-                        <Pencil className="h-4 w-4 mr-2" />
-                        Sanction Selected ({selectedRows.length})
-                      </Button>
-                    )}
-                    <Badge
-                      variant="outline"
-                      className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 h-9 flex items-center whitespace-nowrap"
+              <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+                <div className="relative w-full md:w-100">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input
+                    placeholder="Search..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                  {selectedRows.length >= 2 && (
+                    <Button
+                      onClick={handleBulkClick}
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
+                      size="sm"
                     >
-                      {filteredHistoryItems.length} Completed
-                    </Badge>
-                  </div>
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Process Selected ({selectedRows.length})
+                    </Button>
+                  )}
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 h-9 flex items-center whitespace-nowrap"
+                  >
+                    {filteredHistoryItems.length} Records
+                  </Badge>
                 </div>
               </div>
             </CardHeader>
+
             {/* Filter Dropdowns */}
             <div className="px-6 py-4 bg-slate-50/50 border-b border-blue-50">
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
@@ -777,9 +766,8 @@ export default function SanctionPage() {
                   { key: "village", label: "Village" },
                   { key: "block", label: "Block" },
                   { key: "district", label: "District" },
-                  { key: "pumpSource", label: "Pump Source" },
-                  { key: "pumpCapacity", label: "Pump Capacity" },
-                  { key: "ipName", label: "IP Name" },
+                  { key: "pumpType", label: "Pump Type" },
+                  { key: "company", label: "Company" },
                 ].map(({ key, label }) => (
                   <div key={key} className="space-y-1.5">
                     <Label className="text-xs text-slate-600">{label}</Label>
@@ -810,9 +798,8 @@ export default function SanctionPage() {
                     village: "",
                     block: "",
                     district: "",
-                    pumpSource: "",
-                    pumpCapacity: "",
-                    ipName: "",
+                    pumpType: "",
+                    company: "",
                   })
                 }
                 className="mt-3 text-xs"
@@ -821,9 +808,9 @@ export default function SanctionPage() {
               </Button>
             </div>
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
+              <div className="hidden md:block overflow-x-auto max-h-[70vh] overflow-y-auto relative [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <Table className="[&_th]:text-center [&_td]:text-center">
-                  <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
+                  <TableHeader className="[&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-blue-50 shadow-sm">
                     <TableRow className="border-b border-blue-100 hover:bg-transparent">
                       <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
                         <div className="flex justify-center">
@@ -877,58 +864,80 @@ export default function SanctionPage() {
                         IP Name
                       </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Photo
+                        Work Order No
                       </TableHead>
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Planned Date
+                        Work Order Date
                       </TableHead>
+
                       <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Survey Date
-                      </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Delay
-                      </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Survey Status
+                        Document
                       </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredHistoryItems.length === 0 ? (
+                    {isLoading ? (
+                      Array.from({ length: 6 }).map((_, index) => (
+                        <TableRow
+                          key={`history-skeleton-${index}`}
+                          className="animate-pulse"
+                        >
+                          {Array.from({ length: 11 }).map((__, i) => (
+                            <TableCell key={i}>
+                              <div className="h-4 w-full bg-slate-200 rounded mx-auto"></div>
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))
+                    ) : filteredHistoryItems.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={24}
+                          colSpan={17} // Increased colspan for checkbox column
                           className="h-48 text-center text-slate-500 bg-slate-50/30"
                         >
-                          No survey history found.
+                          {historyItems.length === 0
+                            ? "No work order history found."
+                            : "No history records found matching your search."}
                         </TableCell>
                       </TableRow>
                     ) : (
                       filteredHistoryItems.map((item, index) => (
                         <TableRow
-                          key={item.serialNo}
+                          key={item.regId}
                           className="hover:bg-blue-50/30 transition-colors"
                         >
                           <TableCell className="px-4">
                             <div className="flex justify-center">
                               <Checkbox
-                                checked={selectedRows.includes(item.serialNo)}
+                                checked={selectedRows.includes(item.regId)}
                                 onCheckedChange={(checked) =>
-                                  handleSelectRow(item.serialNo, checked)
+                                  handleSelectRow(item.regId, checked)
                                 }
-                                aria-label={`Select row ${item.serialNo}`}
+                                aria-label={`Select row ${item.regId}`}
                                 className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110"
                               />
                             </div>
                           </TableCell>
                           <TableCell>
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="sm"
-                              onClick={() => handleActionClick(item)}
-                              className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto"
+                              className="text-xs h-8 px-3 border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                              onClick={() => {
+                                setSelectedItem(item);
+                                setIsBulk(false);
+                                setFormData({
+                                  beneficiaryName: item.beneficiaryName,
+                                  company: item.ipName || "",
+                                  workOrderNo: item.workOrderNo || "",
+                                  workOrderDate: item.workOrderDate || "",
+                                  workOrderFile: item.workOrderFile || null,
+                                  workOrderFileObj: null,
+                                });
+                                setIsDialogOpen(true);
+                              }}
                             >
-                              <Pencil className="h-3.5 w-3.5" />
+                              <Pencil className="h-3 w-3 mr-1" />
                               Edit
                             </Button>
                           </TableCell>
@@ -942,7 +951,7 @@ export default function SanctionPage() {
                           <TableCell className="text-slate-600">
                             {item.fatherName}
                           </TableCell>
-                          <TableCell className="text-slate-600">
+                          <TableCell className="text-slate-600 text-xs">
                             {item.mobileNumber}
                           </TableCell>
                           <TableCell className="text-slate-600">
@@ -966,42 +975,34 @@ export default function SanctionPage() {
                           <TableCell className="text-slate-600">
                             {item.ipName}
                           </TableCell>
-                          <TableCell className="py-3 px-4">
-                            {item.surveyFile ? (
-                              <div className="flex justify-center">
-                                <a
-                                  href={getPreviewUrl(item.surveyFile)}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 flex items-center gap-2 hover:text-blue-800 transition-colors group"
-                                >
-                                  <Upload className="h-4 w-4" />
-                                  <span className="underline font-medium text-sm">View</span>
-                                </a>
-                              </div>
-                            ) : (
-                              <span className="text-slate-300 font-mono text-xs">-</span>
-                            )}
+
+                          <TableCell className="text-slate-600">
+                            {item.workOrderNo || "-"}
                           </TableCell>
-                          <TableCell className="text-slate-600 whitespace-nowrap">
-                            {item.planned2 || "-"}
-                          </TableCell>
-                          <TableCell className="text-slate-600 whitespace-nowrap">
-                            {item.actual2 || "-"}
-                          </TableCell>
-                          <TableCell className="text-red-500 font-medium">
-                            {item.delay2 > 0 ? `${item.delay2} Days` : "-"}
+                          <TableCell className="text-slate-600 text-xs">
+                            {formatDate(item.workOrderDate)}
                           </TableCell>
                           <TableCell>
-                            <Badge
-                              variant="outline"
-                              className={`text-xs font-medium ${item.surveyStatus === "Completed"
-                                ? "bg-green-50 text-green-700 border-green-200"
-                                : item.surveyStatus === "Pending"
-                                }`}
-                            >
-                              {item.surveyStatus}
-                            </Badge>
+                            {item.workOrderFile ? (
+                              item.workOrderFile.startsWith("http") ? (
+                                <a
+                                  href={item.workOrderFile}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 underline text-xs cursor-pointer hover:text-blue-800 flex items-center justify-center gap-1"
+                                >
+                                  <Upload className="h-4 w-4" />
+                                  View
+                                </a>
+                              ) : (
+                                <span className="text-slate-600 text-xs flex items-center justify-center gap-1">
+                                  <FileCheck className="h-4 w-4" />
+                                  {item.workOrderFile.substring(0, 15)}...
+                                </span>
+                              )
+                            ) : (
+                              "-"
+                            )}
                           </TableCell>
                         </TableRow>
                       ))
@@ -1014,7 +1015,7 @@ export default function SanctionPage() {
         </TabsContent>
       </Tabs>
 
-      {/* SANCTION DIALOG WITH PREFILLED INFO */}
+      {/* PROCESSING DIALOG */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent
           showCloseButton={!isSuccess}
@@ -1027,17 +1028,18 @@ export default function SanctionPage() {
                 <CheckCircle2 className="h-16 w-16 text-green-600 scale-110" />
               </div>
               <h2 className="text-3xl font-bold text-white drop-shadow-md animate-in slide-in-from-bottom-4 fade-in duration-500 delay-150 ease-out tracking-wide">
-                Approved Successfully!
+                Submitted Successfully!
               </h2>
             </div>
           ) : (
             <>
+              {/* Header Content */}
               <DialogHeader className="p-6 pb-2 border-b border-blue-100 bg-blue-50/30">
-                <DialogTitle className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent flex items-center gap-2">
+                <DialogTitle className="text-xl font-bold bg-linear-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent flex items-center gap-2">
                   <span className="bg-blue-100 p-1.5 rounded-md">
-                    <FileCheck className="h-4 w-4 text-blue-600" />
+                    <Pencil className="h-4 w-4 text-blue-600" />
                   </span>
-                  Process Survey
+                  {isBulk ? `Batch Process Items` : `Process LOI & MR`}
                 </DialogTitle>
                 <DialogDescription className="text-slate-500 ml-10">
                   {isBulk ? (
@@ -1050,7 +1052,7 @@ export default function SanctionPage() {
                     </span>
                   ) : (
                     <span>
-                      Processing survey for{" "}
+                      Processing application for{" "}
                       <span className="font-semibold text-slate-700">
                         {selectedItem?.beneficiaryName}
                       </span>{" "}
@@ -1064,21 +1066,21 @@ export default function SanctionPage() {
 
               {(selectedItem || isBulk) && (
                 <div className="p-6 space-y-6">
-                  {/* PREFILLED BENEFICIARY DETAILS CARD */}
-                  {selectedItem && !isBulk && (
-                    <div className="rounded-xl border border-blue-100 bg-linear-to-br from-blue-50/50 to-cyan-50/30 p-5 shadow-sm">
+                  {/* Beneficiary Info - Read Only (Hide in Bulk Mode) */}
+                  {!isBulk && selectedItem && (
+                    <div className="rounded-xl border border-blue-100 bg-linear-to-br from-blue-50/50 to-blue-50/30 p-5 shadow-sm">
                       <h3 className="text-sm font-bold text-blue-900 mb-4 flex items-center gap-2 border-b border-blue-100 pb-2">
                         <span className="bg-white p-1 rounded shadow-sm">
                           <CheckCircle2 className="h-4 w-4 text-blue-500" />
                         </span>
                         BENEFICIARY DETAILS
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-6">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-y-5 gap-x-6">
                         <div className="space-y-1">
                           <span className="text-[10px] uppercase font-bold text-blue-900/60 block mb-1">
                             Reg ID
                           </span>
-                          <div className="font-medium text-slate-700 font-mono bg-white/50 px-2 py-1 rounded border border-blue-100/50 inline-block break-all">
+                          <div className="font-medium text-slate-700 font-mono bg-white/50 px-2 py-1 rounded border border-blue-100/50 inline-block break-all max-w-full">
                             {selectedItem.regId}
                           </div>
                         </div>
@@ -1106,198 +1108,174 @@ export default function SanctionPage() {
                             {selectedItem.district}
                           </p>
                         </div>
+
                         <div className="space-y-1">
                           <span className="text-[10px] uppercase font-bold text-blue-900/60 block mb-1">
                             Pump Type
                           </span>
                           <Badge
                             variant="secondary"
-                            className="whitespace-normal text-left h-auto leading-tight"
+                            className="bg-white text-blue-700 border-blue-200 shadow-sm font-medium"
                           >
-                            {selectedItem.pumpCapacity}
+                            {selectedItem.pumpType}
                           </Badge>
-                        </div>
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase font-bold text-blue-900/60 block mb-1">
-                            Company
-                          </span>
-                          <p className="font-medium text-slate-700">
-                            {selectedItem.ipName}
-                          </p>
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {/* READ ONLY INFO GRID FOR BULK OR SINGLE */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-2">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-700">
-                        Beneficiary Name
-                      </Label>
-                      <Input
-                        value={isBulk ? "Multiple" : (selectedItem?.beneficiaryName || "")}
-                        readOnly
-                        className="bg-slate-100/50 border-slate-200 text-slate-500"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-700">
-                        Mobile Number
-                      </Label>
-                      <Input
-                        value={isBulk ? "Multiple" : (selectedItem?.mobileNumber || "")}
-                        readOnly
-                        className="bg-slate-100/50 border-slate-200 text-slate-500"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-700">
-                        Village
-                      </Label>
-                      <Input
-                        value={isBulk ? "Multiple" : (selectedItem?.village || "")}
-                        readOnly
-                        className="bg-slate-100/50 border-slate-200 text-slate-500"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-700">
-                        Pump Capacity
-                      </Label>
-                      <Input
-                        value={isBulk ? "Multiple" : (selectedItem?.pumpCapacity || "")}
-                        readOnly
-                        className="bg-slate-100/50 border-slate-200 text-slate-500"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-700">
-                        IP Name
-                      </Label>
-                      <Input
-                        value={isBulk ? "Multiple" : (selectedItem?.ipName || "")}
-                        readOnly
-                        className="bg-slate-100/50 border-slate-200 text-slate-500"
-                      />
-                    </div>
-
-                  </div>
-
-                  {/* SURVEY INPUT FORM */}
+                  {/* Form Fields */}
                   <div className="space-y-6">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="h-5 w-1 bg-cyan-500 rounded-full"></div>
+                      <div className="h-5 w-1 bg-blue-500 rounded-full"></div>
                       <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
-                        Survey Details
+                        Work Order Details
                       </h3>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label className="text-sm font-medium text-slate-700">
-                          Actual Survey Date
+                          Beneficiary Name
                         </Label>
                         <Input
-                          type="date"
-                          value={formData.actual2}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              actual2: e.target.value,
-                            })
-                          }
-                          className="h-10 border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 transition-all bg-white"
+                          value={formData.beneficiaryName || ""}
+                          readOnly
+                          className="bg-slate-100/50 border-slate-200 text-slate-500"
                         />
                       </div>
                       <div className="space-y-2">
+                        <Label className="text-sm font-medium text-slate-700">
+                          Mobile Number
+                        </Label>
+                        <Input
+                          value={isBulk ? "Multiple" : (selectedItem?.mobileNumber || "")}
+                          readOnly
+                          className="bg-slate-100/50 border-slate-200 text-slate-500"
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium text-slate-700">
-                          Survey Status
+                          Village
                         </Label>
-                        <select
-                          value={formData.surveyStatus}
+                        <Input
+                          value={isBulk ? "Multiple" : (selectedItem?.village || "")}
+                          readOnly
+                          className="bg-slate-100/50 border-slate-200 text-slate-500"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-slate-700">
+                          Pump Capacity
+                        </Label>
+                        <Input
+                          value={isBulk ? "Multiple" : (selectedItem?.pumpCapacity || "")}
+                          readOnly
+                          className="bg-slate-100/50 border-slate-200 text-slate-500"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-slate-700">
+                          Pump Head
+                        </Label>
+                        <Input
+                          value={isBulk ? "Multiple" : (selectedItem?.pumpHead || "")}
+                          readOnly
+                          className="bg-slate-100/50 border-slate-200 text-slate-500"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-slate-700">
+                          IP Name
+                        </Label>
+                        <Input
+                          value={formData.company || ""}
+                          readOnly
+                          className="bg-slate-100/50 border-slate-200 text-slate-500"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-slate-700">
+                          Work Order No
+                        </Label>
+                        <Input
+                          value={formData.workOrderNo}
                           onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              surveyStatus: e.target.value,
-                            })
+                            setFormData({ ...formData, workOrderNo: e.target.value })
                           }
-                          className="h-10 border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 transition-all bg-white border px-3 rounded-md"
-                        >
-                          <option value="Pending">Pending</option>
-                          <option value="Completed">Completed</option>
-                        </select>
+                          placeholder="e.g. WO/2025/001"
+                          className="border-slate-200 focus:border-cyan-400 focus:ring-cyan-100"
+                        />
                       </div>
-                      <div className="space-y-2 flex items-end">
+
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-slate-700">
+                          Work Order Date
+                        </Label>
+                        <Input
+                          type="date"
+                          value={formData.workOrderDate}
+                          onChange={(e) =>
+                            setFormData({ ...formData, workOrderDate: e.target.value })
+                          }
+                          className="border-slate-200 focus:border-cyan-400 focus:ring-cyan-100"
+                        />
                       </div>
-                      <div className="space-y-2 md:col-span-2">
-                      </div>
+
+
+
+
+
                       <div className="space-y-2 md:col-span-2">
                         <Label className="text-sm font-medium text-slate-700">
-                          Survey Document
+                          Work Order Document
                         </Label>
-                        {selectedItem?.surveyFile && (
-                          <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                            <p className="text-xs text-slate-600 mb-1">Current Document:</p>
-                            <a
-                              href={selectedItem.surveyFile}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 underline text-sm flex items-center gap-1 hover:text-blue-800"
-                            >
-                              <Upload className="h-4 w-4" />
-                              View Current Survey Document
-                            </a>
-                          </div>
-                        )}
                         <div
-                          className="border-2 border-dashed border-slate-200 rounded-2xl p-8 bg-slate-50/30 flex flex-col items-center justify-center gap-4 hover:bg-slate-50 hover:border-blue-400/50 transition-all cursor-pointer group"
+                          className="border-2 border-dashed border-slate-200 rounded-xl p-4 bg-slate-50/50 flex flex-col items-center justify-center gap-2 hover:bg-slate-50 transition-all cursor-pointer group border-blue-100/50 hover:border-blue-200"
                           onClick={() =>
-                            document.getElementById("survey-file")?.click()
+                            document.getElementById("work-order-upload")?.click()
                           }
                         >
-                          <div className="h-16 w-16 bg-white rounded-full flex items-center justify-center shadow-xl border border-slate-50 group-hover:scale-110 transition-transform duration-300">
-                            <Upload className="h-8 w-8 text-[#0EA5E9]" />
+                          <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-100 group-hover:scale-110 transition-transform">
+                            <Upload className="h-5 w-5 text-blue-500" />
                           </div>
-                          <div className="text-center space-y-1">
-                            <span className="text-lg font-semibold text-[#0369a1] block">
-                              {formData.surveyFile
-                                ? formData.surveyFile
-                                : "Upload Survey Photo"}
+                          <div className="text-center">
+                            <span className="text-sm font-medium text-slate-700 group-hover:text-blue-600 transition-colors">
+                              {formData.workOrderFile
+                                ? formData.workOrderFile
+                                : "Click to Upload Work Order Document"}
                             </span>
-                            <p className="text-sm text-slate-400 font-medium">
-                              PNG, JPG or JPEG (max. 10MB)
+                            <p className="text-xs text-slate-400 mt-0.5">
+                              Any file (Image, PDF, DOC) up to 10MB
                             </p>
                           </div>
                           <Input
                             type="file"
-                            accept="image/*"
+                            accept="image/*,.pdf,.doc,.docx"
                             onChange={handleFileUpload}
                             className="hidden"
-                            id="survey-file"
+                            id="work-order-upload"
                           />
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-center gap-6 mt-8">
+                  <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-slate-100">
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       onClick={() => setIsDialogOpen(false)}
-                      disabled={isSubmitting}
-                      className="text-slate-600 hover:text-slate-900 font-semibold text-base transition-colors"
+                      className="h-10 px-6 border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-800"
                     >
                       Cancel
                     </Button>
                     <Button
                       onClick={handleSubmit}
                       disabled={isSubmitting}
-                      className="h-14 px-12 bg-gradient-to-r from-[#0EA5E9] to-[#2563EB] hover:from-[#0284C7] hover:to-[#1D4ED8] text-white font-bold text-lg rounded-2xl shadow-xl shadow-blue-500/20 hover:shadow-blue-500/40 transition-all duration-300 transform active:scale-95"
+                      className="h-10 px-8 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/20 transition-all"
                     >
-                      {isSubmitting ? "Processing..." : "Submit Survey"}
+                      {isSubmitting ? "Submitting..." : "Submit"}
                     </Button>
                   </div>
                 </div>
@@ -1306,6 +1284,6 @@ export default function SanctionPage() {
           )}
         </DialogContent>
       </Dialog>
-    </div >
+    </div>
   );
 }

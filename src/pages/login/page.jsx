@@ -53,6 +53,7 @@ export default function LoginPage() {
         localStorage.setItem("isAuthenticated", "true");
         localStorage.setItem("username", userData.user_name || username);
         localStorage.setItem("userRole", userData.role || "User");
+        localStorage.setItem("pageAccess", userData.page_access || "");
         navigate("/dashboard");
       }
     } catch (err) {
@@ -111,7 +112,7 @@ export default function LoginPage() {
           </div>
           <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tight text-slate-800">
-              Welcome Back
+              Laxmi
             </h1>
             <p className="text-slate-500 text-sm font-medium">
               Enter your credentials to access the admin portal
