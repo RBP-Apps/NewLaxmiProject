@@ -427,26 +427,35 @@ export default function InstallationPage() {
   };
 
   return (
-    <div className="space-y-8 p-6 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
+    <div className="space-y-6 md:p-8 max-w-[1600px] mx-auto min-h-screen bg-slate-50/50">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+        <div className="space-y-1.5">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+            <span className="bg-blue-600 w-2 h-8 rounded-full hidden md:block"></span>
+            Installation Management
+          </h1>
+          <p className="text-slate-500 text-sm md:text-base max-w-2xl">
+            Monitor and process pending installations, and review the history of completed work.
+          </p>
+        </div>
+      </div>
+
       <Tabs
         defaultValue="pending"
-        className="w-full"
+        className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150 fill-mode-backwards"
         onValueChange={setActiveTab}
       >
-        <TabsList className="grid w-full grid-cols-2 relative p-1 bg-slate-100/80 h-14 rounded-xl border border-slate-200">
-          <div
-            className={`absolute top-1 bottom-1 left-1 w-[calc(50%-0.5rem)] rounded-lg bg-white shadow-sm transition-all duration-300 ease-in-out ${activeTab === "history" ? "translate-x-full" : "translate-x-0"
-              }`}
-          />
+        <TabsList className="grid w-full max-w-md grid-cols-2 p-1 bg-slate-200/50 rounded-xl h-12 border border-slate-200/60 shadow-inner">
           <TabsTrigger
             value="pending"
-            className="z-10 h-full data-[state=active]:bg-transparent data-[state=active]:text-blue-700 data-[state=active]:shadow-none transition-colors duration-200 text-base font-medium text-slate-500"
+            className="rounded-lg text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm"
           >
             Pending Installation
           </TabsTrigger>
           <TabsTrigger
             value="history"
-            className="z-10 h-full data-[state=active]:bg-transparent data-[state=active]:text-blue-700 data-[state=active]:shadow-none transition-colors duration-200 text-base font-medium text-slate-500"
+            className="rounded-lg text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm"
           >
             Installation History
           </TabsTrigger>
@@ -455,54 +464,58 @@ export default function InstallationPage() {
         {/* PENDING TAB */}
         <TabsContent
           value="pending"
-          className="mt-6 focus-visible:ring-0 focus-visible:outline-none animate-in fade-in-0 slide-in-from-left-4 duration-500 ease-out"
+          className="focus-visible:outline-none focus-visible:ring-0"
         >
-          <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-            <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
-              <div className="flex items-center gap-2 w-full md:w-auto justify-between">
-                <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
-                  <div className="p-1 bg-blue-100 rounded-lg">
-                    <Wrench className="h-4 w-4 text-blue-600" />
-                  </div>
-                  Pending Installation
-                </CardTitle>
+          <Card className="border-slate-200 shadow-sm bg-white overflow-hidden rounded-xl">
+            <CardHeader className="border-b border-slate-100 bg-slate-50/50 px-6 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100/50 border border-blue-200/50">
+                  <Wrench className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-semibold text-slate-800">
+                    Pending Installations
+                  </CardTitle>
+                  <p className="text-sm text-slate-500">
+                    Manage and update installation status
+                  </p>
+                </div>
               </div>
 
-              <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                <div className="relative w-full md:w-100">
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                <div className="relative w-full sm:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <Input
-                    placeholder="Search..."
+                    placeholder="Search records..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
+                    className="pl-9 h-10 w-full bg-white border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-blue-500/20 shadow-sm rounded-lg transition-all"
                   />
                 </div>
-
-                <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                   {selectedRows.length >= 2 && (
                     <Button
                       onClick={handleBulkClick}
-                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow h-10 px-4 transition-all duration-300 rounded-lg"
                       size="sm"
                     >
                       <Pencil className="h-4 w-4 mr-2" />
-                      Installation Selected ({selectedRows.length})
+                      Batch Update ({selectedRows.length})
                     </Button>
                   )}
                   <Badge
-                    variant="outline"
-                    className="bg-yellow-100 text-yellow-700 border-yellow-200 px-3 py-1 h-9 flex items-center"
+                    variant="secondary"
+                    className="bg-slate-100 text-slate-700 hover:bg-slate-200 border-transparent h-10 px-4 rounded-lg text-sm font-medium flex items-center shadow-sm"
                   >
-                    {filteredPendingItems.length} Pending
+                    {filteredPendingItems.length} Records
                   </Badge>
                 </div>
               </div>
             </CardHeader>
 
             {/* Filter Dropdowns */}
-            <div className="px-6 py-4 bg-slate-50/50 border-b border-blue-50">
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+            <div className="px-6 py-4 bg-white border-b border-slate-100">
+              <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
                 {[
                   { key: "regId", label: "Reg ID" },
                   { key: "village", label: "Village" },
@@ -512,16 +525,17 @@ export default function InstallationPage() {
                   { key: "pumpType", label: "Pump Type" },
                   { key: "company", label: "Company" },
                 ].map(({ key, label }) => (
-                  <div key={key} className="space-y-1.5">
-                    <Label className="text-xs text-slate-600">{label}</Label>
+                  <div key={key} className="space-y-1.5 flex flex-col">
+                    <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{label}</Label>
                     <select
                       value={filters[key]}
                       onChange={(e) =>
                         setFilters({ ...filters, [key]: e.target.value })
                       }
-                      className="w-full h-9 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                      className="h-9 w-full rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-slate-300 transition-colors appearance-none cursor-pointer"
+                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '1rem' }}
                     >
-                      <option value="">All</option>
+                      <option value="">All {label}</option>
                       {getUniquePendingValues(key).map((val) => (
                         <option key={val} value={val}>
                           {val}
@@ -532,60 +546,59 @@ export default function InstallationPage() {
                 ))}
               </div>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setFilters({
-                    regId: "",
-                    village: "",
-                    block: "",
-                    district: "",
-                    pumpSource: "",
-                    pumpType: "",
-                    company: "",
-                  })
-                }
-                className="mt-3 text-xs"
-              >
-                Clear All Filters
-              </Button>
+              {Object.values(filters).some(v => v !== "") && (
+                <div className="mt-4 flex justify-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      setFilters({
+                        regId: "",
+                        village: "",
+                        block: "",
+                        district: "",
+                        pumpSource: "",
+                        pumpType: "",
+                        company: "",
+                      })
+                    }
+                    className="text-slate-500 hover:text-slate-700 hover:bg-slate-100 h-8 px-3 text-xs font-medium bg-white border border-slate-200 shadow-sm"
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              )}
             </div>
 
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table className="[&_th]:text-center [&_td]:text-center">
-                  <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
-                    <TableRow className="border-b border-blue-100 hover:bg-transparent">
-                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
-                        <div className="flex justify-center">
-                          <Checkbox
-                            checked={
-                              filteredPendingItems.length > 0 &&
-                              selectedRows.length ===
-                              filteredPendingItems.length
-                            }
-                            onCheckedChange={handleSelectAll}
-                            aria-label="Select all rows"
-                            className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
-                          />
-                        </div>
+              <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
+                <Table>
+                  <TableHeader className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm border-b border-slate-200">
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="w-12 px-4 py-3 text-center">
+                        <Checkbox
+                          checked={
+                            filteredPendingItems.length > 0 &&
+                            selectedRows.length === filteredPendingItems.length
+                          }
+                          onCheckedChange={handleSelectAll}
+                          aria-label="Select all rows"
+                          className="border-slate-300 rounded data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                        />
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
-                        Action
-                      </TableHead>
-                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Reg ID</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Beneficiary Name</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Father's Name</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Mobile Number</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Village</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Block</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">District</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Pincode</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Pump Capacity</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Pump Head</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">IP Name</TableHead>
+                      <TableHead className="w-[120px] font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center">Action</TableHead>
+                      <TableHead className="w-14 font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center">S.No</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[120px]">Reg ID</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[150px]">Beneficiary Name</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[130px]">Father's Name</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[120px]">Mobile Number</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[100px]">Village</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[100px]">Block</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[100px]">District</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[100px]">Pincode</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[130px]">Pump Capacity</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[130px]">Pump Head</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[150px]">IP Name</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -593,11 +606,11 @@ export default function InstallationPage() {
                       Array.from({ length: 6 }).map((_, index) => (
                         <TableRow
                           key={`install-skel-${index}`}
-                          className="animate-pulse"
+                          className="animate-pulse border-b border-slate-100"
                         >
-                          {Array.from({ length: 13 }).map((__, i) => (
-                            <TableCell key={i}>
-                              <div className="h-4 w-full bg-slate-200 rounded mx-auto"></div>
+                          {Array.from({ length: 14 }).map((__, i) => (
+                            <TableCell key={i} className="px-4 py-3">
+                              <div className="h-4 w-full bg-slate-200 rounded"></div>
                             </TableCell>
                           ))}
                         </TableRow>
@@ -605,16 +618,15 @@ export default function InstallationPage() {
                     ) : filteredPendingItems.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={13}
-                          className="h-48 text-center text-slate-500 bg-slate-50/30"
+                          colSpan={14}
+                          className="h-48 text-center text-slate-500 bg-slate-50/50"
                         >
-                          <div className="flex flex-col items-center justify-center gap-2">
-                            <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center">
+                          <div className="flex flex-col items-center justify-center gap-3">
+                            <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center shadow-inner">
                               <Wrench className="h-6 w-6 text-slate-400" />
                             </div>
-                            <p>
-                              No pending installation requests found matching
-                              your search
+                            <p className="text-sm">
+                              No pending installation requests found matching your search.
                             </p>
                           </div>
                         </TableCell>
@@ -623,19 +635,17 @@ export default function InstallationPage() {
                       filteredPendingItems.map((item, index) => (
                         <TableRow
                           key={item.regId}
-                          className="hover:bg-blue-50/30 transition-colors"
+                          className="hover:bg-slate-50/80 transition-colors border-b border-slate-100 group"
                         >
-                          <TableCell className="px-4">
-                            <div className="flex justify-center">
-                              <Checkbox
-                                checked={selectedRows.includes(item.serialNo)}
-                                onCheckedChange={(checked) => handleSelectRow(item.serialNo, checked)}
-                                aria-label={`Select row ${item.serialNo}`}
-                                className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110"
-                              />
-                            </div>
+                          <TableCell className="px-4 py-3 align-middle text-center">
+                            <Checkbox
+                              checked={selectedRows.includes(item.serialNo)}
+                              onCheckedChange={(checked) => handleSelectRow(item.serialNo, checked)}
+                              aria-label={`Select row ${item.serialNo}`}
+                              className="border-slate-300 rounded data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 transition-all opacity-0 group-hover:opacity-100 data-[state=checked]:opacity-100"
+                            />
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-center">
                             <Button
                               variant="ghost"
                               size="sm"
@@ -652,25 +662,35 @@ export default function InstallationPage() {
                                 setIsDialogOpen(true);
                               }}
                               disabled={selectedRows.length >= 2}
-                              className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="h-8 px-3 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 transition-all text-xs font-medium w-full max-w-[100px] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mx-auto"
                             >
-                              <Wrench className="h-3.5 w-3.5" />
                               Install
                             </Button>
                           </TableCell>
-                          <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
-
-                          <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">{item.regId}</TableCell>
-                          <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600">{item.fatherName}</TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-700">{item.mobileNumber}</TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600">{item.village}</TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600">{item.block}</TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600">{item.district}</TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600">{item.pincode}</TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600 font-medium text-blue-600 uppercase">{item.pumpCapacity}</TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600">{item.pumpHead}</TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600 font-medium">{item.ipName}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle">
+                            <span className="font-mono text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-1 rounded border border-slate-200">
+                              {item.regId}
+                            </span>
+                          </TableCell>
+                          <TableCell className="px-4 py-3 align-middle font-medium text-slate-800">{item.beneficiaryName}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-600">{item.fatherName}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-700">{item.mobileNumber}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-600">{item.village}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-600">{item.block}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-600">{item.district}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-600 text-center">{item.pincode}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-center">
+                            <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 font-medium">
+                              {item.pumpCapacity}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-center">
+                            <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 font-medium">
+                              {item.pumpHead}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-600 font-medium">{item.ipName}</TableCell>
                         </TableRow>
                       ))
                     )}
@@ -764,43 +784,48 @@ export default function InstallationPage() {
         {/* HISTORY TAB */}
         <TabsContent
           value="history"
-          className="mt-6 focus-visible:ring-0 focus-visible:outline-none animate-in fade-in-0 slide-in-from-right-4 duration-500 ease-out"
+          className="focus-visible:outline-none focus-visible:ring-0"
         >
-          <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-            <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
-              <div className="flex items-center gap-2 w-full md:w-auto">
-                <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
-                  <div className="p-1 bg-blue-100 rounded-lg">
-                    <FileCheck className="h-4 w-4 text-blue-600" />
-                  </div>
-                  Installation History
-                </CardTitle>
+          <Card className="border-slate-200 shadow-sm bg-white overflow-hidden rounded-xl">
+            <CardHeader className="border-b border-slate-100 bg-slate-50/50 px-6 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-teal-50 border border-teal-200/50">
+                  <FileCheck className="h-5 w-5 text-teal-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-semibold text-slate-800">
+                    Installation History
+                  </CardTitle>
+                  <p className="text-sm text-slate-500">
+                    Review previously completed or processed installations
+                  </p>
+                </div>
               </div>
 
-              <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                <div className="relative w-full md:w-100">
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                <div className="relative w-full sm:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <Input
-                    placeholder="Search..."
+                    placeholder="Search records..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
+                    className="pl-9 h-10 w-full bg-white border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-blue-500/20 shadow-sm rounded-lg transition-all"
                   />
                 </div>
-                <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                   {selectedRows.length >= 2 && (
                     <Button
                       onClick={handleBulkClick}
-                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow h-10 px-4 transition-all duration-300 rounded-lg"
                       size="sm"
                     >
                       <Pencil className="h-4 w-4 mr-2" />
-                      Installation Selected ({selectedRows.length})
+                      Batch Update ({selectedRows.length})
                     </Button>
                   )}
                   <Badge
-                    variant="outline"
-                    className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 h-9 flex items-center whitespace-nowrap"
+                    variant="secondary"
+                    className="bg-slate-100 text-slate-700 hover:bg-slate-200 border-transparent h-10 px-4 rounded-lg text-sm font-medium flex items-center shadow-sm"
                   >
                     {filteredHistoryItems.length} Records
                   </Badge>
@@ -809,8 +834,8 @@ export default function InstallationPage() {
             </CardHeader>
 
             {/* Filter Dropdowns */}
-            <div className="px-6 py-4 bg-slate-50/50 border-b border-blue-50">
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+            <div className="px-6 py-4 bg-white border-b border-slate-100">
+              <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
                 {[
                   { key: "regId", label: "Reg ID" },
                   { key: "village", label: "Village" },
@@ -820,16 +845,17 @@ export default function InstallationPage() {
                   { key: "pumpType", label: "Pump Type" },
                   { key: "company", label: "Company" },
                 ].map(({ key, label }) => (
-                  <div key={key} className="space-y-1.5">
-                    <Label className="text-xs text-slate-600">{label}</Label>
+                  <div key={key} className="space-y-1.5 flex flex-col">
+                    <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{label}</Label>
                     <select
                       value={filters[key]}
                       onChange={(e) =>
                         setFilters({ ...filters, [key]: e.target.value })
                       }
-                      className="w-full h-9 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                      className="h-9 w-full rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-slate-300 transition-colors appearance-none cursor-pointer"
+                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '1rem' }}
                     >
-                      <option value="">All</option>
+                      <option value="">All {label}</option>
                       {getUniqueHistoryValues(key).map((val) => (
                         <option key={val} value={val}>
                           {val}
@@ -840,48 +866,50 @@ export default function InstallationPage() {
                 ))}
               </div>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setFilters({
-                    regId: "",
-                    village: "",
-                    block: "",
-                    district: "",
-                    pumpSource: "",
-                    pumpType: "",
-                    company: "",
-                  })
-                }
-                className="mt-3 text-xs"
-              >
-                Clear All Filters
-              </Button>
+              {Object.values(filters).some(v => v !== "") && (
+                <div className="mt-4 flex justify-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      setFilters({
+                        regId: "",
+                        village: "",
+                        block: "",
+                        district: "",
+                        pumpSource: "",
+                        pumpType: "",
+                        company: "",
+                      })
+                    }
+                    className="text-slate-500 hover:text-slate-700 hover:bg-slate-100 h-8 px-3 text-xs font-medium bg-white border border-slate-200 shadow-sm"
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              )}
             </div>
 
             <CardContent className="p-0">
-              <div className="hidden md:block overflow-x-auto">
-                <Table className="[&_th]:text-center [&_td]:text-center">
-                  <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
-                    <TableRow className="border-b border-blue-100 hover:bg-transparent">
-                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
-                        <div className="flex justify-center">
-                          <Checkbox checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length} onCheckedChange={handleSelectAll} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out" />
-                        </div>
+              <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
+                <Table>
+                  <TableHeader className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm border-b border-slate-200">
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="w-12 px-4 py-3 text-center">
+                        <Checkbox checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length} onCheckedChange={handleSelectAll} className="border-slate-300 rounded data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600" />
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[120px]">Action</TableHead>
-                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Reg ID</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Beneficiary Name</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Mobile Number</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Village</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Pump Capacity</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Pump Head</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">IP Name</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Installation Date</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Photo</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Status</TableHead>
+                      <TableHead className="w-[120px] font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center">Action</TableHead>
+                      <TableHead className="w-14 font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center">S.No</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[120px]">Reg ID</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[150px]">Beneficiary Name</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[120px]">Mobile Number</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[100px]">Village</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[130px]">Pump Capacity</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[130px]">Pump Head</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[150px]">IP Name</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[140px]">Installation Date</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[100px]">Photo</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[120px]">Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -889,11 +917,11 @@ export default function InstallationPage() {
                       Array.from({ length: 6 }).map((_, index) => (
                         <TableRow
                           key={`history-skel-${index}`}
-                          className="animate-pulse"
+                          className="animate-pulse border-b border-slate-100"
                         >
                           {Array.from({ length: 13 }).map((__, i) => (
-                            <TableCell key={i}>
-                              <div className="h-4 w-full bg-slate-200 rounded mx-auto"></div>
+                            <TableCell key={i} className="px-4 py-3">
+                              <div className="h-4 w-full bg-slate-200 rounded"></div>
                             </TableCell>
                           ))}
                         </TableRow>
@@ -902,13 +930,13 @@ export default function InstallationPage() {
                       <TableRow>
                         <TableCell
                           colSpan={13}
-                          className="h-48 text-center text-slate-500 bg-slate-50/30"
+                          className="h-48 text-center text-slate-500 bg-slate-50/50"
                         >
-                          <div className="flex flex-col items-center justify-center gap-2">
-                            <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center">
+                          <div className="flex flex-col items-center justify-center gap-3">
+                            <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center shadow-inner">
                               <FileCheck className="h-6 w-6 text-slate-400" />
                             </div>
-                            <p>
+                            <p className="text-sm">
                               {historyItems.length === 0
                                 ? "No installation history found."
                                 : "No history records found matching your search."}
@@ -920,47 +948,57 @@ export default function InstallationPage() {
                       filteredHistoryItems.map((item, index) => (
                         <TableRow
                           key={item.serialNo}
-                          className="hover:bg-blue-50/30 transition-colors"
+                          className="hover:bg-slate-50/80 transition-colors border-b border-slate-100 group"
                         >
-                          <TableCell className="px-4">
-                            <div className="flex justify-center">
-                              <Checkbox checked={selectedRows.includes(item.serialNo || item.id)} onCheckedChange={(checked) => handleSelectRow(item.serialNo || item.id, checked)} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out" />
-                            </div>
+                          <TableCell className="px-4 py-3 align-middle text-center">
+                            <Checkbox checked={selectedRows.includes(item.serialNo || item.id)} onCheckedChange={(checked) => handleSelectRow(item.serialNo || item.id, checked)} className="border-slate-300 rounded data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 transition-all opacity-0 group-hover:opacity-100 data-[state=checked]:opacity-100" />
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-center">
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleActionClick(item)}
                               disabled={selectedRows.length >= 2}
-                              className="bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white border border-cyan-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="h-8 px-3 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 transition-all text-xs font-medium w-full max-w-[100px] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mx-auto"
                             >
-                              <Pencil className="h-3.5 w-3.5" />
                               Edit
                             </Button>
                           </TableCell>
-                          <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
-                          <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">{item.regId}</TableCell>
-                          <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-700">{item.mobileNumber}</TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600">{item.village}</TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600 font-medium text-blue-600 uppercase">{item.pumpCapacity}</TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600">{item.pumpHead}</TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600 font-medium text-xs">{item.ipName}</TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600">{item.installationDate}</TableCell>
-                          <TableCell className="whitespace-nowrap">
-                            {item.photoUploadedOnUpadApp ? (
-                              <a href={getPreviewUrl(item.photoUploadedOnUpadApp)} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline text-xs flex items-center justify-center gap-1 hover:text-blue-800">
-                                <FileCheck className="h-4 w-4" /> View Photo
-                              </a>
-                            ) : <span className="text-slate-400">-</span>}
+                          <TableCell className="px-4 py-3 align-middle text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle">
+                            <span className="font-mono text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-1 rounded border border-slate-200">
+                              {item.regId}
+                            </span>
                           </TableCell>
-                          <TableCell className="whitespace-nowrap">
+                          <TableCell className="px-4 py-3 align-middle font-medium text-slate-800">{item.beneficiaryName}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-700">{item.mobileNumber}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-600">{item.village}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-center">
+                            <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 font-medium">
+                              {item.pumpCapacity}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-center">
+                            <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 font-medium">
+                              {item.pumpHead}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-600 font-medium">{item.ipName}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-600">{item.installationDate}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-center">
+                            {item.photoUploadedOnUpadApp ? (
+                              <a href={getPreviewUrl(item.photoUploadedOnUpadApp)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 hover:underline hover:bg-blue-50 px-2 py-1 rounded transition-colors text-sm font-medium">
+                                <FileCheck className="h-4 w-4" /> View
+                              </a>
+                            ) : <span className="text-slate-400 italic text-sm">--</span>}
+                          </TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-center">
                             <Badge
                               className={`
-                                ${item.installationStatus === "Done" || item.installationStatus === "Completed" ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200" : ""}
-                                ${item.installationStatus === "Pending" ? "bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-200" : ""}
+                                ${item.installationStatus === "Done" || item.installationStatus === "Completed" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : ""}
+                                ${item.installationStatus === "Pending" ? "bg-amber-50 text-amber-700 border-amber-200" : ""}
                               `}
+                              variant="outline"
                             >
                               {item.installationStatus || "Pending"}
                             </Badge>
@@ -971,119 +1009,6 @@ export default function InstallationPage() {
                   </TableBody>
                 </Table>
               </div>
-
-              {/* Mobile View */}
-              <div className="md:hidden space-y-4 p-4 bg-slate-50">
-                {filteredHistoryItems.map((item) => (
-                  <Card
-                    key={item.serialNo}
-                    className="bg-white border text-sm shadow-sm"
-                  >
-                    <CardContent className="p-4 space-y-3">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                          <Badge
-                            variant="secondary"
-                            className="bg-slate-100 text-slate-600"
-                          >
-                            {item.serialNo}
-                          </Badge>
-                          <h4 className="font-semibold text-base text-slate-800">
-                            {item.beneficiaryName}
-                          </h4>
-                          <p className="text-muted-foreground text-xs font-mono">
-                            {item.regId}
-                          </p>
-                        </div>
-                        <Badge className="bg-teal-100 text-teal-800 border-teal-200 text-xs">
-                          Installed
-                        </Badge>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs border-t border-b py-3 my-2 border-slate-100">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-slate-400 text-[10px] uppercase font-semibold">
-                            Status
-                          </span>
-                          <div className="flex flex-wrap gap-1">
-                            <Badge
-                              variant="outline"
-                              className={`
-                              ${item.installationStatus === "Completed"
-                                  ? "bg-green-100 text-green-700 border-green-200"
-                                  : ""
-                                }
-                              ${item.installationStatus === "In Progress"
-                                  ? "bg-blue-100 text-blue-700 border-blue-200"
-                                  : ""
-                                }
-                              ${item.installationStatus === "Pending"
-                                  ? "bg-yellow-100 text-yellow-700 border-yellow-200"
-                                  : ""
-                                }
-                              ${item.installationStatus === "On Hold"
-                                  ? "bg-red-100 text-red-700 border-red-200"
-                                  : ""
-                                }
-                              ${![
-                                  "Completed",
-                                  "In Progress",
-                                  "Pending",
-                                  "On Hold",
-                                ].includes(item.installationStatus)
-                                  ? "bg-slate-100 text-slate-700 border-slate-200"
-                                  : ""
-                                }
-                            `}
-                            >
-                              {item.installationStatus}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-slate-400 text-[10px] uppercase font-semibold">
-                            Completed On
-                          </span>
-                          <span className="font-medium text-slate-700">
-                            {item.installationCompletionDate}
-                          </span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-slate-400 text-[10px] uppercase font-semibold">
-                            Ins Ageing
-                          </span>
-                          <span className="font-medium text-slate-700">
-                            {item.installationMaterialAgeing}
-                          </span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-slate-400 text-[10px] uppercase font-semibold">
-                            Material Rcvd
-                          </span>
-                          <span className="font-medium text-slate-700">
-                            {item.installationMaterialReceivingDate}
-                          </span>
-                        </div>
-                        <div className="col-span-2">
-                          <span className="text-slate-400 text-[10px] uppercase block mb-1 font-semibold">
-                            Challan Document
-                          </span>
-                          {item.installationChallanLink ? (
-                            <span className="text-blue-600 underline cursor-pointer flex items-center gap-1">
-                              <FileCheck className="h-3 w-3" />
-                              {item.installationChallanLink} (File)
-                            </span>
-                          ) : (
-                            <span className="text-gray-400 italic">
-                              No document
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -1093,7 +1018,7 @@ export default function InstallationPage() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent
           showCloseButton={!isSuccess}
-          className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isSuccess ? "bg-transparent !shadow-none !border-none" : ""
+          className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isSuccess ? "bg-transparent shadow-none! border-none!" : "bg-white rounded-xl shadow-2xl border-slate-200"
             }`}
         >
           {isSuccess ? (
@@ -1107,29 +1032,30 @@ export default function InstallationPage() {
             </div>
           ) : (
             <>
-              <DialogHeader className="p-6 pb-2 border-b border-blue-100 bg-blue-50/30">
-                <DialogTitle className="text-xl font-bold bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent flex items-center gap-2">
-                  <span className="bg-blue-100 p-1.5 rounded-md">
-                    <Wrench className="h-4 w-4 text-blue-600" />
+              <DialogHeader className="p-6 pb-4 border-b border-slate-100 bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm">
+                <DialogTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                  <span className="bg-blue-100 p-2 rounded-lg border border-blue-200/50 shadow-sm">
+                    <Wrench className="h-4 w-4 text-blue-700" />
                   </span>
                   Process Installation Work
                 </DialogTitle>
-                <DialogDescription className="text-slate-500 ml-10">
+                <DialogDescription className="text-slate-500 ml-12 text-sm mt-1">
                   {isBulk ? (
                     <span>
                       Applying changes to{" "}
-                      <span className="font-bold text-blue-700">
+                      <span className="font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">
                         {selectedRows.length} selected items
                       </span>
                       . All fields below will be updated for these items.
                     </span>
                   ) : (
-                    <span>
+                    <span className="flex items-center gap-2">
                       Update installation details for{" "}
                       <span className="font-semibold text-slate-700">
                         {selectedItem?.beneficiaryName}
-                      </span>{" "}
-                      <span className="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded text-slate-600 border border-slate-200">
+                      </span>
+                      <span className="hidden sm:inline w-1 h-1 rounded-full bg-slate-300"></span>
+                      <span className="font-mono text-[11px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 border border-slate-200 shadow-sm">
                         {selectedItem?.serialNo}
                       </span>
                     </span>
@@ -1137,62 +1063,62 @@ export default function InstallationPage() {
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="p-6 space-y-6">
+              <div className="p-6 space-y-8 bg-slate-50/30">
                 {(selectedItem || isBulk) && (
                   <>
                     {/* PREFILLED BENEFICIARY DETAILS CARD - Show in Bulk Mode too with props */}
                     {(isBulk || selectedItem) && (
-                      <div className="bg-slate-50/50 rounded-xl border border-slate-200 p-4">
-                        <h3 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
-                          <FileCheck className="h-4 w-4 text-blue-600" />
+                      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
+                          <FileCheck className="h-4 w-4 text-slate-400" />
                           Beneficiary Details
                         </h3>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8 text-sm">
-                          <div>
-                            <span className="text-slate-500 text-xs block mb-1">
+                        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-y-5 gap-x-6 text-sm">
+                          <div className="space-y-1">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
                               Serial No
                             </span>
-                            <p className="font-medium text-slate-800">
+                            <p className="font-medium text-slate-700">
                               {isBulk ? "Multiple" : selectedItem.serialNo}
                             </p>
                           </div>
-                          <div>
-                            <span className="text-slate-500 text-xs block mb-1">
+                          <div className="space-y-1">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
                               Reg ID
                             </span>
-                            <p className="font-medium text-slate-800 font-mono break-all">
+                            <p className="font-medium text-slate-700 font-mono text-[13px] bg-slate-50 px-2 py-1 rounded border border-slate-100 break-all w-max max-w-full">
                               {isBulk ? "Multiple" : selectedItem.regId}
                             </p>
                           </div>
-                          <div>
-                            <span className="text-slate-500 text-xs block mb-1">
+                          <div className="space-y-1">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
                               Beneficiary Name
                             </span>
-                            <p className="font-medium text-slate-800">
+                            <p className="font-medium text-slate-700">
                               {isBulk ? "Multiple" : selectedItem.beneficiaryName}
                             </p>
                           </div>
-                          <div>
-                            <span className="text-slate-500 text-xs block mb-1">
+                          <div className="space-y-1">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
                               Father's Name
                             </span>
-                            <p className="font-medium text-slate-800">
+                            <p className="font-medium text-slate-700">
                               {isBulk ? "Multiple" : selectedItem.fatherName}
                             </p>
                           </div>
-                          <div>
-                            <span className="text-slate-500 text-xs block mb-1">
+                          <div className="space-y-1 col-span-2 md:col-span-1 xl:col-span-2">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
                               Village/Block
                             </span>
-                            <p className="font-medium text-slate-800">
+                            <p className="font-medium text-slate-700">
                               {isBulk ? "Multiple" : `${selectedItem.village}, ${selectedItem.block}`}
                             </p>
                           </div>
-                          <div>
-                            <span className="text-slate-500 text-xs block mb-1">
+                          <div className="space-y-1">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
                               Pump Type
                             </span>
-                            <p className="font-medium text-blue-700 bg-blue-50 inline-block px-2 py-0.5 rounded text-xs border border-blue-100">
+                            <p className="font-medium text-slate-600 bg-slate-100 inline-block px-2 py-0.5 rounded text-xs border border-slate-200">
                               {isBulk ? "Multiple" : selectedItem.pumpCapacity}
                             </p>
                           </div>
@@ -1201,11 +1127,14 @@ export default function InstallationPage() {
                     )}
 
                     {/* INSTALLATION INPUT FORM */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                       <div className="space-y-2">
-                        <Label className="text-sm font-medium text-slate-700">Installation Status</Label>
+                        <Label className="text-sm font-medium text-slate-700 flex justify-between items-center">
+                          Installation Status
+                          <span className="text-[10px] text-slate-400 font-normal">Required</span>
+                        </Label>
                         <select
-                          className="h-10 w-full border border-slate-200 rounded-md px-3 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-400 transition-all font-medium text-slate-700 hover:border-cyan-200"
+                          className="h-10 w-full border border-slate-300 rounded-md px-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all font-medium text-slate-700 shadow-sm"
                           value={formData.installationStatus}
                           onChange={(e) => setFormData({ ...formData, installationStatus: e.target.value })}
                         >
@@ -1215,25 +1144,28 @@ export default function InstallationPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-sm font-medium text-slate-700">Installation Date</Label>
-                        <Input type="date" value={formData.installationDate} onChange={(e) => setFormData({ ...formData, installationDate: e.target.value })} className="h-10 border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 transition-all" />
+                        <Label className="text-sm font-medium text-slate-700 flex justify-between items-center">
+                          Installation Date
+                          <span className="text-[10px] text-slate-400 font-normal">Optional</span>
+                        </Label>
+                        <Input type="date" value={formData.installationDate} onChange={(e) => setFormData({ ...formData, installationDate: e.target.value })} className="h-10 border-slate-300 focus:border-blue-400 focus-visible:ring-blue-100 transition-all shadow-sm" />
                       </div>
 
-                      <div className="space-y-2 md:col-span-2">
+                      <div className="space-y-2 md:col-span-2 mt-2">
                         <Label className="text-sm font-medium text-slate-700">Installation Photo</Label>
-                        <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 bg-slate-50/50 flex flex-col items-center justify-center gap-2 hover:bg-slate-50 transition-colors cursor-pointer group" onClick={() => document.getElementById("photo-file")?.click()}>
+                        <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 bg-slate-50 flex flex-col items-center justify-center gap-3 hover:bg-slate-100/50 transition-all cursor-pointer group hover:border-blue-300" onClick={() => document.getElementById("photo-file")?.click()}>
                           <Input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" id="photo-file" />
-                          <div className="p-3 bg-white rounded-full shadow-sm group-hover:scale-110 transition-transform">
-                            <Upload className="h-5 w-5 text-cyan-600" />
+                          <div className="h-12 w-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 group-hover:scale-110 transition-transform group-hover:border-blue-200 group-hover:shadow-blue-100">
+                            <Upload className="h-6 w-6 text-slate-500 group-hover:text-blue-500 transition-colors" />
                           </div>
-                          <div className="text-center">
-                            <span className="text-sm font-medium text-slate-700 group-hover:text-cyan-700 transition-colors">
+                          <div className="text-center space-y-1">
+                            <span className="text-sm font-medium text-slate-700 group-hover:text-blue-600 transition-colors block">
                               {formData.photoUploadedOnUpadApp ? "Change Photo" : "Upload Installation Photo"}
                             </span>
-                            <p className="text-xs text-slate-400 mt-1">PNG, JPG or JPEG (max. 10MB)</p>
+                            <p className="text-xs text-slate-500 block">PNG, JPG or JPEG (max. 10MB)</p>
                           </div>
                           {formData.photoUploadedOnUpadApp && (
-                            <Badge variant="secondary" className="mt-2 bg-cyan-50 text-cyan-700 border-cyan-200">
+                            <Badge variant="secondary" className="mt-2 bg-slate-100 text-slate-700 border-slate-200">
                               <FileCheck className="h-3 w-3 mr-1" />
                               {formData.photoUploadedOnUpadApp}
                             </Badge>
@@ -1242,25 +1174,25 @@ export default function InstallationPage() {
                       </div>
                     </div>
 
-                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 pb-6 pr-6">
+                    <div className="flex justify-end gap-3 mt-8 pt-5 border-t border-slate-200">
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         onClick={() => setIsDialogOpen(false)}
                         disabled={isSubmitting}
-                        className="h-10 px-6 text-slate-600 hover:text-slate-800 hover:bg-slate-100/50"
+                        className="h-10 px-6 border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors shadow-sm"
                       >
                         Cancel
                       </Button>
                       <Button
                         onClick={handleSubmit}
                         disabled={isSubmitting}
-                        className="h-10 px-6 bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md transition-all hover:shadow-lg min-w-[150px]"
+                        className="h-10 px-8 bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed min-w-[180px]"
                       >
                         {isSubmitting ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Installing...
-                          </>
+                          <div className="flex items-center gap-2">
+                            <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span>Installing...</span>
+                          </div>
                         ) : (
                           "Complete Installation"
                         )}

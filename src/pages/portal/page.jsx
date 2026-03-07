@@ -175,11 +175,11 @@ export default function PortalPage() {
   };
 
   return (
-    <div className="space-y-6 px-4 pt-2 pb-4 md:px-8 md:pt-4 md:pb-8 max-w-[1600px] mx-auto animate-fade-in-up min-h-screen bg-slate-50/50">
+    <div className="space-y-6 sm:space-y-8 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto animate-fade-in-up min-h-screen bg-slate-50/50">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-cyan-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold text-slate-800">
             Registration Portal
           </h1>
           <p className="text-slate-500 text-sm mt-1">
@@ -194,64 +194,64 @@ export default function PortalPage() {
             placeholder="Search beneficiaries, IDs..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 bg-white border-slate-200 focus-visible:ring-blue-500 transition-all hover:border-blue-300"
+            className="pl-9 bg-white border-slate-200 focus-visible:ring-blue-100 transition-all hover:border-slate-300 shadow-sm h-10 rounded-lg"
           />
         </div>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-white/80 backdrop-blur border-blue-100 shadow-sm hover:shadow-md transition-all">
-          <CardContent className="p-4 flex items-center justify-between">
+        <Card className="border-slate-200 shadow-sm rounded-xl bg-white hover:shadow-md transition-shadow">
+          <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium text-slate-500 uppercase">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
                 Total Beneficiaries
               </p>
               <h3 className="text-2xl font-bold text-slate-800">
                 {stats.total}
               </h3>
             </div>
-            <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-              <Users className="h-5 w-5" />
+            <div className="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100/50">
+              <Users className="h-6 w-6" />
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white/80 backdrop-blur border-purple-100 shadow-sm hover:shadow-md transition-all">
-          <CardContent className="p-4 flex items-center justify-between">
+        <Card className="border-slate-200 shadow-sm rounded-xl bg-white hover:shadow-md transition-shadow">
+          <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium text-slate-500 uppercase">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
                 Districts Covered
               </p>
               <h3 className="text-2xl font-bold text-slate-800">
                 {stats.districts}
               </h3>
             </div>
-            <div className="h-10 w-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
-              <MapPin className="h-5 w-5" />
+            <div className="h-12 w-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 border border-purple-100/50">
+              <MapPin className="h-6 w-6" />
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white/80 backdrop-blur border-emerald-100 shadow-sm hover:shadow-md transition-all">
-          <CardContent className="p-4 flex items-center justify-between">
+        <Card className="border-slate-200 shadow-sm rounded-xl bg-white hover:shadow-md transition-shadow">
+          <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium text-slate-500 uppercase">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
                 Villages Reach
               </p>
               <h3 className="text-2xl font-bold text-slate-800">
                 {stats.villages}
               </h3>
             </div>
-            <div className="h-10 w-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
-              <Home className="h-5 w-5" />
+            <div className="h-12 w-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100/50">
+              <Home className="h-6 w-6" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Filter Dropdowns */}
-      <Card className="bg-white border-slate-200 shadow-sm">
-        <CardContent className="p-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <Card className="border border-slate-200 shadow-sm rounded-xl bg-white">
+        <CardContent className="p-4 sm:p-6 bg-slate-50/50 rounded-xl">
+          <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
             {[
               { key: "regId", label: "Reg ID" },
               { key: "village", label: "Village" },
@@ -261,13 +261,13 @@ export default function PortalPage() {
               { key: "ipName", label: "IP Name" },
             ].map(({ key, label }) => (
               <div key={key} className="space-y-1.5">
-                <Label className="text-xs text-slate-600">{label}</Label>
+                <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{label}</Label>
                 <select
                   value={filters[key]}
                   onChange={(e) =>
                     setFilters({ ...filters, [key]: e.target.value })
                   }
-                  className="w-full h-9 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  className="w-full h-9 flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="">All</option>
                   {getUniqueValues(key).map((val) => (
@@ -280,7 +280,6 @@ export default function PortalPage() {
             ))}
           </div>
 
-          {/* Clear Filters Button */}
           <Button
             variant="outline"
             size="sm"
@@ -294,9 +293,9 @@ export default function PortalPage() {
                 ipName: "",
               })
             }
-            className="mt-3 text-xs"
+            className="mt-4 text-xs h-8 px-3 border-slate-200 text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 shadow-sm"
           >
-            Clear All Filters
+            Clear Filters
           </Button>
         </CardContent>
       </Card>
@@ -304,9 +303,9 @@ export default function PortalPage() {
       {/* Search and Add Button Removed as per request, Form preserved below */}
       <Dialog open={open} onOpenChange={setOpen}>
         {/* Trigger removed */}
-        <DialogContent className="max-w-2xl max-h-[75vh] md:max-h-[80vh] flex flex-col p-6 overflow-visible">
-          <DialogHeader className="shrink-0">
-            <DialogTitle className="bg-linear-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent pb-1">
+        <DialogContent className="max-w-2xl max-h-[75vh] md:max-h-[80vh] flex flex-col p-6 overflow-visible rounded-2xl">
+          <DialogHeader className="shrink-0 mb-4 border-b border-slate-100 pb-2">
+            <DialogTitle className="text-xl font-bold text-slate-800 pb-1">
               Beneficiary Registration
             </DialogTitle>
           </DialogHeader>
@@ -476,17 +475,17 @@ export default function PortalPage() {
               </div>
             </div>
           </div>
-          <div className="flex justify-end items-center gap-3 mt-4 pt-4 border-t shrink-0 bg-slate-50/50 -mx-6 px-6 -mb-4 pb-4">
+          <div className="flex justify-end items-center gap-3 mt-4 pt-4 border-t border-slate-100 shrink-0 bg-white -mx-6 px-6 -mb-4 pb-4">
             <Button
               variant="outline"
               onClick={() => setOpen(false)}
-              className="h-10 min-w-[100px]"
+              className="h-10 min-w-[100px] border-slate-200 text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50"
             >
               Cancel
             </Button>
             <Button
               onClick={handleSubmit}
-              className="bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 h-10 min-w-[100px] shadow-sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all duration-300 h-10 min-w-[100px]"
             >
               Submit
             </Button>
@@ -494,52 +493,49 @@ export default function PortalPage() {
         </DialogContent>
       </Dialog>
 
-      <Card className="border border-blue-100 shadow-lg shadow-blue-50/50 overflow-hidden bg-white">
+      <Card className="border border-slate-200 shadow-sm rounded-xl bg-white overflow-hidden">
         <CardContent className="!p-0">
           {/* Desktop Table View */}
-          <div className="overflow-x-auto min-h-[300px] max-h-[70vh] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            <Table className="w-full text-sm text-left">
-              <TableHeader className="bg-slate-50 sticky top-0 z-20 shadow-sm">
-                <TableRow className="border-b border-blue-100 hover:bg-transparent">
-                  <TableHead className="h-12 px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center w-[120px] bg-slate-50/95 backdrop-blur">
-                    Serial No
+          <div className="overflow-x-auto min-h-[300px] max-h-[70vh] rounded-b-xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <Table className="w-full text-left">
+              <TableHeader className="bg-slate-50/80 sticky top-0 z-20 backdrop-blur">
+                <TableRow className="border-b border-slate-100 hover:bg-transparent">
+                  <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle bg-slate-50 w-16">
+                    S.No
                   </TableHead>
-                  <TableHead className="h-12 px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center bg-slate-50/95 backdrop-blur">
+                  <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle bg-slate-50">
                     Reg ID
                   </TableHead>
-                  <TableHead className="h-12 px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center min-w-[180px] bg-slate-50/95 backdrop-blur">
+                  <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle bg-slate-50">
                     Beneficiary Name
                   </TableHead>
-                  <TableHead className="h-12 px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center min-w-[150px] bg-slate-50/95 backdrop-blur">
+                  <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle bg-slate-50">
                     Father's Name
                   </TableHead>
-                  <TableHead className="h-12 px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center bg-slate-50/95 backdrop-blur">
+                  <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle bg-slate-50">
                     Mobile Number
                   </TableHead>
-                  <TableHead className="h-12 px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center bg-slate-50/95 backdrop-blur">
+                  <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle bg-slate-50">
                     Village
                   </TableHead>
-                  <TableHead className="h-12 px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center bg-slate-50/95 backdrop-blur">
+                  <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle bg-slate-50">
                     Block
                   </TableHead>
-                  <TableHead className="h-12 px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center bg-slate-50/95 backdrop-blur">
+                  <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle bg-slate-50">
                     District
                   </TableHead>
-                  <TableHead className="h-12 px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center bg-slate-50/95 backdrop-blur">
+                  <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle bg-slate-50">
                     Pincode
                   </TableHead>
-                  <TableHead className="h-12 px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center bg-slate-50/95 backdrop-blur">
+                  <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle bg-slate-50">
                     Pump Capacity
                   </TableHead>
-                  <TableHead className="h-12 px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center bg-slate-50/95 backdrop-blur">
+                  <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle bg-slate-50">
                     Pump Head
                   </TableHead>
-                  <TableHead className="h-12 px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center bg-slate-50/95 backdrop-blur">
+                  <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle bg-slate-50">
                     IP Name
                   </TableHead>
-                  {/* <TableHead className="h-12 px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center bg-slate-50/95 backdrop-blur">
-                    Amount
-                  </TableHead> */}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -569,50 +565,47 @@ export default function PortalPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredHistory.map((item) => (
+                  filteredHistory.map((item, index) => (
                     <TableRow
                       key={item.regId}
-                      className="hover:bg-blue-50/50 transition-all duration-200 border-b border-slate-50 last:border-0 hover:shadow-sm"
+                      className="hover:bg-slate-50/80 transition-colors data-[state=selected]:bg-slate-50 border-b border-slate-100 group"
                     >
-                      <TableCell className="font-mono text-center text-xs text-slate-500 bg-slate-50/30">
-                        {item.serialNo}
+                      <TableCell className="px-4 py-2 text-center align-middle font-medium text-slate-500 text-[13px]">
+                        {index + 1}
                       </TableCell>
-                      <TableCell className="text-center text-xs font-medium text-slate-700">
+                      <TableCell className="whitespace-nowrap font-mono text-[13px] text-slate-600 bg-slate-50 rounded px-2 py-0.5 border border-slate-100 w-fit mx-auto mt-1.5 block">
                         {item.regId}
                       </TableCell>
-                      <TableCell className="text-center font-semibold text-slate-800 text-sm">
+                      <TableCell className="whitespace-nowrap font-medium text-slate-800 text-[13px] px-4 py-2 text-center align-middle">
                         {item.beneficiaryName}
                       </TableCell>
-                      <TableCell className="text-center text-slate-600 text-sm">
+                      <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">
                         {item.fatherName}
                       </TableCell>
-                      <TableCell className="text-center text-slate-600 text-sm font-mono">
+                      <TableCell className="whitespace-nowrap font-medium text-slate-600 text-[13px] px-4 py-2 text-center align-middle">
                         {item.mobileNumber}
                       </TableCell>
-                      <TableCell className="text-center text-slate-600 text-sm">
+                      <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">
                         {item.village}
                       </TableCell>
-                      <TableCell className="text-center text-slate-600 text-sm">
+                      <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">
                         {item.block}
                       </TableCell>
-                      <TableCell className="text-center text-slate-600 text-sm">
+                      <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">
                         {item.district}
                       </TableCell>
-                      <TableCell className="text-center text-slate-600 text-sm font-mono">
+                      <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">
                         {item.pincode}
                       </TableCell>
-                      <TableCell className="text-center text-slate-600 text-sm">
+                      <TableCell className="whitespace-nowrap text-slate-700 font-medium text-[13px] px-4 py-2 text-center align-middle uppercase">
                         {item.pumpCapacity}
                       </TableCell>
-                      <TableCell className="text-center text-slate-600 text-sm">
+                      <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">
                         {item.pumpHead}
                       </TableCell>
-                      <TableCell className="text-center text-slate-600 text-sm font-medium">
+                      <TableCell className="whitespace-nowrap text-slate-600 font-medium text-[13px] px-4 py-2 text-center align-middle">
                         {item.ipName}
                       </TableCell>
-                      {/* <TableCell className="text-center text-slate-700 text-sm font-medium">
-                        {item.amount !== "-" ? `₹${item.amount}` : "-"}
-                      </TableCell> */}
                     </TableRow>
                   ))
                 )}

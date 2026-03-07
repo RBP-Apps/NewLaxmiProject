@@ -417,26 +417,26 @@ export default function PortalUpdatePage() {
     );
 
     return (
-        <div className="space-y-8 p-6 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
+        <div className="space-y-6 sm:space-y-8 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
             <Tabs
                 defaultValue="pending"
                 className="w-full"
                 onValueChange={setActiveTab}
             >
-                <TabsList className="grid w-full grid-cols-2 relative p-1 bg-slate-100/80 h-14 rounded-xl border border-slate-200">
+                <TabsList className="grid w-full grid-cols-2 relative p-1 bg-slate-100/80 h-auto sm:h-14 rounded-xl border border-slate-200 gap-1 sm:gap-0">
                     <div
-                        className={`absolute top-1 bottom-1 left-1 w-[calc(50%-0.5rem)] rounded-lg bg-white shadow-sm transition-all duration-300 ease-in-out ${activeTab === "history" ? "translate-x-full" : "translate-x-0"
+                        className={`hidden sm:block absolute top-1 bottom-1 left-1 w-[calc(50%-0.5rem)] rounded-lg bg-white shadow-sm transition-all duration-300 ease-in-out ${activeTab === "history" ? "translate-x-full" : "translate-x-0"
                             }`}
                     />
                     <TabsTrigger
                         value="pending"
-                        className="z-10 h-full data-[state=active]:bg-transparent data-[state=active]:text-blue-700 data-[state=active]:shadow-none transition-colors duration-200 text-base font-medium text-slate-500"
+                        className="relative z-10 h-10 sm:h-full data-[state=active]:bg-white sm:data-[state=active]:bg-transparent data-[state=active]:text-blue-700 data-[state=active]:shadow-sm sm:data-[state=active]:shadow-none transition-all duration-200 text-sm sm:text-base font-medium text-slate-600 rounded-lg sm:rounded-none"
                     >
                         Pending Actions
                     </TabsTrigger>
                     <TabsTrigger
                         value="history"
-                        className="z-10 h-full data-[state=active]:bg-transparent data-[state=active]:text-blue-700 data-[state=active]:shadow-none transition-colors duration-200 text-base font-medium text-slate-500"
+                        className="relative z-10 h-10 sm:h-full data-[state=active]:bg-white sm:data-[state=active]:bg-transparent data-[state=active]:text-blue-700 data-[state=active]:shadow-sm sm:data-[state=active]:shadow-none transition-all duration-200 text-sm sm:text-base font-medium text-slate-600 rounded-lg sm:rounded-none"
                     >
                         History & Records
                     </TabsTrigger>
@@ -447,52 +447,54 @@ export default function PortalUpdatePage() {
                     value="pending"
                     className="mt-6 focus-visible:ring-0 focus-visible:outline-none animate-in fade-in-0 slide-in-from-left-4 duration-500 ease-out"
                 >
-                    <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-                        <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
-                            <div className="flex items-center gap-2 w-full md:w-auto justify-between">
-                                <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
-                                    <div className="p-1 bg-blue-100 rounded-lg">
+                    <Card className="border border-slate-200 shadow-sm rounded-xl bg-white overflow-hidden">
+                        <CardHeader className="border-b border-slate-100 bg-slate-50/50 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
+                            <div className="flex items-center gap-2 w-full sm:w-auto justify-between">
+                                <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                                    <div className="p-2 bg-blue-50 rounded-lg border border-blue-100/50">
                                         <FileText className="h-4 w-4 text-blue-600" />
                                     </div>
                                     Pending Portal Update
                                 </CardTitle>
                             </div>
 
-                            <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                                <div className="relative w-full md:w-100">
+                            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                                <div className="relative w-full sm:w-64 max-w-sm">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                     <Input
                                         placeholder="Search..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
+                                        className="pl-9 bg-white border-slate-200 focus-visible:ring-blue-100 h-9 transition-all hover:border-slate-300"
                                     />
                                 </div>
 
-                                <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                                     {selectedRows.length >= 2 && (
                                         <Button
                                             onClick={handleBulkClick}
-                                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
+                                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all duration-300 h-9 px-4"
                                             size="sm"
                                         >
                                             <ClipboardCheck className="h-4 w-4 mr-2" />
-                                            Update Selected ({selectedRows.length})
+                                            <span className="hidden sm:inline">Update Selected</span>
+                                            <span className="sm:hidden">Update</span> ({selectedRows.length})
                                         </Button>
                                     )}
                                     <Badge
                                         variant="outline"
-                                        className="bg-yellow-100 text-yellow-700 border-yellow-200 px-3 py-1 h-9 flex items-center"
+                                        className="bg-white text-slate-600 font-medium border-slate-200 px-3 py-1 h-9 flex items-center shadow-sm"
                                     >
-                                        {filteredPendingItems.length} Pending
+                                        <span className="hidden sm:inline mr-1">{filteredPendingItems.length} Pending</span>
+                                        <span className="sm:hidden">{filteredPendingItems.length} Records</span>
                                     </Badge>
                                 </div>
                             </div>
                         </CardHeader>
 
                         {/* Filter Dropdowns */}
-                        <div className="px-6 py-4 bg-slate-50/50 border-b border-blue-50">
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <div className="px-4 sm:px-6 py-4 bg-slate-50 border-b border-slate-100">
+                            <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
                                 {[
                                     { key: "regId", label: "Reg ID" },
                                     { key: "village", label: "Village" },
@@ -502,13 +504,13 @@ export default function PortalUpdatePage() {
                                     { key: "ipName", label: "IP Name" },
                                 ].map(({ key, label }) => (
                                     <div key={key} className="space-y-1.5">
-                                        <Label className="text-xs text-slate-600">{label}</Label>
+                                        <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{label}</Label>
                                         <select
                                             value={filters[key]}
                                             onChange={(e) =>
                                                 setFilters({ ...filters, [key]: e.target.value })
                                             }
-                                            className="w-full h-9 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                            className="w-full h-9 flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 disabled:cursor-not-allowed disabled:opacity-50"
                                         >
                                             <option value="">All</option>
                                             {getUniquePendingValues(key).map((val) => (
@@ -520,53 +522,53 @@ export default function PortalUpdatePage() {
                                     </div>
                                 ))}
                             </div>
-                            <Button variant="outline" size="sm" onClick={() => setFilters({ regId: "", village: "", block: "", district: "", pumpCapacity: "", ipName: "" })} className="mt-3 text-xs">
-                                Clear All Filters
+                            <Button variant="outline" size="sm" onClick={() => setFilters({ regId: "", village: "", block: "", district: "", pumpCapacity: "", ipName: "" })} className="mt-4 text-xs h-8 px-3 border-slate-200 text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50">
+                                Clear Filters
                             </Button>
                         </div>
 
                         <CardContent className="p-0">
-                            <div className="overflow-x-auto">
+                            <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
                                 <Table className="[&_th]:text-center [&_td]:text-center">
-                                    <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
-                                        <TableRow className="border-b border-blue-100 hover:bg-transparent">
-                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
-                                                <div className="flex justify-center"><Checkbox checked={filteredPendingItems.length > 0 && selectedRows.length === filteredPendingItems.length} onCheckedChange={handleSelectAll} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out" /></div>
+                                    <TableHeader className="bg-slate-50/80">
+                                        <TableRow className="border-b border-slate-100 hover:bg-transparent">
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-12 text-center align-middle">
+                                                <div className="flex justify-center"><Checkbox checked={filteredPendingItems.length > 0 && selectedRows.length === filteredPendingItems.length} onCheckedChange={handleSelectAll} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out" /></div>
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[150px]">Action</TableHead>
-                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Reg ID</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Beneficiary Name</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Father's Name</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Mobile Number</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Village</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Block</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">District</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Pincode</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Pump Capacity</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Pump Head</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">IP Name</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap min-w-[120px] text-center align-middle">Action</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-12 text-center align-middle">S.No</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Reg ID</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Beneficiary Name</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Father's Name</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Mobile Number</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Village</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Block</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">District</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Pincode</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Pump Capacity</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Pump Head</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">IP Name</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {isLoading ? Array.from({ length: 5 }).map((_, i) => <TableRow key={i} className="animate-pulse">{Array.from({ length: 14 }).map((__, j) => <TableCell key={j}><div className="h-4 w-full bg-slate-200 rounded mx-auto"></div></TableCell>)}</TableRow>) :
                                             filteredPendingItems.length === 0 ? <TableRow><TableCell colSpan={14} className="h-48 text-center text-slate-500">No pending records.</TableCell></TableRow> :
                                                 filteredPendingItems.map((item, index) => (
-                                                    <TableRow key={item.regId} className="hover:bg-blue-50/30 transition-colors">
-                                                        <TableCell className="px-4"><div className="flex justify-center"><Checkbox checked={selectedRows.includes(item.regId)} onCheckedChange={(c) => handleSelectRow(item.regId, c)} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110" /></div></TableCell>
-                                                        <TableCell><Button variant="ghost" size="sm" onClick={() => handleActionClick(item)} disabled={selectedRows.length >= 2} className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"><FileText className="h-3.5 w-3.5" />Process</Button></TableCell>
-                                                        <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
-                                                        <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">{item.regId}</TableCell>
-                                                        <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
-                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.fatherName}</TableCell>
-                                                        <TableCell className="whitespace-nowrap text-slate-700">{item.mobileNumber}</TableCell>
-                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.village}</TableCell>
-                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.block}</TableCell>
-                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.district}</TableCell>
-                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.pincode}</TableCell>
-                                                        <TableCell className="whitespace-nowrap text-slate-600 font-medium text-blue-600 uppercase">{item.pumpCapacity}</TableCell>
-                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.pumpHead}</TableCell>
-                                                        <TableCell className="whitespace-nowrap text-slate-600 font-medium">{item.ipName}</TableCell>
+                                                    <TableRow key={item.regId} className="hover:bg-slate-50/80 transition-colors data-[state=selected]:bg-slate-50 border-b border-slate-100 group">
+                                                        <TableCell className="px-4 py-2 text-center align-middle"><div className="flex justify-center"><Checkbox checked={selectedRows.includes(item.regId)} onCheckedChange={(c) => handleSelectRow(item.regId, c)} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110" /></div></TableCell>
+                                                        <TableCell className="px-4 py-2 text-center align-middle"><Button variant="ghost" size="sm" onClick={() => handleActionClick(item)} disabled={selectedRows.length >= 2} className="bg-slate-50 text-blue-600 hover:bg-blue-50 border border-slate-200 shadow-sm text-[11px] font-semibold h-7 px-3 rounded-md flex items-center gap-1.5 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed group-hover:border-blue-200 group-hover:bg-white"><FileText className="h-3 w-3" />Process</Button></TableCell>
+                                                        <TableCell className="px-4 py-2 text-center align-middle font-medium text-slate-500 text-[13px]">{index + 1}</TableCell>
+                                                        <TableCell className="whitespace-nowrap font-mono text-[13px] text-slate-600 bg-slate-50 rounded px-2 py-0.5 border border-slate-100 w-fit mx-auto">{item.regId}</TableCell>
+                                                        <TableCell className="whitespace-nowrap font-medium text-slate-800 text-[13px] px-4 py-2 text-center align-middle">{item.beneficiaryName}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">{item.fatherName}</TableCell>
+                                                        <TableCell className="whitespace-nowrap font-medium text-slate-600 text-[13px] px-4 py-2 text-center align-middle">{item.mobileNumber}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">{item.village}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">{item.block}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">{item.district}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">{item.pincode}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-700 font-medium text-[13px] px-4 py-2 text-center align-middle uppercase">{item.pumpCapacity}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">{item.pumpHead}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600 font-medium text-[13px] px-4 py-2 text-center align-middle">{item.ipName}</TableCell>
                                                     </TableRow>
                                                 ))}
                                     </TableBody>
@@ -581,72 +583,88 @@ export default function PortalUpdatePage() {
                     value="history"
                     className="mt-6 focus-visible:ring-0 focus-visible:outline-none animate-in fade-in-0 slide-in-from-right-4 duration-500 ease-out"
                 >
-                    <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-                        <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
-                            <CardTitle className="text-lg font-semibold text-blue-900">History & Records</CardTitle>
-                            <div className="relative w-full md:w-100">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                <Input placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9 bg-white" />
+                    <Card className="border border-slate-200 shadow-sm rounded-xl bg-white overflow-hidden">
+                        <CardHeader className="border-b border-slate-100 bg-slate-50/50 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
+                            <div className="flex items-center gap-2 w-full sm:w-auto justify-between">
+                                <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                                    <div className="p-2 bg-blue-50 rounded-lg border border-blue-100/50">
+                                        <FileText className="h-4 w-4 text-blue-600" />
+                                    </div>
+                                    History & Records
+                                </CardTitle>
                             </div>
-                            <div className="flex items-center gap-2 w-full md:w-auto justify-end">
-                                {selectedRows.length >= 2 && (
-                                    <Button
-                                        onClick={handleBulkClick}
-                                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
-                                        size="sm"
-                                    >
-                                        <ClipboardCheck className="h-4 w-4 mr-2" />
-                                        Update Selected ({selectedRows.length})
-                                    </Button>
-                                )}
+
+                            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                                <div className="relative w-full sm:w-64 max-w-sm">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                    <Input
+                                        placeholder="Search..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="pl-9 bg-white border-slate-200 focus-visible:ring-blue-100 h-9 transition-all hover:border-slate-300"
+                                    />
+                                </div>
+
+                                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                                    {selectedRows.length >= 2 && (
+                                        <Button
+                                            onClick={handleBulkClick}
+                                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all duration-300 h-9 px-4"
+                                            size="sm"
+                                        >
+                                            <ClipboardCheck className="h-4 w-4 mr-2" />
+                                            <span className="hidden sm:inline">Update Selected</span>
+                                            <span className="sm:hidden">Update</span> ({selectedRows.length})
+                                        </Button>
+                                    )}
+                                </div>
                             </div>
                         </CardHeader>
                         <CardContent className="p-0">
-                            <div className="overflow-x-auto">
+                            <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
                                 <Table className="[&_th]:text-center [&_td]:text-center">
-                                    <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
-                                        <TableRow className="border-b border-blue-100 hover:bg-transparent">
-                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
-                                                <div className="flex justify-center"><Checkbox checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length} onCheckedChange={handleSelectAll} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out" /></div>
+                                    <TableHeader className="bg-slate-50/80">
+                                        <TableRow className="border-b border-slate-100 hover:bg-transparent">
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-12 text-center align-middle">
+                                                <div className="flex justify-center"><Checkbox checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length} onCheckedChange={handleSelectAll} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out" /></div>
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[120px]">Action</TableHead>
-                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Reg ID</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Beneficiary Name</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Mobile Number</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Village</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Block</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">District</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Pump Capacity</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Pump Head</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">IP Name</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Supply Date</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap min-w-[120px] text-center align-middle">Action</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-12 text-center align-middle">S.No</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Reg ID</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Beneficiary Name</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Mobile Number</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Village</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Block</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">District</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Pump Capacity</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Pump Head</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">IP Name</TableHead>
+                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Supply Date</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {isLoading ? Array.from({ length: 5 }).map((_, i) => <TableRow key={i} className="animate-pulse">{Array.from({ length: 13 }).map((__, j) => <TableCell key={j}><div className="h-4 w-full bg-slate-200 rounded mx-auto"></div></TableCell>)}</TableRow>) :
                                             filteredHistoryItems.length === 0 ? <TableRow><TableCell colSpan={13} className="h-48 text-center text-slate-500">No history records.</TableCell></TableRow> :
                                                 filteredHistoryItems.map((item, index) => (
-                                                    <TableRow key={item.regId} className="hover:bg-blue-50/30 transition-colors">
-                                                        <TableCell className="px-4"><div className="flex justify-center"><Checkbox checked={selectedRows.includes(item.regId)} onCheckedChange={(c) => handleSelectRow(item.regId, c)} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110" /></div></TableCell>
-                                                        <TableCell>
-                                                            <Button variant="ghost" size="sm" onClick={() => handleActionClick(item)} disabled={selectedRows.length >= 2} className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed">
-                                                                <Pencil className="h-3.5 w-3.5" />
+                                                    <TableRow key={item.regId} className="hover:bg-slate-50/80 transition-colors data-[state=selected]:bg-slate-50 border-b border-slate-100 group">
+                                                        <TableCell className="px-4 py-2 text-center align-middle"><div className="flex justify-center"><Checkbox checked={selectedRows.includes(item.regId)} onCheckedChange={(c) => handleSelectRow(item.regId, c)} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110" /></div></TableCell>
+                                                        <TableCell className="px-4 py-2 text-center align-middle">
+                                                            <Button variant="ghost" size="sm" onClick={() => handleActionClick(item)} disabled={selectedRows.length >= 2} className="bg-slate-50 text-blue-600 hover:bg-blue-50 border border-slate-200 shadow-sm text-[11px] font-semibold h-7 px-3 rounded-md flex items-center gap-1.5 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed group-hover:border-blue-200 group-hover:bg-white">
+                                                                <Pencil className="h-3 w-3" />
                                                                 Edit
                                                             </Button>
                                                         </TableCell>
-                                                        <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
-
-                                                        <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">{item.regId}</TableCell>
-                                                        <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
-                                                        <TableCell className="whitespace-nowrap text-slate-700">{item.mobileNumber}</TableCell>
-                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.village}</TableCell>
-                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.block}</TableCell>
-                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.district}</TableCell>
-                                                        <TableCell className="whitespace-nowrap text-slate-600 font-medium text-blue-600 uppercase">{item.pumpCapacity}</TableCell>
-                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.pumpHead}</TableCell>
-                                                        <TableCell className="whitespace-nowrap text-slate-600 font-medium">{item.ipName}</TableCell>
-                                                        <TableCell className="whitespace-nowrap text-slate-600">{item.supply_aapurti_date}</TableCell>
+                                                        <TableCell className="px-4 py-2 text-center align-middle font-medium text-slate-500 text-[13px]">{index + 1}</TableCell>
+                                                        <TableCell className="whitespace-nowrap font-mono text-[13px] text-slate-600 bg-slate-50 rounded px-2 py-0.5 border border-slate-100 w-fit mx-auto">{item.regId}</TableCell>
+                                                        <TableCell className="whitespace-nowrap font-medium text-slate-800 text-[13px] px-4 py-2 text-center align-middle">{item.beneficiaryName}</TableCell>
+                                                        <TableCell className="whitespace-nowrap font-medium text-slate-600 text-[13px] px-4 py-2 text-center align-middle">{item.mobileNumber}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">{item.village}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">{item.block}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">{item.district}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-700 font-medium text-[13px] px-4 py-2 text-center align-middle uppercase">{item.pumpCapacity}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">{item.pumpHead}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600 font-medium text-[13px] px-4 py-2 text-center align-middle">{item.ipName}</TableCell>
+                                                        <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">{item.supply_aapurti_date}</TableCell>
                                                     </TableRow>
                                                 ))}
                                     </TableBody>
@@ -658,7 +676,7 @@ export default function PortalUpdatePage() {
             </Tabs>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent showCloseButton={!isSuccess} className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 ${isSuccess ? "bg-transparent shadow-none border-none" : "bg-white"}`}>
+                <DialogContent showCloseButton={!isSuccess} className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 rounded-2xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isSuccess ? "bg-transparent !shadow-none !border-none" : "bg-white"}`}>
                     {isSuccess ? (
                         <div className="flex flex-col items-center justify-center p-8 text-center space-y-6">
                             <CheckCircle2 className="h-16 w-16 text-green-600" />
@@ -666,42 +684,51 @@ export default function PortalUpdatePage() {
                         </div>
                     ) : (
                         <>
-                            <DialogHeader className="p-6 border-b border-blue-100 bg-blue-50/30">
-                                <DialogTitle className="text-xl font-bold text-blue-900">Update Portal Record</DialogTitle>
+                            <DialogHeader className="p-5 sm:p-6 pb-4 sm:pb-5 border-b border-slate-100 bg-slate-50/50">
+                                <DialogTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                    <span className="bg-blue-50 text-blue-600 p-1.5 rounded-lg shadow-sm border border-blue-100/50">
+                                        <FileText className="h-4 w-4" />
+                                    </span>
+                                    Update Portal Record
+                                </DialogTitle>
                                 <DialogDescription>{isBulk ? `Updating ${selectedRows.length} items` : `Update details for ${selectedItem?.beneficiaryName}`}</DialogDescription>
                             </DialogHeader>
 
                             {(selectedItem || isBulk) && (
-                                <div className="grid gap-6 p-6">
+                                <div className="grid gap-6 p-5 sm:p-6 bg-slate-50/30">
                                     {/* Beneficiary Details Card */}
-                                    <div className="bg-slate-50/50 rounded-xl border border-slate-200 p-4">
-                                        <h3 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
-                                            <FileCheck className="h-4 w-4 text-blue-600" />
-                                            Beneficiary Details
-                                        </h3>
+                                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
+                                        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+                                            <span className="bg-emerald-50 p-1 rounded-md shadow-sm border border-emerald-100">
+                                                <FileCheck className="h-4 w-4 text-emerald-500" />
+                                            </span>
+                                            <h3 className="font-semibold text-slate-800">
+                                                Beneficiary Details
+                                            </h3>
+                                        </div>
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8 text-sm">
                                             <div>
-                                                <span className="text-slate-500 text-xs block mb-1">Serial No</span>
+                                                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Serial No</span>
                                                 <p className="font-medium text-slate-800">{isBulk ? "Multiple" : selectedItem?.serialNo}</p>
                                             </div>
                                             <div>
-                                                <span className="text-slate-500 text-xs block mb-1">Reg ID</span>
-                                                <p className="font-medium text-slate-800 font-mono break-all">{isBulk ? "Multiple" : selectedItem?.regId}</p>
+                                                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Reg ID</span>
+                                                <p className="font-mono text-sm font-medium text-slate-800 break-all">{isBulk ? "Multiple" : selectedItem?.regId}</p>
                                             </div>
                                             <div>
-                                                <span className="text-slate-500 text-xs block mb-1">Beneficiary Name</span>
+                                                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Beneficiary Name</span>
                                                 <p className="font-medium text-slate-800">{isBulk ? "Multiple" : selectedItem?.beneficiaryName}</p>
                                             </div>
                                             <div>
-                                                <span className="text-slate-500 text-xs block mb-1">Father's Name</span>
+                                                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Father's Name</span>
                                                 <p className="font-medium text-slate-800">{isBulk ? "Multiple" : selectedItem?.fatherName}</p>
                                             </div>
                                             <div>
-                                                <span className="text-slate-500 text-xs block mb-1">Village/Block</span>
+                                                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Village/Block</span>
                                                 <p className="font-medium text-slate-800">{isBulk ? "Multiple" : `${selectedItem?.village}, ${selectedItem?.block}`}</p>
                                             </div>
                                             <div>
-                                                <span className="text-slate-500 text-xs block mb-1">Pump Type</span>
+                                                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Pump Type</span>
                                                 <p className="font-medium text-blue-700 bg-blue-50 inline-block px-2 py-0.5 rounded text-xs border border-blue-100">{isBulk ? "Multiple" : selectedItem?.pumpCapacity}</p>
                                             </div>
                                         </div>

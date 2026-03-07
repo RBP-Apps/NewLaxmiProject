@@ -323,7 +323,7 @@ export default function JccStatusPage() {
     };
 
     return (
-        <div className="space-y-8 p-6 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
+        <div className="space-y-8 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
             <Tabs
                 defaultValue="pending"
                 className="w-full"
@@ -353,11 +353,11 @@ export default function JccStatusPage() {
                     value="pending"
                     className="mt-6 focus-visible:ring-0 focus-visible:outline-none animate-in fade-in-0 slide-in-from-left-4 duration-500 ease-out"
                 >
-                    <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-                        <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
-                            <div className="flex items-center gap-2 w-full md:w-auto justify-between">
-                                <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
-                                    <div className="p-1 bg-blue-100 rounded-lg">
+                    <Card className="border border-slate-200 shadow-sm bg-white overflow-hidden">
+                        <CardHeader className="border-b border-slate-100 bg-slate-50/80 px-6 py-4 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between">
+                            <div className="flex items-center gap-2 w-full md:w-auto">
+                                <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                                    <div className="p-1.5 bg-blue-100/50 rounded-lg border border-blue-200/50 shadow-sm">
                                         <Activity className="h-4 w-4 text-blue-600" />
                                     </div>
                                     Pending Status Updates
@@ -365,13 +365,13 @@ export default function JccStatusPage() {
                             </div>
 
                             <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                                <div className="relative w-full md:w-100">
+                                <div className="relative w-full md:w-72">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                     <Input
-                                        placeholder="Search..."
+                                        placeholder="Search records..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
+                                        className="pl-9 bg-white border-slate-200 focus-visible:ring-blue-500/20 h-9 transition-all hover:border-slate-300 text-sm shadow-sm"
                                     />
                                 </div>
 
@@ -379,17 +379,18 @@ export default function JccStatusPage() {
                                     {selectedRows.length >= 2 && (
                                         <Button
                                             onClick={handleBulkClick}
-                                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
+                                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9 font-medium"
                                             size="sm"
                                         >
                                             <ClipboardCheck className="h-4 w-4 mr-2" />
-                                            Status Selected ({selectedRows.length})
+                                            Update Selected ({selectedRows.length})
                                         </Button>
                                     )}
                                     <Badge
                                         variant="outline"
-                                        className="bg-yellow-100 text-yellow-700 border-yellow-200 px-3 py-1 h-9 flex items-center"
+                                        className="bg-amber-50 text-amber-700 border-amber-200 px-3 py-1.5 h-9 flex items-center whitespace-nowrap font-medium shadow-sm"
                                     >
+                                        <Activity className="h-3.5 w-3.5 mr-1.5" />
                                         {filteredPendingItems.length} Pending
                                     </Badge>
                                 </div>
@@ -397,8 +398,8 @@ export default function JccStatusPage() {
                         </CardHeader>
 
                         {/* Filter Dropdowns */}
-                        <div className="px-6 py-4 bg-slate-50/50 border-b border-blue-50">
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <div className="px-6 py-4 bg-white border-b border-slate-100 flex flex-col gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                                 {[
                                     { key: "regId", label: "Reg ID" },
                                     { key: "village", label: "Village" },
@@ -408,15 +409,15 @@ export default function JccStatusPage() {
                                     { key: "company", label: "Company" },
                                 ].map(({ key, label }) => (
                                     <div key={key} className="space-y-1.5">
-                                        <Label className="text-xs text-slate-600">{label}</Label>
+                                        <Label className="text-xs font-medium text-slate-600 tracking-wide">{label}</Label>
                                         <select
                                             value={filters[key]}
                                             onChange={(e) =>
                                                 setFilters({ ...filters, [key]: e.target.value })
                                             }
-                                            className="w-full h-9 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                            className="w-full h-9 px-3 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-slate-50 hover:bg-white transition-colors cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-size-[16px_16px] bg-position-[right_12px_center] bg-no-repeat pr-8"
                                         >
-                                            <option value="">All</option>
+                                            <option value="">All {label}s</option>
                                             {getUniquePendingValues(key).map((val) => (
                                                 <option key={val} value={val}>
                                                     {val}
@@ -427,32 +428,34 @@ export default function JccStatusPage() {
                                 ))}
                             </div>
 
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                    setFilters({
-                                        regId: "",
-                                        village: "",
-                                        block: "",
-                                        district: "",
-                                        pumpType: "",
-                                        company: "",
-                                    })
-                                }
-                                className="mt-3 text-xs"
-                            >
-                                Clear All Filters
-                            </Button>
+                            <div className="flex justify-end">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() =>
+                                        setFilters({
+                                            regId: "",
+                                            village: "",
+                                            block: "",
+                                            district: "",
+                                            pumpType: "",
+                                            company: "",
+                                        })
+                                    }
+                                    className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 h-8 px-3 text-xs font-medium transition-colors"
+                                >
+                                    Clear Filters
+                                </Button>
+                            </div>
                         </div>
 
                         <CardContent className="p-0">
                             {/* Desktop Table */}
-                            <div className="overflow-x-auto">
+                            <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
                                 <Table className="[&_th]:text-center [&_td]:text-center">
-                                    <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
-                                        <TableRow className="border-b border-blue-100 hover:bg-transparent">
-                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
+                                    <TableHeader className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm">
+                                        <TableRow className="border-b border-slate-200 hover:bg-transparent">
+                                            <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-12">
                                                 <div className="flex justify-center">
                                                     <Checkbox
                                                         checked={
@@ -462,46 +465,46 @@ export default function JccStatusPage() {
                                                         }
                                                         onCheckedChange={handleSelectAll}
                                                         aria-label="Select all rows"
-                                                        className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
+                                                        className="border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                                                     />
                                                 </div>
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Action
                                             </TableHead>
-                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
+                                            <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
 
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Reg ID
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Beneficiary Name
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Father's Name
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Mobile Number
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Village
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Block
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 District
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Pincode
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Pump Capacity
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Pump Head
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 IP Name
                                             </TableHead>
                                         </TableRow>
@@ -541,7 +544,7 @@ export default function JccStatusPage() {
                                             filteredPendingItems.map((item, index) => (
                                                 <TableRow
                                                     key={item.regId}
-                                                    className="hover:bg-blue-50/30 transition-colors"
+                                                    className={`hover:bg-blue-50/40 transition-colors group border-b border-slate-100 ${selectedRows.includes(item.regId) ? "bg-blue-50/20" : ""}`}
                                                 >
                                                     <TableCell className="px-4">
                                                         <div className="flex justify-center">
@@ -551,36 +554,38 @@ export default function JccStatusPage() {
                                                                     handleSelectRow(item.regId, checked)
                                                                 }
                                                                 aria-label={`Select row ${item.regId}`}
-                                                                className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110"
+                                                                className="border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                                                             />
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
                                                         <Button
-                                                            variant="ghost"
+                                                            variant="default"
                                                             size="sm"
                                                             onClick={() => handleActionClick(item)}
                                                             disabled={selectedRows.length >= 2}
-                                                            className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm font-medium h-8 w-24 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
-                                                            <FileCheck className="h-3.5 w-3.5" />
                                                             Status
                                                         </Button>
                                                     </TableCell>
                                                     <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
 
-
-                                                    <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500">{item.regId}</TableCell>
-                                                    <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.fatherName}</TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.mobileNumber}</TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.village}</TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.block}</TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.district}</TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.pincode}</TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.pumpType}</TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.pumpHead}</TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.company}</TableCell>
+                                                    <TableCell>
+                                                        <span className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">
+                                                            {item.regId}
+                                                        </span>
+                                                    </TableCell>
+                                                    <TableCell className="whitespace-nowrap font-medium text-slate-800 text-sm">{item.beneficiaryName}</TableCell>
+                                                    <TableCell className="whitespace-nowrap text-slate-600 text-sm">{item.fatherName}</TableCell>
+                                                    <TableCell className="whitespace-nowrap font-mono text-slate-600 text-xs">{item.mobileNumber}</TableCell>
+                                                    <TableCell className="whitespace-nowrap text-slate-600 text-sm">{item.village}</TableCell>
+                                                    <TableCell className="whitespace-nowrap text-slate-600 text-sm">{item.block}</TableCell>
+                                                    <TableCell className="whitespace-nowrap text-slate-600 text-sm">{item.district}</TableCell>
+                                                    <TableCell className="whitespace-nowrap font-mono text-slate-600 text-xs">{item.pincode}</TableCell>
+                                                    <TableCell className="whitespace-nowrap font-medium text-blue-600 uppercase text-xs">{item.pumpType}</TableCell>
+                                                    <TableCell className="whitespace-nowrap text-slate-600 text-xs">{item.pumpHead}</TableCell>
+                                                    <TableCell className="whitespace-nowrap font-medium text-slate-600 text-xs">{item.company}</TableCell>
                                                 </TableRow>
                                             ))
                                         )}
@@ -598,18 +603,25 @@ export default function JccStatusPage() {
                                     filteredPendingItems.map((item) => (
                                         <Card
                                             key={item.regId}
-                                            className="bg-white border text-sm shadow-sm"
+                                            className="bg-white border text-sm shadow-sm hover:shadow-md transition-shadow relative"
                                         >
-                                            <CardContent className="p-4 space-y-3">
+                                            <div className="absolute top-4 left-4 z-10">
+                                                <Checkbox
+                                                    checked={selectedRows.includes(item.regId)}
+                                                    onCheckedChange={(checked) => handleSelectRow(item.regId, checked)}
+                                                    className="border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 bg-white"
+                                                />
+                                            </div>
+                                            <CardContent className="p-4 pt-10 space-y-3">
                                                 <div className="flex justify-between items-start">
                                                     <div className="space-y-1">
                                                         <Badge
                                                             variant="secondary"
-                                                            className="bg-slate-100 text-slate-600"
+                                                            className="bg-slate-100 text-slate-600 font-mono text-[10px]"
                                                         >
                                                             {item.serialNo}
                                                         </Badge>
-                                                        <h4 className="font-semibold text-base text-slate-800">
+                                                        <h4 className="font-semibold text-base text-slate-800 leading-tight">
                                                             {item.beneficiaryName}
                                                         </h4>
                                                         <p className="text-muted-foreground text-xs font-mono">
@@ -618,50 +630,50 @@ export default function JccStatusPage() {
                                                     </div>
                                                     <Badge
                                                         variant="outline"
-                                                        className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs"
+                                                        className="bg-amber-50 text-amber-700 border-amber-200 text-xs shadow-sm"
                                                     >
                                                         Pending
                                                     </Badge>
                                                 </div>
 
-                                                <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs border-t border-b py-3 my-2 border-slate-100">
-                                                    <div className="flex flex-col gap-1">
-                                                        <span className="text-slate-400 text-[10px] uppercase font-semibold">
+                                                <div className="grid grid-cols-2 gap-2 text-xs border-t border-slate-100 pt-3 mt-2">
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <span className="text-slate-500 uppercase font-semibold text-[10px] tracking-wider">
                                                             Father's Name
                                                         </span>
                                                         <span className="font-medium text-slate-700">
                                                             {item.fatherName}
                                                         </span>
                                                     </div>
-                                                    <div className="flex flex-col gap-1">
-                                                        <span className="text-slate-400 text-[10px] uppercase font-semibold">
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <span className="text-slate-500 uppercase font-semibold text-[10px] tracking-wider">
                                                             Village
                                                         </span>
                                                         <span className="font-medium text-slate-700">
                                                             {item.village}
                                                         </span>
                                                     </div>
-                                                    <div className="flex flex-col gap-1">
-                                                        <span className="text-slate-400 text-[10px] uppercase font-semibold">
+                                                    <div className="flex flex-col gap-0.5 mt-1">
+                                                        <span className="text-slate-500 uppercase font-semibold text-[10px] tracking-wider">
                                                             District
                                                         </span>
                                                         <span className="font-medium text-slate-700">
                                                             {item.district}
                                                         </span>
                                                     </div>
-                                                    <div className="flex flex-col gap-1">
-                                                        <span className="text-slate-400 text-[10px] uppercase font-semibold">
+                                                    <div className="flex flex-col gap-0.5 mt-1">
+                                                        <span className="text-slate-500 uppercase font-semibold text-[10px] tracking-wider">
                                                             Company
                                                         </span>
                                                         <span className="font-medium text-slate-700">
                                                             {item.company}
                                                         </span>
                                                     </div>
-                                                    <div className="col-span-2">
-                                                        <span className="font-medium text-slate-600">
-                                                            JCC Cert:
-                                                        </span>{" "}
-                                                        <span className="text-slate-800">
+                                                    <div className="col-span-2 bg-slate-50 p-2 rounded-lg border border-slate-100 mt-2 flex justify-between items-center">
+                                                        <span className="font-semibold text-slate-500 uppercase text-[10px] tracking-wider">
+                                                            JCC Cert
+                                                        </span>
+                                                        <span className="font-medium text-slate-800 text-xs font-mono">
                                                             {item.jccCertificateNo || "-"}
                                                         </span>
                                                     </div>
@@ -670,11 +682,11 @@ export default function JccStatusPage() {
                                                 <Button
                                                     size="sm"
                                                     disabled={selectedRows.length >= 2}
-                                                    className="w-full bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                                                     onClick={() => handleActionClick(item)}
                                                 >
                                                     <FileCheck className="h-4 w-4 mr-2" />
-                                                    Update Status
+                                                    Status
                                                 </Button>
                                             </CardContent>
                                         </Card>
@@ -690,51 +702,50 @@ export default function JccStatusPage() {
                     value="history"
                     className="mt-6 focus-visible:ring-0 focus-visible:outline-none animate-in fade-in-0 slide-in-from-right-4 duration-500 ease-out"
                 >
-                    <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-                        <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
-                            <div className="flex items-center gap-2 w-full md:w-auto">
-                                <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
-                                    <div className="p-1 bg-blue-100 rounded-lg">
-                                        <FileCheck className="h-4 w-4 text-blue-600" />
-                                    </div>
+                    <Card className="border border-slate-200 shadow-sm bg-white overflow-hidden">
+                        <CardHeader className="border-b border-slate-100 bg-white px-6 py-4 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto">
+                            <div className="flex items-center gap-3 w-full md:w-auto">
+                                <div className="p-2 bg-blue-50 rounded-lg">
+                                    <FileCheck className="h-5 w-5 text-blue-600" />
+                                </div>
+                                <CardTitle className="text-xl font-bold text-slate-800 tracking-tight">
                                     JCC Status History
                                 </CardTitle>
                             </div>
 
                             <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                                <div className="relative w-full md:w-100">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                <div className="relative w-full md:w-80 group">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-hover:text-blue-500 transition-colors" />
                                     <Input
-                                        placeholder="Search..."
+                                        placeholder="Search by ID, Name, Mobile..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
+                                        className="pl-9 bg-slate-50 border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-blue-500/20 h-10 transition-all rounded-lg text-sm"
                                     />
                                 </div>
                                 <div className="flex items-center gap-2 w-full md:w-auto justify-end">
                                     {selectedRows.length >= 2 && (
                                         <Button
                                             onClick={handleBulkClick}
-                                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
-                                            size="sm"
+                                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm h-10 px-4 rounded-lg font-medium transition-all"
                                         >
                                             <ClipboardCheck className="h-4 w-4 mr-2" />
-                                            Status Selected ({selectedRows.length})
+                                            Update ({selectedRows.length})
                                         </Button>
                                     )}
                                     <Badge
-                                        variant="outline"
-                                        className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 h-9 flex items-center whitespace-nowrap"
+                                        variant="secondary"
+                                        className="bg-slate-100 text-slate-700 border-transparent px-3 py-1 h-10 flex items-center whitespace-nowrap rounded-lg font-medium text-sm"
                                     >
-                                        {filteredHistoryItems.length} Records
+                                        <span className="text-blue-600 mr-1.5 font-bold">{filteredHistoryItems.length}</span> Records
                                     </Badge>
                                 </div>
                             </div>
                         </CardHeader>
 
                         {/* Filter Dropdowns */}
-                        <div className="px-6 py-4 bg-slate-50/50 border-b border-blue-50">
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <div className="px-6 py-4 bg-white border-b border-slate-100 flex flex-col gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                                 {[
                                     { key: "regId", label: "Reg ID" },
                                     { key: "village", label: "Village" },
@@ -744,15 +755,15 @@ export default function JccStatusPage() {
                                     { key: "company", label: "Company" },
                                 ].map(({ key, label }) => (
                                     <div key={key} className="space-y-1.5">
-                                        <Label className="text-xs text-slate-600">{label}</Label>
+                                        <Label className="text-xs font-medium text-slate-600 tracking-wide">{label}</Label>
                                         <select
                                             value={filters[key]}
                                             onChange={(e) =>
                                                 setFilters({ ...filters, [key]: e.target.value })
                                             }
-                                            className="w-full h-9 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                            className="w-full h-9 px-3 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-slate-50 hover:bg-white transition-colors cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-size-[16px_16px] bg-position-[right_12px_center] bg-no-repeat pr-8"
                                         >
-                                            <option value="">All</option>
+                                            <option value="">All {label}s</option>
                                             {getUniqueHistoryValues(key).map((val) => (
                                                 <option key={val} value={val}>
                                                     {val}
@@ -763,78 +774,80 @@ export default function JccStatusPage() {
                                 ))}
                             </div>
 
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                    setFilters({
-                                        regId: "",
-                                        village: "",
-                                        block: "",
-                                        district: "",
-                                        pumpType: "",
-                                        company: "",
-                                    })
-                                }
-                                className="mt-3 text-xs"
-                            >
-                                Clear All Filters
-                            </Button>
+                            <div className="flex justify-end">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() =>
+                                        setFilters({
+                                            regId: "",
+                                            village: "",
+                                            block: "",
+                                            district: "",
+                                            pumpType: "",
+                                            company: "",
+                                        })
+                                    }
+                                    className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 h-8 px-3 text-xs font-medium transition-colors"
+                                >
+                                    Clear Filters
+                                </Button>
+                            </div>
                         </div>
 
                         <CardContent className="p-0">
                             {/* Desktop Table */}
-                            <div className="overflow-x-auto">
+                            <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
                                 <Table className="[&_th]:text-center [&_td]:text-center">
-                                    <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
-                                        <TableRow className="border-b border-blue-100 hover:bg-transparent">
-                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
+                                    <TableHeader className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm">
+                                        <TableRow className="border-b border-slate-200 hover:bg-transparent">
+                                            <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-12">
                                                 <div className="flex justify-center">
                                                     <Checkbox
                                                         checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length}
                                                         onCheckedChange={handleSelectAll}
-                                                        className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
+                                                        className="border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                                                     />
                                                 </div>
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Action
                                             </TableHead>
-                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Reg ID
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Beneficiary Name
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Father's Name
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Village
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Block
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 District
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Pump Capacity
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 IP Name
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Planned Date
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Actual Date
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 JCR Status
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Link
                                             </TableHead>
                                         </TableRow>
@@ -872,66 +885,68 @@ export default function JccStatusPage() {
                                             filteredHistoryItems.map((item, index) => (
                                                 <TableRow
                                                     key={item.serialNo}
-                                                    className="hover:bg-blue-50/30 transition-colors"
+                                                    className={`hover:bg-blue-50/40 transition-colors group border-b border-slate-100 ${selectedRows.includes(item.regId) ? "bg-blue-50/20" : ""}`}
                                                 >
                                                     <TableCell className="px-4">
                                                         <div className="flex justify-center">
                                                             <Checkbox
                                                                 checked={selectedRows.includes(item.regId)}
                                                                 onCheckedChange={(checked) => handleSelectRow(item.regId, checked)}
-                                                                className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
+                                                                className="border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                                                             />
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
                                                         <Button
-                                                            variant="ghost"
+                                                            variant="default"
                                                             size="sm"
                                                             onClick={() => handleActionClick(item)}
                                                             disabled={selectedRows.length >= 2}
-                                                            className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm font-medium h-8 w-24 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
-                                                            <Edit className="h-3.5 w-3.5" />
+                                                            <Edit className="h-3.5 w-3.5 mr-1" />
                                                             Edit
                                                         </Button>
                                                     </TableCell>
                                                     <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
-                                                    <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500">
-                                                        {item.regId}
+                                                    <TableCell>
+                                                        <span className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">
+                                                            {item.regId}
+                                                        </span>
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap font-medium text-slate-800">
+                                                    <TableCell className="whitespace-nowrap font-medium text-slate-800 text-sm">
                                                         {item.beneficiaryName}
                                                     </TableCell>
-                                                    <TableCell className="text-slate-600">
+                                                    <TableCell className="whitespace-nowrap text-slate-600 text-sm">
                                                         {item.fatherName}
                                                     </TableCell>
-                                                    <TableCell className="text-slate-600">
+                                                    <TableCell className="whitespace-nowrap text-slate-600 text-sm">
                                                         {item.village}
                                                     </TableCell>
-                                                    <TableCell className="text-slate-600">
+                                                    <TableCell className="whitespace-nowrap text-slate-600 text-sm">
                                                         {item.block}
                                                     </TableCell>
-                                                    <TableCell className="text-slate-600">
+                                                    <TableCell className="whitespace-nowrap text-slate-600 text-sm">
                                                         {item.district}
                                                     </TableCell>
-                                                    <TableCell className="text-slate-600">
+                                                    <TableCell className="whitespace-nowrap font-medium text-blue-600 uppercase text-xs">
                                                         {item.pumpType}
                                                     </TableCell>
-                                                    <TableCell className="text-slate-600">
+                                                    <TableCell className="whitespace-nowrap font-medium text-slate-600 text-xs">
                                                         {item.company}
                                                     </TableCell>
-                                                    <TableCell className="text-slate-600">
+                                                    <TableCell className="whitespace-nowrap font-mono text-slate-500 text-xs">
                                                         {item.planned8 || "-"}
                                                     </TableCell>
-                                                    <TableCell className="text-slate-600">
+                                                    <TableCell className="whitespace-nowrap font-mono text-slate-500 text-xs">
                                                         {item.actual8 || "-"}
                                                     </TableCell>
-                                                    <TableCell className="text-slate-600">
+                                                    <TableCell className="whitespace-nowrap font-medium text-slate-600 text-xs">
                                                         {item.jcrStatus || "-"}
                                                     </TableCell>
                                                     <TableCell className="text-blue-600 underline text-xs max-w-[150px] truncate">
                                                         {item.jcrLink ? (
-                                                            <a href={item.jcrLink} target="_blank" rel="noopener noreferrer">
+                                                            <a href={item.jcrLink} target="_blank" rel="noopener noreferrer" className="hover:text-blue-800 transition-colors">
                                                                 View
                                                             </a>
                                                         ) : (
@@ -950,59 +965,90 @@ export default function JccStatusPage() {
                                 {filteredHistoryItems.map((item) => (
                                     <Card
                                         key={item.serialNo}
-                                        className="bg-white border text-sm shadow-sm"
+                                        className="bg-white border text-sm shadow-sm hover:shadow-md transition-shadow relative"
                                     >
-                                        <CardContent className="p-4 space-y-3">
+                                        <div className="absolute top-4 left-4 z-10">
+                                            <Checkbox
+                                                checked={selectedRows.includes(item.regId)}
+                                                onCheckedChange={(checked) => handleSelectRow(item.regId, checked)}
+                                                className="border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 bg-white"
+                                            />
+                                        </div>
+                                        <CardContent className="p-4 pt-10 space-y-3">
                                             <div className="flex justify-between items-start">
                                                 <div className="space-y-1">
-                                                    <p className="font-semibold text-blue-900">
-                                                        #{item.serialNo}
-                                                    </p>
-                                                    <p className="text-base font-medium text-slate-800">
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className="bg-slate-100 text-slate-600 font-mono text-[10px]"
+                                                    >
+                                                        {item.serialNo}
+                                                    </Badge>
+                                                    <h4 className="font-semibold text-base text-slate-800 leading-tight">
                                                         {item.beneficiaryName}
-                                                    </p>
-                                                    <p className="text-muted-foreground text-xs">
-                                                        {item.district} • {item.village}
+                                                    </h4>
+                                                    <p className="text-muted-foreground text-xs font-mono">
+                                                        {item.regId}
                                                     </p>
                                                 </div>
-                                                <Badge className="bg-green-100 text-green-800 border-green-200">
+                                                <Badge className="bg-green-50 text-green-700 border-green-200 text-xs shadow-sm">
                                                     Completed
                                                 </Badge>
                                             </div>
 
-                                            <div className="grid grid-cols-2 gap-2 text-xs border-t border-slate-100 pt-2 mt-2">
-                                                <div>
-                                                    <span className="font-medium text-slate-500">
-                                                        Planned:
-                                                    </span>{" "}
-                                                    {item.planned8 || "-"}
+                                            <div className="grid grid-cols-2 gap-2 text-xs border-t border-slate-100 pt-3 mt-2">
+                                                <div className="flex flex-col gap-0.5">
+                                                    <span className="text-slate-500 uppercase font-semibold text-[10px] tracking-wider">
+                                                        District & Village
+                                                    </span>
+                                                    <span className="font-medium text-slate-700">
+                                                        {item.district} • {item.village}
+                                                    </span>
                                                 </div>
-                                                <div>
-                                                    <span className="font-medium text-slate-500">
-                                                        Actual:
-                                                    </span>{" "}
-                                                    {item.actual8 || "-"}
+                                                <div className="flex flex-col gap-0.5">
+                                                    <span className="text-slate-500 uppercase font-semibold text-[10px] tracking-wider">
+                                                        Planned Date
+                                                    </span>
+                                                    <span className="font-medium text-slate-700">
+                                                        {item.planned8 || "-"}
+                                                    </span>
                                                 </div>
-                                                <div>
-                                                    <span className="font-medium text-slate-500">
-                                                        Status:
-                                                    </span>{" "}
-                                                    {item.jcrStatus || "-"}
+                                                <div className="flex flex-col gap-0.5 mt-1">
+                                                    <span className="text-slate-500 uppercase font-semibold text-[10px] tracking-wider">
+                                                        Actual Date
+                                                    </span>
+                                                    <span className="font-medium text-slate-700">
+                                                        {item.actual8 || "-"}
+                                                    </span>
                                                 </div>
-                                                <div>
-                                                    <span className="font-medium text-slate-500">
-                                                        Link:
-                                                    </span>{" "}
-                                                    {item.jcrLink ? (
-                                                        <a href={item.jcrLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
-                                                            View
-                                                        </a>
-                                                    ) : (
-                                                        "-"
-                                                    )}
+                                                <div className="flex flex-col gap-0.5 mt-1">
+                                                    <span className="text-slate-500 uppercase font-semibold text-[10px] tracking-wider">
+                                                        JCR Status
+                                                    </span>
+                                                    <span className="font-medium text-slate-700">
+                                                        {item.jcrStatus || "-"}
+                                                    </span>
                                                 </div>
-                                                <div className="col-span-2 pt-2 flex justify-end">
-                                                    <Button size="sm" variant="outline" onClick={() => handleActionClick(item)} className="h-8 gap-2">
+
+                                                <div className="col-span-2 flex items-center justify-between border-t border-slate-100 mt-2 pt-2">
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <span className="text-slate-500 uppercase font-semibold text-[10px] tracking-wider">
+                                                            Link
+                                                        </span>
+                                                        {item.jcrLink ? (
+                                                            <a href={item.jcrLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-medium hover:text-blue-800 transition-colors">
+                                                                View Document
+                                                            </a>
+                                                        ) : (
+                                                            <span className="text-slate-400 font-medium">-</span>
+                                                        )}
+                                                    </div>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => handleActionClick(item)}
+                                                        className="h-8 gap-2 border-slate-200 hover:bg-slate-50 hover:text-blue-600 transition-colors shadow-sm"
+                                                        disabled={selectedRows.length >= 2}
+                                                    >
                                                         <Edit className="h-3.5 w-3.5" /> Edit
                                                     </Button>
                                                 </div>
@@ -1020,8 +1066,7 @@ export default function JccStatusPage() {
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent
                     showCloseButton={!isSuccess}
-                    className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isSuccess ? "bg-transparent !shadow-none !border-none" : "bg-white"
-                        }`}
+                    className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isSuccess ? "bg-transparent shadow-none! border-none!" : "bg-white"}`}
                 >
                     {isSuccess ? (
                         <div className="flex flex-col items-center justify-center w-full p-8 text-center space-y-6 animate-in fade-in duration-300">
@@ -1035,7 +1080,7 @@ export default function JccStatusPage() {
                     ) : (
                         <>
                             <DialogHeader className="p-6 pb-2 border-b border-blue-100 bg-blue-50/30">
-                                <DialogTitle className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent flex items-center gap-2">
+                                <DialogTitle className="text-xl font-bold bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent flex items-center gap-2">
                                     <span className="bg-blue-100 p-1.5 rounded-md">
                                         <Activity className="h-4 w-4 text-blue-600" />
                                     </span>
@@ -1065,7 +1110,7 @@ export default function JccStatusPage() {
                                 <div className="grid gap-6 p-6">
                                     {/* PREFILLED BENEFICIARY DETAILS CARD - Hide in Bulk */}
                                     {!isBulk && selectedItem && (
-                                        <div className="rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50/50 to-cyan-50/30 p-5 shadow-sm">
+                                        <div className="rounded-xl border border-blue-100 bg-linear-to-br from-blue-50/50 to-cyan-50/30 p-5 shadow-sm">
                                             <div className="flex items-center gap-2 mb-4 pb-2 border-b border-blue-100/50">
                                                 <span className="bg-white p-1 rounded shadow-sm">
                                                     <CheckCircle2 className="h-4 w-4 text-blue-500" />
@@ -1162,7 +1207,7 @@ export default function JccStatusPage() {
                                                 onChange={(e) =>
                                                     setFormData({ ...formData, jcrStatus: e.target.value })
                                                 }
-                                                className="w-full h-10 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-400 bg-white"
+                                                className="w-full h-10 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-slate-50 hover:bg-white transition-colors cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-size-[16px_16px] bg-position-[right_12px_center] bg-no-repeat pr-8"
                                             >
                                                 <option value="Done">Done</option>
                                                 <option value="Pending">Pending</option>
@@ -1179,7 +1224,7 @@ export default function JccStatusPage() {
                                                 onChange={(e) =>
                                                     setFormData({ ...formData, jcrSubmitDate: e.target.value })
                                                 }
-                                                className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
+                                                className="w-full h-10 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-slate-50 hover:bg-white transition-colors"
                                             />
                                         </div>
 
@@ -1190,25 +1235,25 @@ export default function JccStatusPage() {
                                             <Input
                                                 type="file"
                                                 onChange={(e) => handleFileUpload(e, 'file_jcrLink')}
-                                                className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
+                                                className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-slate-50 hover:bg-white transition-colors file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100 cursor-pointer"
                                             />
                                         </div>
                                     </div>
 
                                     {/* ACTION BUTTONS */}
-                                    <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-slate-100 pb-6 pr-6">
+                                    <div className="flex justify-end gap-4 mt-6 pt-6 border-t border-slate-100">
                                         <Button
                                             variant="outline"
                                             onClick={() => setIsDialogOpen(false)}
                                             disabled={isSubmitting}
-                                            className="px-6 bg-white hover:bg-slate-50 text-slate-700 border-slate-200"
+                                            className="px-6 h-10 bg-white hover:bg-slate-50 text-slate-700 border-slate-200 font-medium rounded-lg"
                                         >
                                             Cancel
                                         </Button>
                                         <Button
                                             onClick={handleSubmit}
                                             disabled={isSubmitting}
-                                            className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/20 px-8"
+                                            className="h-10 px-8 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm"
                                         >
                                             {isSubmitting ? (
                                                 <>

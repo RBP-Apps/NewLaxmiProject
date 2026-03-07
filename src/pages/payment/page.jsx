@@ -197,10 +197,10 @@ export default function PaymentPage() {
           ipPaymentPerInstallation: row.ip_payment_per_installation || "",
           gst18Percent: row.gst_18_percent || "",
           billSendDate: row.bill_send_date || "",
-          totalAmount: 
-            row.total_amount_payment_to_ip || 
-            ((parseFloat(row.ip_payment_per_installation) || 0) + 
-             (parseFloat(row.gst_18_percent) || 0)).toFixed(2), // Fallback calculation
+          totalAmount:
+            row.total_amount_payment_to_ip ||
+            ((parseFloat(row.ip_payment_per_installation) || 0) +
+              (parseFloat(row.gst_18_percent) || 0)).toFixed(2), // Fallback calculation
           hoCsr60Percent: row.ho_csr_60_percent || "",
           hoCsr75Percent: row.ho_csr_75_percent || "",
           transportExpense: row.transport_expense || "",
@@ -375,7 +375,7 @@ export default function PaymentPage() {
   };
 
   return (
-    <div className="space-y-8 p-6 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
+    <div className="space-y-8 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
       <Tabs
         defaultValue="pending"
         className="w-full"
@@ -500,7 +500,7 @@ export default function PaymentPage() {
 
             <CardContent className="p-0">
               {/* Desktop Table View */}
-              <div className="overflow-x-auto">
+              <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
                 <Table className="[&_th]:text-center [&_td]:text-center">
                   <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                     <TableRow className="border-b border-blue-100 hover:bg-transparent">
@@ -840,7 +840,7 @@ export default function PaymentPage() {
             </div>
             <CardContent className="p-0">
               {/* Desktop Table View */}
-              <div className="hidden lg:block overflow-x-auto">
+              <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
                 <Table className="[&_th]:text-center [&_td]:text-center">
                   <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                     <TableRow className="border-b border-blue-100 hover:bg-transparent">
@@ -968,18 +968,18 @@ export default function PaymentPage() {
                             {item.district}
                           </TableCell>
                           <TableCell className="text-slate-600 font-mono text-xs">
-                             ₹{item.ipJcrCsrPayment || "-"}
+                            ₹{item.ipJcrCsrPayment || "-"}
                           </TableCell>
                           <TableCell>
                             <Badge variant={item.installationPaymentToIp === "Done" ? "default" : "secondary"} className={item.installationPaymentToIp === "Done" ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-800"}>
-                                {item.installationPaymentToIp || "Pending"}
+                              {item.installationPaymentToIp || "Pending"}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-slate-600 font-mono text-xs">
-                             ₹{item.ipPaymentPerInstallation || "-"}
+                            ₹{item.ipPaymentPerInstallation || "-"}
                           </TableCell>
                           <TableCell className="text-slate-600 font-mono text-xs">
-                             ₹{item.gst18Percent || "-"}
+                            ₹{item.gst18Percent || "-"}
                           </TableCell>
                           <TableCell className="text-green-700 font-bold bg-green-50/50">
                             ₹{item.totalAmount || "0"}
@@ -1007,87 +1007,6 @@ export default function PaymentPage() {
                 </Table>
               </div>
 
-              {/* Mobile Card View */}
-              <div className="lg:hidden space-y-4 p-4 bg-slate-50">
-                {filteredHistoryItems.map((item) => (
-                  <Card
-                    key={item.serialNo}
-                    className="bg-white border text-sm shadow-sm"
-                  >
-                    <CardContent className="p-4 space-y-3">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                          <p className="font-semibold text-blue-900">
-                            #{item.serialNo}
-                          </p>
-                          <p className="text-base font-medium text-slate-800">
-                            {item.beneficiaryName}
-                          </p>
-                        </div>
-                        <Badge className={item.installationPaymentToIp === "Done" ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-800"}>
-                            {item.installationPaymentToIp || "Pending"}
-                        </Badge>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2 text-xs border-t border-slate-100 pt-2 mt-2">
-                        <div>
-                          <span className="font-medium text-slate-500">
-                            Amount:
-                          </span>{" "}
-                          ₹{item.totalAmount || "0"}
-                        </div>
-                        <div>
-                          <span className="font-medium text-slate-500">
-                            Bill Date:
-                          </span>{" "}
-                          {item.billSendDate || "-"}
-                        </div>
-                        <div>
-                          <span className="font-medium text-slate-500">
-                            GST:
-                          </span>{" "}
-                          ₹{item.gst18Percent || "0"}
-                        </div>
-                        <div>
-                          <span className="font-medium text-slate-500">
-                            IP JCR:
-                          </span>{" "}
-                          ₹{item.ipJcrCsrPayment || "0"}
-                        </div>
-                        <div>
-                          <span className="font-medium text-slate-500">
-                            HO(CSR) 60%:
-                          </span>{" "}
-                          ₹{item.hoCsr60Percent || "0"}
-                        </div>
-                        <div>
-                          <span className="font-medium text-slate-500">
-                            HO(CSR) 75%:
-                          </span>{" "}
-                          ₹{item.hoCsr75Percent || "0"}
-                        </div>
-                        <div>
-                          <span className="font-medium text-slate-500">
-                            Transport:
-                          </span>{" "}
-                          ₹{item.transportExpense || "0"}
-                        </div>
-                        <div className="col-span-2">
-                          <span className="font-medium text-slate-500">
-                            Remarks:
-                          </span>{" "}
-                          {item.remarks || "-"}
-                        </div>
-                        <div className="col-span-2 pt-2 flex justify-end">
-                          <Button size="sm" variant="outline" onClick={() => handleActionClick(item)} className="h-8 gap-2">
-                            <Edit className="h-3.5 w-3.5" /> Edit
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
             </CardContent>
           </Card>
         </TabsContent>

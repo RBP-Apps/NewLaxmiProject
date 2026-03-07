@@ -342,35 +342,36 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6 p-6 md:p-8 animate-fade-in-up min-h-screen bg-slate-50/50">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-cyan-600 bg-clip-text text-transparent">
+    <div className="space-y-6 sm:space-y-8 sm:p-6 lg:p-8 lg:max-w-screen-2xl mx-auto animate-fade-in-up min-h-screen bg-slate-50/30 text-slate-800">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-8">
+        <div className="mb-2 lg:mb-0">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent tracking-tight">
             Master Dashboard
           </h1>
           <p className="text-slate-500 text-sm mt-1">
             Aggregated Live Data
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           {lastUpdated && (
-            <span className="text-xs text-slate-400 mr-2 flex items-center gap-1">
+            <span className="text-xs text-slate-400 mr-2 flex items-center gap-1 w-full md:w-auto mb-2 md:mb-0">
               <Clock className="h-3 w-3" /> Updated: {lastUpdated.toLocaleTimeString()}
             </span>
           )}
           <Button
             onClick={handleExportAll}
             disabled={isExporting}
-            className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md shadow-emerald-500/20 transition-all"
+            className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md shadow-emerald-500/20 transition-all flex-1 sm:flex-none whitespace-nowrap"
           >
             <Download className={cn("h-4 w-4 mr-2", isExporting && "animate-bounce")} />
-            {isExporting ? "Exporting..." : "Export All Data"}
+            <span className="hidden sm:inline">{isExporting ? "Exporting..." : "Export All Data"}</span>
+            <span className="sm:hidden">{isExporting ? "Exporting..." : "Export All"}</span>
           </Button>
           <Button
             onClick={fetchData}
             disabled={isLoading}
             variant="outline"
-            className="border-slate-200 hover:bg-white hover:text-blue-600 hover:border-blue-300 transition-all"
+            className="border-slate-200 hover:bg-white hover:text-blue-600 hover:border-blue-300 transition-all flex-1 sm:flex-none whitespace-nowrap"
           >
             <RefreshCw className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")} />
             Refresh
@@ -378,20 +379,21 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <Card className="border border-slate-200 shadow-lg shadow-slate-200/50 bg-white overflow-hidden">
-        <CardHeader className="border-b border-slate-100 bg-slate-50/50 px-6 py-4">
-          <div className="flex items-center justify-between">
+      <Card className="border border-slate-200 shadow-sm bg-white overflow-hidden rounded-xl">
+        <CardHeader className="border-b border-slate-100 bg-slate-50/50 px-5 sm:px-6 py-4 sm:py-5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <CardTitle className="text-lg font-semibold text-slate-800">Summary Report</CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-between w-full sm:w-auto gap-2">
               <Button
                 onClick={handleExportSummary}
                 size="sm"
-                className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-sm text-xs h-8"
+                className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-sm text-xs h-8 flex-1 sm:flex-none"
               >
                 <Download className="h-3.5 w-3.5 mr-1.5" />
-                Download Summary
+                <span className="hidden sm:inline">Download Summary</span>
+                <span className="sm:hidden">Download</span>
               </Button>
-              <Badge variant="secondary" className="bg-white border-slate-200 text-slate-600">
+              <Badge variant="secondary" className="bg-white border-slate-200 text-slate-600 shrink-0">
                 <PlayCircle className="h-3 w-3 mr-1 text-green-500" /> {data.length} Records
               </Badge>
             </div>
@@ -406,7 +408,7 @@ export default function DashboardPage() {
                     <TableHead
                       key={idx}
                       className={cn(
-                        "h-12 px-2 font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap border-r border-slate-200/50 bg-slate-50",
+                        "h-11 px-3 sm:px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap border-r border-slate-200/50 bg-slate-50/80 transition-colors",
                         col.className
                       )}
                     >
@@ -445,28 +447,28 @@ export default function DashboardPage() {
                 ) : (
                   <>
                     {/* Totals Row */}
-                    <TableRow className="bg-slate-100/80 font-bold border-b-2 border-slate-300 hover:bg-slate-200/50 sticky top-12 z-20">
-                      <TableCell className="text-center sticky left-0 bg-slate-100 z-20"></TableCell>
-                      <TableCell className="sticky left-12 bg-slate-100 z-20">Total</TableCell>
+                    <TableRow className="bg-slate-100/90 font-semibold border-y-2 border-slate-200 hover:bg-slate-200/50 sticky top-11 z-20">
+                      <TableCell className="text-center sticky left-0 bg-slate-100/90 z-20"></TableCell>
+                      <TableCell className="sticky left-12 bg-slate-100/90 z-20 px-3 sm:px-4">Total</TableCell>
                       <TableCell className="sticky left-[212px] bg-slate-100 z-20"></TableCell>
-                      <TableCell className="text-center sticky left-[362px] bg-slate-100 z-20 font-bold text-blue-900">
+                      <TableCell className="text-center sticky left-[362px] bg-slate-100/90 z-20 font-bold text-slate-900 px-3 sm:px-4">
                         {data.reduce((sum, row) => sum + (Number(row.target) || 0), 0)}
                       </TableCell>
                       {dashboardColumns.slice(4).map((col, i) => (
-                        <TableCell key={i} className={cn("border-r border-slate-300 px-2 py-3", col.className?.includes("text-right") ? "text-right" : "text-center")}>
-                           {formatValue(data.reduce((sum, row) => sum + (Number(row[col.accessor]) || 0), 0), col.format)}
+                        <TableCell key={i} className={cn("border-r border-slate-200/50 px-3 sm:px-4 py-3 font-medium text-slate-800", col.className?.includes("text-right") ? "text-right" : "text-center")}>
+                          {formatValue(data.reduce((sum, row) => sum + (Number(row[col.accessor]) || 0), 0), col.format)}
                         </TableCell>
                       ))}
                     </TableRow>
 
                     {/* Data Rows */}
                     {data.map((row) => (
-                      <TableRow key={row.id} className="group hover:bg-blue-50/30 transition-colors border-b border-slate-100 last:border-0">
+                      <TableRow key={row.id} className="group hover:bg-slate-50/50 transition-colors border-b border-slate-100 last:border-0">
                         {dashboardColumns.map((col, idx) => (
                           <TableCell
                             key={idx}
                             className={cn(
-                              "border-r border-slate-100 px-2 py-2 truncate max-w-[200px]",
+                              "border-r border-slate-100/50 px-3 sm:px-4 py-2.5 truncate max-w-[200px] text-slate-600 group-hover:text-slate-900 transition-colors",
                               col.className
                             )}
                             title={row[col.accessor]}
@@ -485,25 +487,26 @@ export default function DashboardPage() {
       </Card>
 
       {/* ====================== EXPENSE SUMMARY ====================== */}
-      <Card className="border border-emerald-200 shadow-lg shadow-emerald-100/30 bg-white overflow-hidden">
-        <CardHeader className="border-b border-emerald-100 bg-emerald-50/30 px-6 py-4">
-          <div className="flex items-center justify-between">
+      <Card className="border border-slate-200 shadow-sm bg-white overflow-hidden rounded-xl">
+        <CardHeader className="border-b border-slate-100 bg-slate-50/50 px-5 sm:px-6 py-4 sm:py-5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <CardTitle className="text-lg font-semibold text-emerald-900 flex items-center gap-2">
-              <div className="p-1 bg-emerald-100 rounded-lg">
+              <div className="p-1 bg-emerald-100 rounded-lg shrink-0">
                 <IndianRupee className="h-4 w-4 text-emerald-600" />
               </div>
               IP Wise Payment Summary
             </CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-between w-full sm:w-auto gap-2">
               <Button
                 onClick={handleExportIPPayment}
                 size="sm"
-                className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-sm text-xs h-8"
+                className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-sm text-xs h-8 flex-1 sm:flex-none"
               >
                 <Download className="h-3.5 w-3.5 mr-1.5" />
-                Download IP Payment
+                <span className="hidden sm:inline">Download IP Payment</span>
+                <span className="sm:hidden">Download</span>
               </Button>
-              <Badge variant="secondary" className="bg-white border-emerald-200 text-emerald-700">
+              <Badge variant="secondary" className="bg-white border-emerald-200 text-emerald-700 shrink-0">
                 {expenseSummary.length} IPs
               </Badge>
             </div>
@@ -512,16 +515,16 @@ export default function DashboardPage() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table className="w-full text-sm border-collapse">
-              <TableHeader className="bg-emerald-50/50">
-                <TableRow className="border-b border-emerald-200 hover:bg-transparent">
-                  <TableHead className="h-12 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap text-center w-14">S.No</TableHead>
-                  <TableHead className="h-12 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[200px]">IP</TableHead>
-                  <TableHead className="h-12 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">IP (CSR)</TableHead>
-                  <TableHead className="h-12 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">HO(CSR) 60%</TableHead>
-                  <TableHead className="h-12 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">HO(CSR) 75%</TableHead>
-                  <TableHead className="h-12 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">Transport Expense</TableHead>
-                  <TableHead className="h-12 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">IP Payment Total</TableHead>
-                  <TableHead className="h-12 px-4 text-xs font-bold text-emerald-700 uppercase tracking-wider whitespace-nowrap text-right bg-emerald-50">Net Total</TableHead>
+              <TableHeader className="bg-slate-50/80">
+                <TableRow className="border-b border-slate-200 hover:bg-transparent">
+                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap text-center w-14">S.No</TableHead>
+                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[200px]">IP</TableHead>
+                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">IP (CSR)</TableHead>
+                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">HO(CSR) 60%</TableHead>
+                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">HO(CSR) 75%</TableHead>
+                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">Transport Expense</TableHead>
+                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">IP Payment Total</TableHead>
+                  <TableHead className="h-11 px-4 text-xs font-semibold text-emerald-800 uppercase tracking-wider whitespace-nowrap text-right bg-emerald-50/50">Net Total</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -540,7 +543,7 @@ export default function DashboardPage() {
                 ) : (
                   <>
                     {/* Totals Row */}
-                    <TableRow className="bg-emerald-50/80 font-bold border-b-2 border-emerald-300 hover:bg-emerald-100/50">
+                    <TableRow className="bg-slate-50/80 font-semibold border-y-2 border-slate-200 hover:bg-slate-100/50 text-slate-800">
                       <TableCell className="text-center"></TableCell>
                       <TableCell className="font-bold text-emerald-900">Total</TableCell>
                       <TableCell className="text-right font-mono">
@@ -565,15 +568,15 @@ export default function DashboardPage() {
 
                     {/* Data Rows */}
                     {expenseSummary.map((row) => (
-                      <TableRow key={row.ipName} className="hover:bg-emerald-50/30 transition-colors border-b border-slate-100">
-                        <TableCell className="text-center text-slate-500 font-medium">{row.sNo}</TableCell>
-                        <TableCell className="font-medium text-slate-800">{row.ipName}</TableCell>
-                        <TableCell className="text-right font-mono text-slate-600">{formatValue(row.ipCsr, "currency")}</TableCell>
-                        <TableCell className="text-right font-mono text-slate-600">{formatValue(row.hoCsr60, "currency")}</TableCell>
-                        <TableCell className="text-right font-mono text-slate-600">{formatValue(row.hoCsr75, "currency")}</TableCell>
-                        <TableCell className="text-right font-mono text-slate-600">{formatValue(row.transportExpense, "currency")}</TableCell>
-                        <TableCell className="text-right font-mono text-slate-600">{formatValue(row.ipPaymentTotal, "currency")}</TableCell>
-                        <TableCell className="text-right font-mono font-bold text-emerald-700 bg-emerald-50/30">{formatValue(row.netTotal, "currency")}</TableCell>
+                      <TableRow key={row.ipName} className="hover:bg-slate-50/70 transition-colors border-b border-slate-100/70 last:border-none">
+                        <TableCell className="text-center text-slate-500 py-3">{row.sNo}</TableCell>
+                        <TableCell className="font-medium text-slate-700 py-3">{row.ipName}</TableCell>
+                        <TableCell className="text-right font-mono text-slate-600 py-3">{formatValue(row.ipCsr, "currency")}</TableCell>
+                        <TableCell className="text-right font-mono text-slate-600 py-3">{formatValue(row.hoCsr60, "currency")}</TableCell>
+                        <TableCell className="text-right font-mono text-slate-600 py-3">{formatValue(row.hoCsr75, "currency")}</TableCell>
+                        <TableCell className="text-right font-mono text-slate-600 py-3">{formatValue(row.transportExpense, "currency")}</TableCell>
+                        <TableCell className="text-right font-mono text-slate-700 font-medium py-3">{formatValue(row.ipPaymentTotal, "currency")}</TableCell>
+                        <TableCell className="text-right font-mono font-semibold text-emerald-700 bg-emerald-50/30 py-3">{formatValue(row.netTotal, "currency")}</TableCell>
                       </TableRow>
                     ))}
                   </>

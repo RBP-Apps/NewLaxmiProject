@@ -21,7 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Pencil, FileText, Inbox, FileCheck, Search, Loader2, CheckCircle2 } from "lucide-react";
+import { Pencil, FileText, Inbox, FileCheck, Search, Loader2, CheckCircle2, Upload } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function InvoicingPage() {
@@ -345,7 +345,7 @@ export default function InvoicingPage() {
   };
 
   return (
-    <div className="space-y-8 p-6 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
+    <div className="space-y-8 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
       <Tabs
         defaultValue="pending"
         className="w-full"
@@ -375,42 +375,42 @@ export default function InvoicingPage() {
           value="pending"
           className="mt-6 focus-visible:ring-0 focus-visible:outline-none"
         >
-          <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-            <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
-              <div className="flex items-center gap-2 w-full md:w-auto justify-between">
-                <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
-                  <div className="p-1 bg-blue-100 rounded-lg">
-                    <FileText className="h-4 w-4 text-blue-600" />
+          <Card className="border border-slate-200 shadow-sm bg-white overflow-hidden rounded-xl">
+            <CardHeader className="border-b border-slate-100 bg-white px-6 py-5 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto">
+              <div className="flex items-center gap-3 w-full md:w-auto justify-between">
+                <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                  <div className="p-2.5 bg-blue-50 rounded-xl border border-blue-100/50">
+                    <FileText className="h-5 w-5 text-blue-600" />
                   </div>
                   Pending Invoicing
                 </CardTitle>
               </div>
 
               <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                <div className="relative w-full md:w-100">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <div className="relative w-full md:w-64 group">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
                   <Input
                     placeholder="Search..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
+                    className="pl-9 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 h-10 transition-all rounded-lg"
                   />
                 </div>
 
-                <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                <div className="flex items-center gap-3 w-full md:w-auto justify-end">
                   {selectedRows.length >= 2 && (
                     <Button
                       onClick={handleBulkClick}
-                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-10 px-4 rounded-lg font-medium"
                       size="sm"
                     >
                       <FileText className="h-4 w-4 mr-2" />
-                      Invoice Selected ({selectedRows.length})
+                      Process Selected ({selectedRows.length})
                     </Button>
                   )}
                   <Badge
                     variant="outline"
-                    className="bg-yellow-100 text-yellow-700 border-yellow-200 px-3 py-1 h-9 flex items-center"
+                    className="bg-amber-50 text-amber-700 border-amber-200 px-3 py-1.5 h-10 flex items-center rounded-lg font-medium shadow-sm"
                   >
                     {filteredPendingItems.length} Pending
                   </Badge>
@@ -419,8 +419,12 @@ export default function InvoicingPage() {
             </CardHeader>
 
             {/* Filter Dropdowns */}
-            <div className="px-6 py-4 bg-slate-50/50 border-b border-blue-50">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="px-6 py-5 bg-slate-50/30 border-b border-slate-100">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="h-4 w-1 bg-blue-600 rounded-full"></div>
+                <h3 className="text-sm font-semibold text-slate-700">Filter Records</h3>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {[
                   { key: "regId", label: "Reg ID" },
                   { key: "village", label: "Village" },
@@ -429,14 +433,15 @@ export default function InvoicingPage() {
                   { key: "pumpType", label: "Pump Type" },
                   { key: "company", label: "Company" },
                 ].map(({ key, label }) => (
-                  <div key={key} className="space-y-1.5">
-                    <Label className="text-xs text-slate-600">{label}</Label>
+                  <div key={key} className="space-y-1.5 flex flex-col">
+                    <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{label}</Label>
                     <select
                       value={filters[key]}
                       onChange={(e) =>
                         setFilters({ ...filters, [key]: e.target.value })
                       }
-                      className="w-full h-9 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                      className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-slate-300 transition-colors shadow-sm appearance-none cursor-pointer"
+                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
                     >
                       <option value="">All</option>
                       {getUniquePendingValues(key).map((val) => (
@@ -449,31 +454,33 @@ export default function InvoicingPage() {
                 ))}
               </div>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setFilters({
-                    regId: "",
-                    village: "",
-                    block: "",
-                    district: "",
-                    pumpType: "",
-                    company: "",
-                  })
-                }
-                className="mt-3 text-xs"
-              >
-                Clear All Filters
-              </Button>
+              <div className="flex justify-end mt-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    setFilters({
+                      regId: "",
+                      village: "",
+                      block: "",
+                      district: "",
+                      pumpType: "",
+                      company: "",
+                    })
+                  }
+                  className="text-sm font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 h-8 px-3 rounded-md transition-colors"
+                >
+                  Clear Filters
+                </Button>
+              </div>
             </div>
             <CardContent className="p-0">
               {/* Desktop Table */}
-              <div className="overflow-x-auto">
+              <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
                 <Table className="[&_th]:text-center [&_td]:text-center">
-                  <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
-                    <TableRow className="border-b border-blue-100 hover:bg-transparent">
-                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
+                  <TableHeader className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm">
+                    <TableRow className="border-b border-slate-200 hover:bg-transparent">
+                      <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-12">
                         <div className="flex justify-center">
                           <Checkbox
                             checked={
@@ -483,40 +490,40 @@ export default function InvoicingPage() {
                             }
                             onCheckedChange={handleSelectAll}
                             aria-label="Select all rows"
-                            className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
+                            className="checkbox-3d border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out rounded"
                           />
                         </div>
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                         Action
                       </TableHead>
-                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
+                      <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
 
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Reg ID
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Beneficiary Name
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Father's Name
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Village
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Block
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         District
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Pump Type
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Company
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Installer
                       </TableHead>
                     </TableRow>
@@ -556,7 +563,7 @@ export default function InvoicingPage() {
                       filteredPendingItems.map((item, index) => (
                         <TableRow
                           key={item.regId}
-                          className="hover:bg-blue-50/30 transition-colors"
+                          className="hover:bg-blue-50/40 transition-colors group border-b border-slate-100"
                         >
                           <TableCell className="px-4">
                             <div className="flex justify-center">
@@ -566,7 +573,7 @@ export default function InvoicingPage() {
                                   handleSelectRow(item.regId, checked)
                                 }
                                 aria-label={`Select row ${item.regId}`}
-                                className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110"
+                                className="checkbox-3d border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110 rounded"
                               />
                             </div>
                           </TableCell>
@@ -576,10 +583,10 @@ export default function InvoicingPage() {
                               size="sm"
                               onClick={() => handleActionClick(item)}
                               disabled={selectedRows.length >= 2}
-                              className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200/50 shadow-sm text-[11px] font-semibold h-7 px-3 rounded-md flex items-center gap-1.5 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              <FileText className="h-3.5 w-3.5" />
-                              Invoice
+                              <FileText className="h-3 w-3" />
+                              Process
                             </Button>
                           </TableCell>
                           <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
@@ -587,28 +594,28 @@ export default function InvoicingPage() {
                           <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">
                             {item.regId}
                           </TableCell>
-                          <TableCell className="whitespace-nowrap font-medium text-slate-800">
+                          <TableCell className="whitespace-nowrap font-medium text-slate-800 text-sm">
                             {item.beneficiaryName}
                           </TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600">
+                          <TableCell className="whitespace-nowrap text-slate-600 text-sm">
                             {item.fatherName}
                           </TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600">
+                          <TableCell className="whitespace-nowrap text-slate-600 text-sm">
                             {item.village}
                           </TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600">
+                          <TableCell className="whitespace-nowrap text-slate-600 text-sm">
                             {item.block}
                           </TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600">
+                          <TableCell className="whitespace-nowrap text-slate-600 text-sm">
                             {item.district}
                           </TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600">
+                          <TableCell className="whitespace-nowrap text-slate-600 text-sm">
                             {item.pumpType}
                           </TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600">
+                          <TableCell className="whitespace-nowrap text-slate-600 text-sm">
                             {item.company}
                           </TableCell>
-                          <TableCell className="whitespace-nowrap text-slate-600">
+                          <TableCell className="whitespace-nowrap text-slate-600 text-sm">
                             {item.installer}
                           </TableCell>
                         </TableRow>
@@ -705,32 +712,32 @@ export default function InvoicingPage() {
           value="history"
           className="mt-6 focus-visible:ring-0 focus-visible:outline-none animate-in fade-in-0 slide-in-from-right-4 duration-500 ease-out"
         >
-          <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-            <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
-              <div className="flex items-center gap-2 w-full md:w-auto">
-                <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
-                  <div className="p-1 bg-blue-100 rounded-lg">
-                    <FileCheck className="h-4 w-4 text-blue-600" />
+          <Card className="border border-slate-200 shadow-sm bg-white overflow-hidden rounded-xl">
+            <CardHeader className="border-b border-slate-100 bg-white px-6 py-5 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto">
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                  <div className="p-2.5 bg-blue-50 rounded-xl border border-blue-100/50">
+                    <FileCheck className="h-5 w-5 text-blue-600" />
                   </div>
                   Invoicing History
                 </CardTitle>
               </div>
 
               <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                <div className="relative w-full md:w-100">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <div className="relative w-full md:w-64 group">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
                   <Input
                     placeholder="Search..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
+                    className="pl-9 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 h-10 transition-all rounded-lg"
                   />
                 </div>
-                <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                <div className="flex items-center gap-3 w-full md:w-auto justify-end">
                   {selectedRows.length >= 2 && (
                     <Button
                       onClick={handleBulkClick}
-                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-10 px-4 rounded-lg font-medium"
                       size="sm"
                     >
                       <FileText className="h-4 w-4 mr-2" />
@@ -739,7 +746,7 @@ export default function InvoicingPage() {
                   )}
                   <Badge
                     variant="outline"
-                    className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 h-9 flex items-center whitespace-nowrap"
+                    className="bg-slate-100 text-slate-700 border-slate-200 px-3 py-1.5 h-10 flex items-center whitespace-nowrap rounded-lg font-medium shadow-sm"
                   >
                     {filteredHistoryItems.length} Records
                   </Badge>
@@ -748,8 +755,12 @@ export default function InvoicingPage() {
             </CardHeader>
 
             {/* Filter Dropdowns */}
-            <div className="px-6 py-4 bg-slate-50/50 border-b border-blue-50">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="px-6 py-5 bg-slate-50/30 border-b border-slate-100">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="h-4 w-1 bg-blue-600 rounded-full"></div>
+                <h3 className="text-sm font-semibold text-slate-700">Filter Records</h3>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {[
                   { key: "regId", label: "Reg ID" },
                   { key: "village", label: "Village" },
@@ -758,14 +769,15 @@ export default function InvoicingPage() {
                   { key: "pumpType", label: "Pump Type" },
                   { key: "company", label: "Company" },
                 ].map(({ key, label }) => (
-                  <div key={key} className="space-y-1.5">
-                    <Label className="text-xs text-slate-600">{label}</Label>
+                  <div key={key} className="space-y-1.5 flex flex-col">
+                    <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{label}</Label>
                     <select
                       value={filters[key]}
                       onChange={(e) =>
                         setFilters({ ...filters, [key]: e.target.value })
                       }
-                      className="w-full h-9 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                      className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-slate-300 transition-colors shadow-sm appearance-none cursor-pointer"
+                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
                     >
                       <option value="">All</option>
                       {getUniqueHistoryValues(key).map((val) => (
@@ -778,66 +790,68 @@ export default function InvoicingPage() {
                 ))}
               </div>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setFilters({
-                    regId: "",
-                    village: "",
-                    block: "",
-                    district: "",
-                    pumpType: "",
-                    company: "",
-                  })
-                }
-                className="mt-3 text-xs"
-              >
-                Clear All Filters
-              </Button>
+              <div className="flex justify-end mt-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    setFilters({
+                      regId: "",
+                      village: "",
+                      block: "",
+                      district: "",
+                      pumpType: "",
+                      company: "",
+                    })
+                  }
+                  className="text-sm font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 h-8 px-3 rounded-md transition-colors"
+                >
+                  Clear Filters
+                </Button>
+              </div>
             </div>
 
             <CardContent className="p-0">
               {/* Desktop Table */}
-              <div className="hidden md:block overflow-x-auto">
+              <div className="hidden md:block max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
                 <Table className="[&_th]:text-center [&_td]:text-center">
-                  <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
-                    <TableRow className="border-b border-blue-100 hover:bg-transparent">
-                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
+                  <TableHeader className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm">
+                    <TableRow className="border-b border-slate-200 hover:bg-transparent">
+                      <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-12">
                         <div className="flex justify-center">
                           <Checkbox
                             checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length}
                             onCheckedChange={handleSelectAll}
-                            className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
+                            className="checkbox-3d border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out rounded"
                           />
                         </div>
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Action
                       </TableHead>
-                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Reg ID
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Beneficiary
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         District
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Raisoni Invoice No
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Invoice Date
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Raisoni Link
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Laxmi Link
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Status
                       </TableHead>
 
@@ -879,14 +893,14 @@ export default function InvoicingPage() {
                       filteredHistoryItems.map((item, index) => (
                         <TableRow
                           key={item.regId}
-                          className="hover:bg-blue-50/30 transition-colors"
+                          className="hover:bg-blue-50/40 transition-colors group border-b border-slate-100"
                         >
                           <TableCell className="px-4">
                             <div className="flex justify-center">
                               <Checkbox
                                 checked={selectedRows.includes(item.regId)}
                                 onCheckedChange={(checked) => handleSelectRow(item.regId, checked)}
-                                className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
+                                className="checkbox-3d border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110 rounded"
                               />
                             </div>
                           </TableCell>
@@ -896,9 +910,9 @@ export default function InvoicingPage() {
                               size="sm"
                               onClick={() => handleActionClick(item)}
                               disabled={selectedRows.length >= 2}
-                              className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200/50 shadow-sm text-[11px] font-semibold h-7 px-3 rounded-md flex items-center gap-1.5 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              <Pencil className="h-3.5 w-3.5" />
+                              <Pencil className="h-3 w-3" />
                               Edit
                             </Button>
                           </TableCell>
@@ -910,7 +924,7 @@ export default function InvoicingPage() {
                           </TableCell>
                           <TableCell>
                             <div>
-                              <div className="font-medium text-slate-800">
+                              <div className="font-medium text-slate-800 text-sm">
                                 {item.beneficiaryName}
                               </div>
                               <div className="text-xs text-muted-foreground">
@@ -918,27 +932,27 @@ export default function InvoicingPage() {
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell className="text-slate-600">
+                          <TableCell className="text-slate-600 text-sm">
                             {item.district}
                           </TableCell>
-                          <TableCell className="font-medium text-blue-700 bg-blue-50/50">
+                          <TableCell className="font-medium text-blue-700 bg-blue-50/50 text-sm">
                             {item.raisoni_invoice_no || "-"}
                           </TableCell>
-                          <TableCell className="text-slate-600">
+                          <TableCell className="text-slate-600 text-sm">
                             {item.invoice_date || "-"}
                           </TableCell>
                           <TableCell>
                             {item.raisoni_invoice_link ? (
-                              <a href={item.raisoni_invoice_link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">View</a>
+                              <a href={item.raisoni_invoice_link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-sm font-medium">View</a>
                             ) : "-"}
                           </TableCell>
                           <TableCell>
                             {item.laxmi_invoice_link ? (
-                              <a href={item.laxmi_invoice_link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">View</a>
+                              <a href={item.laxmi_invoice_link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-sm font-medium">View</a>
                             ) : "-"}
                           </TableCell>
                           <TableCell>
-                            <Badge className="bg-teal-100 text-teal-800 border-teal-200">
+                            <Badge className="bg-teal-50 text-teal-700 border-teal-200 shadow-sm">
                               Invoiced
                             </Badge>
                           </TableCell>
@@ -970,36 +984,42 @@ export default function InvoicingPage() {
                             {item.district} • {item.village}
                           </p>
                         </div>
-                        <Badge className="bg-teal-100 text-teal-800 border-teal-200">
+                        <Badge className="bg-teal-50 text-teal-700 border-teal-200">
                           Invoiced
                         </Badge>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 text-xs border-t border-slate-100 pt-2 mt-2">
-                        <div>
-                          <span className="font-medium text-slate-500">
-                            Inv No:
-                          </span>{" "}
-                          {item.raisoni_invoice_no || "-"}
+                      <div className="grid grid-cols-2 gap-2 text-xs border-t border-slate-100 pt-3 mt-2">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-slate-400 text-[10px] uppercase font-semibold">
+                            Inv No
+                          </span>
+                          <span className="font-medium text-slate-700">
+                            {item.raisoni_invoice_no || "-"}
+                          </span>
                         </div>
-                        <div>
-                          <span className="font-medium text-slate-500">
-                            Inv Date:
-                          </span>{" "}
-                          {item.invoice_date || "-"}
+                        <div className="flex flex-col gap-1">
+                          <span className="text-slate-400 text-[10px] uppercase font-semibold">
+                            Inv Date
+                          </span>
+                          <span className="font-medium text-slate-700">
+                            {item.invoice_date || "-"}
+                          </span>
                         </div>
-                        <div className="col-span-2">
-                          <span className="font-medium text-slate-500">
-                            Laxmi Link:
-                          </span>{" "}
-                          {item.laxmi_invoice_link ? (
-                            <a href={item.laxmi_invoice_link} target="_blank" rel="noreferrer" className="text-blue-600 truncate inline-block max-w-[150px]">View</a>
-                          ) : "-"}
+                        <div className="col-span-2 flex flex-col gap-1 mt-2">
+                          <span className="text-slate-400 text-[10px] uppercase font-semibold">
+                            Laxmi Link
+                          </span>
+                          <span className="font-medium text-slate-700">
+                            {item.laxmi_invoice_link ? (
+                              <a href={item.laxmi_invoice_link} target="_blank" rel="noreferrer" className="text-blue-600 truncate inline-block max-w-[200px] hover:underline">View Document</a>
+                            ) : "-"}
+                          </span>
                         </div>
                       </div>
                       <Button
                         size="sm"
-                        className="w-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200"
+                        className="w-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 mt-2 transition-colors"
                         onClick={() => handleActionClick(item)}
                       >
                         <Pencil className="h-3.5 w-3.5 mr-2" />
@@ -1018,7 +1038,7 @@ export default function InvoicingPage() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent
           showCloseButton={!isSuccess}
-          className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isSuccess ? "bg-transparent !shadow-none !border-none" : "bg-white"
+          className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isSuccess ? "bg-transparent shadow-none! border-none!" : "bg-white"
             }`}
         >
           {isSuccess ? (
@@ -1032,14 +1052,14 @@ export default function InvoicingPage() {
             </div>
           ) : (
             <>
-              <DialogHeader className="p-6 pb-2 border-b border-blue-100 bg-blue-50/30">
-                <DialogTitle className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent flex items-center gap-2">
-                  <span className="bg-blue-100 p-1.5 rounded-md">
-                    <FileText className="h-4 w-4 text-blue-600" />
+              <DialogHeader className="p-6 pb-4 border-b border-slate-100 bg-slate-50/80">
+                <DialogTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                  <span className="bg-blue-100 p-2 rounded-lg border border-blue-200/50 shadow-sm">
+                    <FileText className="h-5 w-5 text-blue-600" />
                   </span>
                   Enter Invoicing Information
                 </DialogTitle>
-                <DialogDescription className="text-slate-500 ml-10">
+                <DialogDescription className="text-slate-500 ml-12 text-sm mt-1 border-l-2 border-blue-200 pl-3 py-0.5">
                   {isBulk ? (
                     <span>
                       Applying changes to{" "}
@@ -1063,16 +1083,16 @@ export default function InvoicingPage() {
                 <div className="grid gap-6 p-6">
                   {/* Beneficiary Details Card - Hide in Bulk */}
                   {!isBulk && selectedItem && (
-                    <div className="rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50/50 to-cyan-50/30 p-5 shadow-sm">
-                      <div className="flex items-center gap-2 mb-4 pb-2 border-b border-blue-100/50">
-                        <span className="bg-white p-1 rounded shadow-sm">
-                          <FileText className="h-4 w-4 text-blue-500" />
+                    <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-5 shadow-sm">
+                      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-200/60">
+                        <span className="bg-white p-1.5 rounded-md shadow-sm border border-slate-200 text-blue-600">
+                          <FileText className="h-4 w-4" />
                         </span>
-                        <h4 className="font-semibold text-blue-900">
+                        <h4 className="font-semibold text-slate-800">
                           Beneficiary & Project Details
                         </h4>
                       </div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 text-sm">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-6 text-sm">
                         {[
                           { label: "Serial No", value: selectedItem.serialNo },
                           { label: "Reg ID", value: selectedItem.regId },
@@ -1089,11 +1109,11 @@ export default function InvoicingPage() {
                           { label: "Pump Type", value: selectedItem.pumpType },
                           { label: "Company", value: selectedItem.company },
                         ].map((field, i) => (
-                          <div key={i}>
-                            <span className="text-xs font-medium text-blue-600/70 uppercase tracking-wider block mb-1">
+                          <div key={i} className="space-y-1">
+                            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
                               {field.label}
                             </span>
-                            <p className="font-semibold text-slate-700">
+                            <p className="font-medium text-slate-700 bg-white px-2.5 py-1.5 rounded-md border border-slate-100 shadow-sm leading-tight">
                               {field.value || "-"}
                             </p>
                           </div>
@@ -1103,9 +1123,10 @@ export default function InvoicingPage() {
                   )}
 
                   {/* Form Fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 scale-95 origin-top">
                     <div className="space-y-2">
-                      <Label className="text-slate-700 font-medium">
+                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
                         Raisoni Invoice No
                       </Label>
                       <Input
@@ -1114,11 +1135,12 @@ export default function InvoicingPage() {
                           setFormData({ ...formData, raisoni_invoice_no: e.target.value })
                         }
                         placeholder="Enter Raisoni invoice number"
-                        className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
+                        className="border-slate-200 focus:border-blue-500 focus-visible:ring-blue-500/20 bg-slate-50 hover:bg-white transition-colors h-11"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-slate-700 font-medium">
+                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
                         Invoice Date
                       </Label>
                       <Input
@@ -1130,21 +1152,28 @@ export default function InvoicingPage() {
                             invoice_date: e.target.value,
                           })
                         }
-                        className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
+                        className="border-slate-200 focus:border-blue-500 focus-visible:ring-blue-500/20 bg-slate-50 hover:bg-white transition-colors h-11"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-slate-700 font-medium">
+                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
                         Raisoni Invoice Link
                       </Label>
-                      <Input
-                        type="file"
-                        onChange={(e) => handleFileUpload(e, 'file_raisoni_invoice_link')}
-                        className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
-                      />
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                          <Upload className="h-4 w-4 text-slate-400" />
+                        </div>
+                        <Input
+                          type="file"
+                          onChange={(e) => handleFileUpload(e, 'file_raisoni_invoice_link')}
+                          className="border-slate-200 focus:border-blue-500 focus-visible:ring-blue-500/20 bg-slate-50 hover:bg-white transition-colors h-11 pl-10 pt-[0.6rem] cursor-pointer file:cursor-pointer file:bg-blue-50 file:text-blue-700 file:border-0 file:rounded-md file:px-2 file:py-1 file:text-xs file:font-semibold"
+                        />
+                      </div>
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-slate-700 font-medium">
+                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
                         Laxmi Invoice No
                       </Label>
                       <Input
@@ -1153,11 +1182,12 @@ export default function InvoicingPage() {
                           setFormData({ ...formData, laxmi_invoice_no: e.target.value })
                         }
                         placeholder="Enter Laxmi invoice number"
-                        className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
+                        className="border-slate-200 focus:border-purple-500 focus-visible:ring-purple-500/20 bg-slate-50 hover:bg-white transition-colors h-11"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-slate-700 font-medium">
+                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
                         Laxmi Invoice Date
                       </Label>
                       <Input
@@ -1166,39 +1196,45 @@ export default function InvoicingPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, laxmi_invoice_date: e.target.value })
                         }
-                        className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
+                        className="border-slate-200 focus:border-purple-500 focus-visible:ring-purple-500/20 bg-slate-50 hover:bg-white transition-colors h-11"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-slate-700 font-medium">
+                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
                         Laxmi Invoice Link
                       </Label>
-                      <Input
-                        type="file"
-                        onChange={(e) => handleFileUpload(e, 'file_laxmi_invoice_link')}
-                        className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
-                      />
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                          <Upload className="h-4 w-4 text-slate-400" />
+                        </div>
+                        <Input
+                          type="file"
+                          onChange={(e) => handleFileUpload(e, 'file_laxmi_invoice_link')}
+                          className="border-slate-200 focus:border-purple-500 focus-visible:ring-purple-500/20 bg-slate-50 hover:bg-white transition-colors h-11 pl-10 pt-[0.6rem] cursor-pointer file:cursor-pointer file:bg-purple-50 file:text-purple-700 file:border-0 file:rounded-md file:px-2 file:py-1 file:text-xs file:font-semibold"
+                        />
+                      </div>
                     </div>
                   </div>
 
                   {/* Footer */}
-                  <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-slate-100 pb-6 pr-6">
+                  <div className="flex justify-end gap-3 mt-4 pt-5 border-t border-slate-100">
                     <Button
                       variant="outline"
                       onClick={() => setIsDialogOpen(false)}
                       disabled={isSubmitting}
-                      className="px-6 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200"
+                      className="h-11 px-6 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200 rounded-lg"
                     >
                       Cancel
                     </Button>
                     <Button
                       onClick={handleSubmit}
                       disabled={isSubmitting}
-                      className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/20 px-8"
+                      className="h-11 px-8 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 rounded-lg font-medium transition-all active:scale-[0.98]"
                     >
                       {isSubmitting ? (
                         <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                           Saving...
                         </>
                       ) : (

@@ -367,7 +367,7 @@ export default function BeneficiarySharePage() {
     };
 
     return (
-        <div className="space-y-8 p-6 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
+        <div className="space-y-6 sm:space-y-8 sm:p-6 lg:p-8 lg:max-w-screen-2xl mx-auto bg-slate-50/30 min-h-screen animate-fade-in-up text-slate-800">
             <Tabs
                 defaultValue="pending"
                 className="w-full"
@@ -397,8 +397,8 @@ export default function BeneficiarySharePage() {
                     value="pending"
                     className="mt-6 focus-visible:ring-0 focus-visible:outline-none animate-in fade-in-0 slide-in-from-left-4 duration-500 ease-out"
                 >
-                    <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-                        <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
+                    <Card className="border border-slate-200 shadow-sm bg-white overflow-hidden rounded-xl">
+                        <CardHeader className="border-b border-slate-100 bg-slate-50/50 px-5 sm:px-6 py-4 sm:py-5 flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
                             <div className="flex items-center gap-2 w-full md:w-auto justify-between">
                                 <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
                                     <div className="p-1 bg-blue-100 rounded-lg">
@@ -441,7 +441,7 @@ export default function BeneficiarySharePage() {
                         </CardHeader>
 
                         {/* Filter Dropdowns */}
-                        <div className="px-6 py-4 bg-slate-50/50 border-b border-blue-50">
+                        <div className="px-5 sm:px-6 py-4 bg-slate-50/30 border-b border-slate-100">
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                                 {[
                                     { key: "regId", label: "Reg ID" },
@@ -492,11 +492,11 @@ export default function BeneficiarySharePage() {
 
                         <CardContent className="p-0">
                             {/* Desktop Table */}
-                            <div className="overflow-x-auto">
-                                <Table className="[&_th]:text-center [&_td]:text-center">
-                                    <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
-                                        <TableRow className="border-b border-blue-100 hover:bg-transparent">
-                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
+                            <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
+                                <Table className="w-full text-sm border-collapse [&_th]:text-center [&_td]:text-center">
+                                    <TableHeader className="bg-slate-50/80">
+                                        <TableRow className="border-b border-slate-200 hover:bg-transparent">
+                                            <TableHead className="h-11 px-3 sm:px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12 border-r border-slate-200/50">
                                                 <div className="flex justify-center">
                                                     <Checkbox
                                                         checked={
@@ -510,41 +510,41 @@ export default function BeneficiarySharePage() {
                                                     />
                                                 </div>
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
+                                            <TableHead className="h-11 px-3 sm:px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[150px] border-r border-slate-200/50">
                                                 Action
                                             </TableHead>
-                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-11 px-3 sm:px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14 border-r border-slate-200/50">S.No</TableHead>
+                                            <TableHead className="h-11 px-3 sm:px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap border-r border-slate-200/50">
                                                 Reg ID
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-11 px-3 sm:px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap border-r border-slate-200/50">
                                                 Beneficiary Name
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-11 px-3 sm:px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap border-r border-slate-200/50">
                                                 Father's Name
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-11 px-3 sm:px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap border-r border-slate-200/50">
                                                 Mobile Number
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-11 px-3 sm:px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap border-r border-slate-200/50">
                                                 Village
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-11 px-3 sm:px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap border-r border-slate-200/50">
                                                 Block
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-11 px-3 sm:px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap border-r border-slate-200/50">
                                                 District
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-11 px-3 sm:px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap border-r border-slate-200/50">
                                                 Pincode
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-11 px-3 sm:px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap border-r border-slate-200/50">
                                                 Pump Capacity
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-11 px-3 sm:px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap border-r border-slate-200/50">
                                                 Pump Head
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-11 px-3 sm:px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap border-r border-slate-200/50">
                                                 IP Name
                                             </TableHead>
                                         </TableRow>
@@ -583,9 +583,9 @@ export default function BeneficiarySharePage() {
                                             filteredPendingItems.map((item, index) => (
                                                 <TableRow
                                                     key={item.regId}
-                                                    className="hover:bg-blue-50/30 transition-colors"
+                                                    className="group hover:bg-slate-50/50 transition-colors border-b border-slate-100/70 last:border-none"
                                                 >
-                                                    <TableCell className="px-4">
+                                                    <TableCell className="px-3 sm:px-4 py-2.5 border-r border-slate-100/50">
                                                         <div className="flex justify-center">
                                                             <Checkbox
                                                                 checked={selectedRows.includes(item.regId)}
@@ -597,7 +597,7 @@ export default function BeneficiarySharePage() {
                                                             />
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell>
+                                                    <TableCell className="px-3 sm:px-4 py-2.5 border-r border-slate-100/50">
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
@@ -609,38 +609,38 @@ export default function BeneficiarySharePage() {
                                                             Process Update
                                                         </Button>
                                                     </TableCell>
-                                                    <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
-                                                    <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">
+                                                    <TableCell className="px-3 sm:px-4 py-2.5 border-r border-slate-100/50 text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                                                    <TableCell className="px-3 sm:px-4 py-2.5 border-r border-slate-100/50 whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 rounded-md mx-auto w-fit text-center">
                                                         {item.regId}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap font-medium text-slate-800">
+                                                    <TableCell className="px-3 sm:px-4 py-2.5 border-r border-slate-100/50 whitespace-nowrap font-medium text-slate-800 text-left">
                                                         {item.beneficiaryName}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">
+                                                    <TableCell className="px-3 sm:px-4 py-2.5 border-r border-slate-100/50 whitespace-nowrap text-slate-600 text-left">
                                                         {item.fatherName}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">
+                                                    <TableCell className="px-3 sm:px-4 py-2.5 border-r border-slate-100/50 whitespace-nowrap text-slate-600 text-center">
                                                         {item.mobileNumber}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">
+                                                    <TableCell className="px-3 sm:px-4 py-2.5 border-r border-slate-100/50 whitespace-nowrap text-slate-600 text-left">
                                                         {item.village}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">
+                                                    <TableCell className="px-3 sm:px-4 py-2.5 border-r border-slate-100/50 whitespace-nowrap text-slate-600 text-left">
                                                         {item.block}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">
+                                                    <TableCell className="px-3 sm:px-4 py-2.5 border-r border-slate-100/50 whitespace-nowrap text-slate-600 text-left">
                                                         {item.district}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">
+                                                    <TableCell className="px-3 sm:px-4 py-2.5 border-r border-slate-100/50 whitespace-nowrap text-slate-600 text-center">
                                                         {item.pincode}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">
+                                                    <TableCell className="px-3 sm:px-4 py-2.5 border-r border-slate-100/50 whitespace-nowrap text-slate-600 text-center">
                                                         {item.pumpCapacity}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">
+                                                    <TableCell className="px-3 sm:px-4 py-2.5 border-r border-slate-100/50 whitespace-nowrap text-slate-600 text-center">
                                                         {item.pumpHead}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600 font-medium">
+                                                    <TableCell className="px-3 sm:px-4 py-2.5 border-r border-slate-100/50 whitespace-nowrap text-slate-600 font-medium text-left">
                                                         {item.ipName}
                                                     </TableCell>
                                                 </TableRow>
@@ -752,8 +752,8 @@ export default function BeneficiarySharePage() {
                     value="history"
                     className="mt-6 focus-visible:ring-0 focus-visible:outline-none animate-in fade-in-0 slide-in-from-right-4 duration-500 ease-out"
                 >
-                    <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-                        <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
+                    <Card className="border border-slate-200 shadow-sm bg-white overflow-hidden rounded-xl">
+                        <CardHeader className="border-b border-slate-100 bg-slate-50/50 px-5 sm:px-6 py-4 sm:py-5 flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
                             <div className="flex items-center gap-2 w-full md:w-auto">
                                 <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
                                     <div className="p-1 bg-blue-100 rounded-lg">
@@ -846,7 +846,7 @@ export default function BeneficiarySharePage() {
 
                         <CardContent className="p-0">
                             {/* Desktop Table */}
-                            <div className="overflow-x-auto">
+                            <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
                                 <Table className="[&_th]:text-center [&_td]:text-center">
                                     <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                                         <TableRow className="border-b border-blue-100 hover:bg-transparent">
@@ -995,7 +995,7 @@ export default function BeneficiarySharePage() {
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent
                     showCloseButton={!isSuccess}
-                    className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isSuccess ? "bg-transparent !shadow-none !border-none" : "bg-white"
+                    className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 rounded-2xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isSuccess ? "bg-transparent !shadow-none !border-none" : "bg-white"
                         }`}
                 >
                     {isSuccess ? (
@@ -1009,10 +1009,10 @@ export default function BeneficiarySharePage() {
                         </div>
                     ) : (
                         <>
-                            <DialogHeader className="p-6 pb-2 border-b border-blue-100 bg-blue-50/30">
-                                <DialogTitle className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent flex items-center gap-2">
-                                    <span className="bg-blue-100 p-1.5 rounded-md">
-                                        <FileText className="h-4 w-4 text-blue-600" />
+                            <DialogHeader className="p-5 sm:p-6 pb-4 sm:pb-5 border-b border-slate-100 bg-slate-50/50">
+                                <DialogTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                    <span className="bg-blue-50 text-blue-600 p-1.5 rounded-lg shadow-sm border border-blue-100/50">
+                                        <FileText className="h-4 w-4" />
                                     </span>
                                     Update Portal Record
                                 </DialogTitle>
@@ -1037,48 +1037,48 @@ export default function BeneficiarySharePage() {
                             </DialogHeader>
 
                             {(selectedItem || isBulk) && (
-                                <div className="grid gap-6 p-6">
+                                <div className="grid gap-6 p-5 sm:p-6 bg-slate-50/30">
                                     {/* PREFILLED BENEFICIARY DETAILS CARD - Hide in Bulk */}
                                     {!isBulk && selectedItem && (
-                                        <div className="rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50/50 to-cyan-50/30 p-5 shadow-sm">
-                                            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-blue-100/50">
-                                                <span className="bg-white p-1 rounded shadow-sm">
-                                                    <CheckCircle2 className="h-4 w-4 text-blue-500" />
+                                        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
+                                            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+                                                <span className="bg-emerald-50 p-1 rounded-md shadow-sm border border-emerald-100">
+                                                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                                                 </span>
-                                                <h4 className="font-semibold text-blue-900">
+                                                <h4 className="font-semibold text-slate-800">
                                                     Beneficiary Details
                                                 </h4>
                                             </div>
                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 text-sm">
                                                 <div>
-                                                    <span className="text-xs font-medium text-blue-600/70 uppercase tracking-wider block mb-1">
+                                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                                                         Serial No
                                                     </span>
-                                                    <p className="font-semibold text-slate-700">
+                                                    <p className="font-medium text-slate-800">
                                                         {selectedItem.serialNo}
                                                     </p>
                                                 </div>
                                                 <div>
-                                                    <span className="text-xs font-medium text-blue-600/70 uppercase tracking-wider block mb-1">
+                                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                                                         Reg ID
                                                     </span>
-                                                    <p className="font-semibold text-slate-700">
+                                                    <p className="font-mono text-sm font-medium text-slate-800">
                                                         {selectedItem.regId}
                                                     </p>
                                                 </div>
                                                 <div>
-                                                    <span className="text-xs font-medium text-blue-600/70 uppercase tracking-wider block mb-1">
+                                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                                                         Beneficiary Name
                                                     </span>
-                                                    <p className="font-semibold text-slate-700">
+                                                    <p className="font-medium text-slate-800">
                                                         {selectedItem.beneficiaryName}
                                                     </p>
                                                 </div>
                                                 <div>
-                                                    <span className="text-xs font-medium text-blue-600/70 uppercase tracking-wider block mb-1">
+                                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                                                         Father's Name
                                                     </span>
-                                                    <p className="font-semibold text-slate-700">
+                                                    <p className="font-medium text-slate-800">
                                                         {selectedItem.fatherName}
                                                     </p>
                                                 </div>

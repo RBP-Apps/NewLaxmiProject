@@ -498,7 +498,7 @@ export default function SurveyPage() {
   };
 
   return (
-    <div className="space-y-8 p-6 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
+    <div className="space-y-8 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
       <Tabs
         defaultValue="pending"
         value={activeTab}
@@ -527,53 +527,59 @@ export default function SurveyPage() {
         {/* PENDING TAB */}
         <TabsContent
           value="pending"
-          className="mt-6 focus-visible:outline-hidden animate-in fade-in-0 slide-in-from-left-4 duration-500 ease-out"
+          className="focus-visible:outline-none focus-visible:ring-0"
         >
-          <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-            <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-0.5 h-10 flex items-center">
-              <div className="flex flex-col md:flex-row items-center gap-4 w-full justify-between">
-                <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
-                  <div className="p-1 bg-blue-100 rounded-lg">
-                    <FileCheck className="h-4 w-4 text-blue-600" />
-                  </div>
-                  Pending for Survey
-                </CardTitle>
+          <Card className="border-slate-200 shadow-sm bg-white overflow-hidden rounded-xl">
+            <CardHeader className="border-b border-slate-100 bg-slate-50/50 px-6 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 border border-blue-200/50">
+                  <FileCheck className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-semibold text-slate-800">
+                    Pending for Survey
+                  </CardTitle>
+                  <p className="text-sm text-slate-500">
+                    Review and process pending surveys
+                  </p>
+                </div>
+              </div>
 
-                <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                  <div className="relative w-full md:w-80">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                      placeholder="Search..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-9 bg-white border-slate-200 focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
-                    />
-                  </div>
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                <div className="relative w-full sm:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input
+                    placeholder="Search records..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9 h-10 w-full bg-white border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-blue-500/20 shadow-sm rounded-lg transition-all"
+                  />
+                </div>
 
-                  <div className="flex items-center gap-3 justify-end w-full md:w-auto">
-                    {selectedRows.length >= 2 && (
-                      <Button
-                        onClick={handleBulkClick}
-                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
-                        size="sm"
-                      >
-                        <Pencil className="h-4 w-4 mr-2" />
-                        survey Selected ({selectedRows.length})
-                      </Button>
-                    )}
-                    <Badge
-                      variant="outline"
-                      className="bg-yellow-100 text-yellow-700 border-yellow-200 px-3 py-1 h-9 flex items-center"
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                  {selectedRows.length >= 2 && (
+                    <Button
+                      onClick={handleBulkClick}
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow h-10 px-4 transition-all duration-300 rounded-lg"
+                      size="sm"
                     >
-                      {filteredPendingItems.length} Pending
-                    </Badge>
-                  </div>
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Batch Update ({selectedRows.length})
+                    </Button>
+                  )}
+                  <Badge
+                    variant="secondary"
+                    className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-transparent h-10 px-4 rounded-lg text-sm font-medium flex items-center shadow-sm"
+                  >
+                    {filteredPendingItems.length} Pending
+                  </Badge>
                 </div>
               </div>
             </CardHeader>
+
             {/* Filter Dropdowns */}
-            <div className="px-6 py-4 bg-slate-50/50 border-b border-blue-50">
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+            <div className="px-6 py-4 bg-white border-b border-slate-100">
+              <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
                 {[
                   { key: "regId", label: "Reg ID" },
                   { key: "village", label: "Village" },
@@ -583,16 +589,17 @@ export default function SurveyPage() {
                   { key: "pumpCapacity", label: "Pump Capacity" },
                   { key: "ipName", label: "IP Name" },
                 ].map(({ key, label }) => (
-                  <div key={key} className="space-y-1.5">
-                    <Label className="text-xs text-slate-600">{label}</Label>
+                  <div key={key} className="space-y-1.5 flex flex-col">
+                    <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{label}</Label>
                     <select
                       value={filters[key]}
                       onChange={(e) =>
                         setFilters({ ...filters, [key]: e.target.value })
                       }
-                      className="w-full h-9 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                      className="h-9 w-full rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-slate-300 transition-colors appearance-none cursor-pointer"
+                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '1rem' }}
                     >
-                      <option value="">All</option>
+                      <option value="">All {label}</option>
                       {getUniquePendingValues(key).map((val) => (
                         <option key={val} value={val}>
                           {val}
@@ -603,155 +610,175 @@ export default function SurveyPage() {
                 ))}
               </div>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setFilters({
-                    regId: "",
-                    village: "",
-                    block: "",
-                    district: "",
-                    pumpSource: "",
-                    pumpCapacity: "",
-                    ipName: "",
-                  })
-                }
-                className="mt-3 text-xs"
-              >
-                Clear All Filters
-              </Button>
+              {Object.values(filters).some(v => v !== "") && (
+                <div className="mt-4 flex justify-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      setFilters({
+                        regId: "",
+                        village: "",
+                        block: "",
+                        district: "",
+                        pumpSource: "",
+                        pumpCapacity: "",
+                        ipName: "",
+                      })
+                    }
+                    className="text-slate-500 hover:text-slate-700 hover:bg-slate-100 h-8 px-3 text-xs font-medium bg-white border border-slate-200 shadow-sm"
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              )}
             </div>
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table className="[&_th]:text-center [&_td]:text-center">
-                  <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
-                    <TableRow className="border-b border-blue-100 hover:bg-transparent">
-                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
-                        <div className="flex justify-center">
-                          <Checkbox
-                            checked={
-                              filteredPendingItems.length > 0 &&
-                              selectedRows.length ===
-                              filteredPendingItems.length
-                            }
-                            onCheckedChange={handleSelectAll}
-                            aria-label="Select all rows"
-                            className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
-                          />
-                        </div>
+              <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
+                <Table>
+                  <TableHeader className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm border-b border-slate-200">
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="w-12 px-4 py-3 text-center">
+                        <Checkbox
+                          checked={
+                            filteredPendingItems.length > 0 &&
+                            selectedRows.length ===
+                            filteredPendingItems.length
+                          }
+                          onCheckedChange={handleSelectAll}
+                          aria-label="Select all rows"
+                          className="border-slate-300 rounded data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                        />
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-32">
+                      <TableHead className="w-[120px] font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center">
                         Action
                       </TableHead>
-                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="w-14 font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center">S.No</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[120px]">
                         Reg ID
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[150px]">
                         Beneficiary Name
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[150px]">
                         Father's Name
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[120px]">
                         Mobile Number
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[100px]">
                         Village
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[100px]">
                         Block
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[100px]">
                         District
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[100px]">
                         Pincode
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[130px]">
                         Pump Capacity
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[130px]">
                         Pump Head
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[150px]">
                         IP Name
                       </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredPendingItems.length === 0 ? (
+                    {isLoading ? (
+                      Array.from({ length: 5 }).map((_, index) => (
+                        <TableRow key={`skeleton-pending-${index}`} className="animate-pulse border-b border-slate-100">
+                          {Array.from({ length: 14 }).map((__, i) => (
+                            <TableCell key={i} className="px-4 py-3">
+                              <div className="h-4 bg-slate-200 rounded"></div>
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))
+                    ) : filteredPendingItems.length === 0 ? (
                       <TableRow>
                         <TableCell
                           colSpan={14}
-                          className="h-32 text-center text-muted-foreground"
+                          className="h-48 text-center text-slate-500 bg-slate-50/50"
                         >
-                          No pending items found matching your search.
+                          <div className="flex flex-col items-center justify-center gap-3">
+                            <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center shadow-inner">
+                              <FileCheck className="h-6 w-6 text-slate-400" />
+                            </div>
+                            <p className="text-sm">No pending items found matching your search.</p>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ) : (
                       filteredPendingItems.map((item, index) => (
                         <TableRow
                           key={item.serialNo}
-                          className="hover:bg-blue-50/50 transition-colors"
+                          className="hover:bg-slate-50/80 transition-colors border-b border-slate-100 group"
                         >
-                          <TableCell className="px-4">
-                            <div className="flex justify-center">
-                              <Checkbox
-                                checked={selectedRows.includes(item.serialNo)}
-                                onCheckedChange={(checked) =>
-                                  handleSelectRow(item.serialNo, checked)
-                                }
-                                aria-label={`Select row ${item.serialNo}`}
-                                className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110"
-                              />
-                            </div>
+                          <TableCell className="px-4 py-3 align-middle text-center">
+                            <Checkbox
+                              checked={selectedRows.includes(item.serialNo)}
+                              onCheckedChange={(checked) =>
+                                handleSelectRow(item.serialNo, checked)
+                              }
+                              aria-label={`Select row ${item.serialNo}`}
+                              className="border-slate-300 rounded data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 transition-all opacity-0 group-hover:opacity-100 data-[state=checked]:opacity-100"
+                            />
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-center">
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleActionClick(item)}
                               disabled={selectedRows.length >= 2}
-                              className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="h-8 px-3 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 transition-all text-xs font-medium w-full max-w-[100px] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mx-auto"
                             >
-                              <FileCheck className="h-3.5 w-3.5" />
-                              Submit
+                              Process
                             </Button>
                           </TableCell>
-                          <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
-                          <TableCell className="text-slate-600 font-mono text-xs">
-                            {item.regId}
+                          <TableCell className="px-4 py-3 align-middle text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle">
+                            <span className="font-mono text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-1 rounded border border-slate-200">
+                              {item.regId}
+                            </span>
                           </TableCell>
-                          <TableCell className="font-medium text-slate-800">
+                          <TableCell className="px-4 py-3 align-middle font-medium text-slate-800">
                             {item.beneficiaryName}
                           </TableCell>
-                          <TableCell className="text-slate-600">
+                          <TableCell className="px-4 py-3 align-middle text-slate-700">
                             {item.fatherName}
                           </TableCell>
-                          <TableCell className="text-slate-600">
+                          <TableCell className="px-4 py-3 align-middle text-slate-700">
                             {item.mobileNumber}
                           </TableCell>
-                          <TableCell className="text-slate-600">
+                          <TableCell className="px-4 py-3 align-middle text-slate-600">
                             {item.village}
                           </TableCell>
-                          <TableCell className="text-slate-600">
+                          <TableCell className="px-4 py-3 align-middle text-slate-600">
                             {item.block}
                           </TableCell>
-                          <TableCell className="text-slate-600">
+                          <TableCell className="px-4 py-3 align-middle text-slate-600">
                             {item.district}
                           </TableCell>
-                          <TableCell className="text-slate-600">
+                          <TableCell className="px-4 py-3 align-middle text-center text-slate-600">
                             {item.pincode}
                           </TableCell>
-                          <TableCell className="text-slate-600">
-                            {item.pumpCapacity}
+                          <TableCell className="px-4 py-3 align-middle text-center">
+                            <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 font-medium">
+                              {item.pumpCapacity}
+                            </Badge>
                           </TableCell>
-                          <TableCell className="text-slate-600">
-                            {item.pumpHead}
+                          <TableCell className="px-4 py-3 align-middle text-center">
+                            <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 font-medium">
+                              {item.pumpHead}
+                            </Badge>
                           </TableCell>
-                          <TableCell className="text-slate-600">
+                          <TableCell className="px-4 py-3 align-middle text-slate-600 font-medium">
                             {item.ipName}
                           </TableCell>
                         </TableRow>
@@ -767,52 +794,58 @@ export default function SurveyPage() {
         {/* HISTORY TAB */}
         <TabsContent
           value="history"
-          className="mt-6 focus-visible:outline-hidden animate-in fade-in-0 slide-in-from-right-4 duration-500 ease-out"
+          className="focus-visible:outline-none focus-visible:ring-0"
         >
-          <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-            <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-0.5 h-10 flex items-center">
-              <div className="flex flex-col md:flex-row items-center gap-4 w-full justify-between">
-                <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
-                  <div className="p-1 bg-blue-100 rounded-lg">
-                    <CheckCircle2 className="h-4 w-4 text-blue-600" />
-                  </div>
-                  Completed Survey History
-                </CardTitle>
+          <Card className="border-slate-200 shadow-sm bg-white overflow-hidden rounded-xl">
+            <CardHeader className="border-b border-slate-100 bg-slate-50/50 px-6 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-teal-50 border border-teal-200/50">
+                  <CheckCircle2 className="h-5 w-5 text-teal-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-semibold text-slate-800">
+                    Completed Survey History
+                  </CardTitle>
+                  <p className="text-sm text-slate-500">
+                    Review and manage previously processed surveys
+                  </p>
+                </div>
+              </div>
 
-                <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                  <div className="relative w-full md:w-80">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                      placeholder="Search..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-9 bg-white border-slate-200 focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
-                    />
-                  </div>
-                  <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-                    {selectedRows.length >= 2 && (
-                      <Button
-                        onClick={handleBulkClick}
-                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
-                        size="sm"
-                      >
-                        <Pencil className="h-4 w-4 mr-2" />
-                        survey Selected ({selectedRows.length})
-                      </Button>
-                    )}
-                    <Badge
-                      variant="outline"
-                      className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 h-9 flex items-center whitespace-nowrap"
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                <div className="relative w-full sm:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input
+                    placeholder="Search records..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9 h-10 w-full bg-white border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-blue-500/20 shadow-sm rounded-lg transition-all"
+                  />
+                </div>
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                  {selectedRows.length >= 2 && (
+                    <Button
+                      onClick={handleBulkClick}
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow h-10 px-4 transition-all duration-300 rounded-lg"
+                      size="sm"
                     >
-                      {filteredHistoryItems.length} Completed
-                    </Badge>
-                  </div>
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Batch Update ({selectedRows.length})
+                    </Button>
+                  )}
+                  <Badge
+                    variant="secondary"
+                    className="bg-slate-100 text-slate-700 hover:bg-slate-200 border-transparent h-10 px-4 rounded-lg text-sm font-medium flex items-center shadow-sm"
+                  >
+                    {filteredHistoryItems.length} Completed
+                  </Badge>
                 </div>
               </div>
             </CardHeader>
+
             {/* Filter Dropdowns */}
-            <div className="px-6 py-4 bg-slate-50/50 border-b border-blue-50">
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+            <div className="px-6 py-4 bg-white border-b border-slate-100">
+              <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
                 {[
                   { key: "regId", label: "Reg ID" },
                   { key: "village", label: "Village" },
@@ -822,16 +855,17 @@ export default function SurveyPage() {
                   { key: "pumpCapacity", label: "Pump Capacity" },
                   { key: "ipName", label: "IP Name" },
                 ].map(({ key, label }) => (
-                  <div key={key} className="space-y-1.5">
-                    <Label className="text-xs text-slate-600">{label}</Label>
+                  <div key={key} className="space-y-1.5 flex flex-col">
+                    <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{label}</Label>
                     <select
                       value={filters[key]}
                       onChange={(e) =>
                         setFilters({ ...filters, [key]: e.target.value })
                       }
-                      className="w-full h-9 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                      className="h-9 w-full rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-slate-300 transition-colors appearance-none cursor-pointer"
+                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '1rem' }}
                     >
-                      <option value="">All</option>
+                      <option value="">All {label}</option>
                       {getUniqueHistoryValues(key).map((val) => (
                         <option key={val} value={val}>
                           {val}
@@ -842,206 +876,228 @@ export default function SurveyPage() {
                 ))}
               </div>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setFilters({
-                    regId: "",
-                    village: "",
-                    block: "",
-                    district: "",
-                    pumpSource: "",
-                    pumpCapacity: "",
-                    ipName: "",
-                  })
-                }
-                className="mt-3 text-xs"
-              >
-                Clear All Filters
-              </Button>
+              {Object.values(filters).some(v => v !== "") && (
+                <div className="mt-4 flex justify-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      setFilters({
+                        regId: "",
+                        village: "",
+                        block: "",
+                        district: "",
+                        pumpSource: "",
+                        pumpCapacity: "",
+                        ipName: "",
+                      })
+                    }
+                    className="text-slate-500 hover:text-slate-700 hover:bg-slate-100 h-8 px-3 text-xs font-medium bg-white border border-slate-200 shadow-sm"
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              )}
             </div>
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table className="[&_th]:text-center [&_td]:text-center">
-                  <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
-                    <TableRow className="border-b border-blue-100 hover:bg-transparent">
-                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
-                        <div className="flex justify-center">
-                          <Checkbox
-                            checked={
-                              filteredHistoryItems.length > 0 &&
-                              selectedRows.length ===
-                              filteredHistoryItems.length
-                            }
-                            onCheckedChange={handleSelectAll}
-                            aria-label="Select all rows"
-                            className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
-                          />
-                        </div>
+              <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
+                <Table>
+                  <TableHeader className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm border-b border-slate-200">
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="w-12 px-4 py-3 text-center">
+                        <Checkbox
+                          checked={
+                            filteredHistoryItems.length > 0 &&
+                            selectedRows.length ===
+                            filteredHistoryItems.length
+                          }
+                          onCheckedChange={handleSelectAll}
+                          aria-label="Select all rows"
+                          className="border-slate-300 rounded data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                        />
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="w-[120px] font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center">
                         Action
                       </TableHead>
-                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="w-14 font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center">S.No</TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[120px]">
                         Reg ID
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[150px]">
                         Beneficiary Name
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[150px]">
                         Father's Name
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[120px]">
                         Mobile Number
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[100px]">
                         Village
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[100px]">
                         Block
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[100px]">
                         District
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[100px]">
                         Pincode
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[130px]">
                         Pump Capacity
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[130px]">
                         Pump Head
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[150px]">
                         IP Name
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[100px]">
                         Photo
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[120px]">
                         Planned Date
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[120px]">
                         Survey Date
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[100px]">
                         Delay
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                        Survey Status
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[120px]">
+                        Status
                       </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredHistoryItems.length === 0 ? (
+                    {isLoading ? (
+                      Array.from({ length: 5 }).map((_, index) => (
+                        <TableRow key={`skeleton-history-${index}`} className="animate-pulse border-b border-slate-100">
+                          {Array.from({ length: 19 }).map((__, i) => (
+                            <TableCell key={i} className="px-4 py-3">
+                              <div className="h-4 bg-slate-200 rounded"></div>
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))
+                    ) : filteredHistoryItems.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={24}
-                          className="h-48 text-center text-slate-500 bg-slate-50/30"
+                          colSpan={19}
+                          className="h-48 text-center text-slate-500 bg-slate-50/50"
                         >
-                          No survey history found.
+                          <div className="flex flex-col items-center justify-center gap-3">
+                            <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center shadow-inner">
+                              <FileCheck className="h-6 w-6 text-slate-400" />
+                            </div>
+                            <p className="text-sm">No survey history found.</p>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ) : (
                       filteredHistoryItems.map((item, index) => (
                         <TableRow
                           key={item.serialNo}
-                          className="hover:bg-blue-50/30 transition-colors"
+                          className="hover:bg-slate-50/80 transition-colors border-b border-slate-100 group"
                         >
-                          <TableCell className="px-4">
-                            <div className="flex justify-center">
-                              <Checkbox
-                                checked={selectedRows.includes(item.serialNo)}
-                                onCheckedChange={(checked) =>
-                                  handleSelectRow(item.serialNo, checked)
-                                }
-                                aria-label={`Select row ${item.serialNo}`}
-                                className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110"
-                              />
-                            </div>
+                          <TableCell className="px-4 py-3 align-middle text-center">
+                            <Checkbox
+                              checked={selectedRows.includes(item.serialNo)}
+                              onCheckedChange={(checked) =>
+                                handleSelectRow(item.serialNo, checked)
+                              }
+                              aria-label={`Select row ${item.serialNo}`}
+                              className="border-slate-300 rounded data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 transition-all opacity-0 group-hover:opacity-100 data-[state=checked]:opacity-100"
+                            />
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-center">
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleActionClick(item)}
-                              className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto"
+                              disabled={selectedRows.length >= 2}
+                              className="h-8 px-3 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 transition-all text-xs font-medium w-full max-w-[100px] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mx-auto"
                             >
-                              <Pencil className="h-3.5 w-3.5" />
                               Edit
                             </Button>
                           </TableCell>
-                          <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
-                          <TableCell className="text-slate-600 font-mono text-xs">
-                            {item.regId}
+                          <TableCell className="px-4 py-3 align-middle text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle">
+                            <span className="font-mono text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-1 rounded border border-slate-200">
+                              {item.regId}
+                            </span>
                           </TableCell>
-                          <TableCell className="font-medium text-slate-800">
+                          <TableCell className="px-4 py-3 align-middle font-medium text-slate-800">
                             {item.beneficiaryName}
                           </TableCell>
-                          <TableCell className="text-slate-600">
+                          <TableCell className="px-4 py-3 align-middle text-slate-700">
                             {item.fatherName}
                           </TableCell>
-                          <TableCell className="text-slate-600">
+                          <TableCell className="px-4 py-3 align-middle text-slate-700">
                             {item.mobileNumber}
                           </TableCell>
-                          <TableCell className="text-slate-600">
+                          <TableCell className="px-4 py-3 align-middle text-slate-600">
                             {item.village}
                           </TableCell>
-                          <TableCell className="text-slate-600">
+                          <TableCell className="px-4 py-3 align-middle text-slate-600">
                             {item.block}
                           </TableCell>
-                          <TableCell className="text-slate-600">
+                          <TableCell className="px-4 py-3 align-middle text-slate-600">
                             {item.district}
                           </TableCell>
-                          <TableCell className="text-slate-600">
+                          <TableCell className="px-4 py-3 align-middle text-center text-slate-600">
                             {item.pincode}
                           </TableCell>
-                          <TableCell className="text-slate-600">
-                            {item.pumpCapacity}
+                          <TableCell className="px-4 py-3 align-middle text-center">
+                            <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 font-medium">
+                              {item.pumpCapacity}
+                            </Badge>
                           </TableCell>
-                          <TableCell className="text-slate-600">
-                            {item.pumpHead}
+                          <TableCell className="px-4 py-3 align-middle text-center">
+                            <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 font-medium">
+                              {item.pumpHead}
+                            </Badge>
                           </TableCell>
-                          <TableCell className="text-slate-600">
+                          <TableCell className="px-4 py-3 align-middle text-slate-600 font-medium">
                             {item.ipName}
                           </TableCell>
-                          <TableCell className="py-3 px-4">
+                          <TableCell className="px-4 py-3 align-middle text-center">
                             {item.surveyFile ? (
-                              <div className="flex justify-center">
-                                <a
-                                  href={getPreviewUrl(item.surveyFile)}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 flex items-center gap-2 hover:text-blue-800 transition-colors group"
-                                >
-                                  <Upload className="h-4 w-4" />
-                                  <span className="underline font-medium text-sm">View</span>
-                                </a>
-                              </div>
+                              <a
+                                href={getPreviewUrl(item.surveyFile)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 hover:underline hover:bg-blue-50 px-2 py-1 rounded transition-colors text-sm font-medium"
+                              >
+                                <Upload className="h-4 w-4" /> View
+                              </a>
                             ) : (
-                              <span className="text-slate-300 font-mono text-xs">-</span>
+                              <span className="text-slate-400 italic text-sm">--</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-slate-600 whitespace-nowrap">
-                            {item.planned2 || "-"}
+                          <TableCell className="px-4 py-3 align-middle text-center text-slate-600">
+                            {item.planned2 || "--"}
                           </TableCell>
-                          <TableCell className="text-slate-600 whitespace-nowrap">
-                            {item.actual2 || "-"}
+                          <TableCell className="px-4 py-3 align-middle text-center text-slate-600">
+                            {item.actual2 || "--"}
                           </TableCell>
-                          <TableCell className="text-red-500 font-medium">
-                            {item.delay2 > 0 ? `${item.delay2} Days` : "-"}
+                          <TableCell className="px-4 py-3 align-middle text-center">
+                            {item.delay2 > 0 ? (
+                              <span className="text-red-600 font-medium">{item.delay2} Days</span>
+                            ) : (
+                              <span className="text-slate-400">--</span>
+                            )}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-center">
                             <Badge
+                              className={`
+                                ${item.surveyStatus === "Completed" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : ""}
+                                ${item.surveyStatus === "Pending" ? "bg-amber-50 text-amber-700 border-amber-200" : ""}
+                              `}
                               variant="outline"
-                              className={`text-xs font-medium ${item.surveyStatus === "Completed"
-                                ? "bg-green-50 text-green-700 border-green-200"
-                                : item.surveyStatus === "Pending"
-                                }`}
                             >
-                              {item.surveyStatus}
+                              {item.surveyStatus || "Pending"}
                             </Badge>
                           </TableCell>
                         </TableRow>
@@ -1059,13 +1115,13 @@ export default function SurveyPage() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent
           showCloseButton={!isSuccess}
-          className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isSuccess ? "bg-transparent !shadow-none !border-none" : ""
+          className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] sm:rounded-2xl ${isSuccess ? "bg-transparent shadow-none! border-none!" : ""
             }`}
         >
           {isSuccess ? (
             <div className="flex flex-col items-center justify-center w-full p-8 text-center space-y-6 animate-in fade-in duration-300">
               <div className="rounded-full bg-white p-5 shadow-2xl shadow-white/20 ring-8 ring-white/10 animate-in zoom-in duration-500 ease-out">
-                <CheckCircle2 className="h-16 w-16 text-green-600 scale-110" />
+                <CheckCircle2 className="h-16 w-16 text-emerald-600 scale-110" />
               </div>
               <h2 className="text-3xl font-bold text-white drop-shadow-md animate-in slide-in-from-bottom-4 fade-in duration-500 delay-150 ease-out tracking-wide">
                 Approved Successfully!
@@ -1073,30 +1129,30 @@ export default function SurveyPage() {
             </div>
           ) : (
             <>
-              <DialogHeader className="p-6 pb-2 border-b border-blue-100 bg-blue-50/30">
-                <DialogTitle className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent flex items-center gap-2">
-                  <span className="bg-blue-100 p-1.5 rounded-md">
-                    <FileCheck className="h-4 w-4 text-blue-600" />
-                  </span>
+              <DialogHeader className="p-6 pb-4 border-b border-slate-100 bg-white sticky top-0 z-10 shadow-sm">
+                <DialogTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                  <div className="p-2 bg-blue-50 rounded-lg border border-blue-100/50">
+                    <FileCheck className="h-5 w-5 text-blue-600" />
+                  </div>
                   Process Survey
                 </DialogTitle>
-                <DialogDescription className="text-slate-500 ml-10">
+                <DialogDescription className="text-slate-500 ml-12 text-sm">
                   {isBulk ? (
                     <span>
                       Applying changes to{" "}
-                      <span className="font-bold text-blue-700">
+                      <span className="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">
                         {selectedRows.length} selected items
                       </span>
                       . All fields below will be updated for these items.
                     </span>
                   ) : (
-                    <span>
+                    <span className="flex items-center gap-2">
                       Processing survey for{" "}
                       <span className="font-semibold text-slate-700">
                         {selectedItem?.beneficiaryName}
                       </span>{" "}
-                      <span className="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded text-slate-600 border border-slate-200">
-                        {selectedItem?.serialNo}
+                      <span className="font-mono text-xs bg-slate-100 px-2 py-0.5 rounded-md text-slate-600 border border-slate-200">
+                        Reg ID: {selectedItem?.regId}
                       </span>
                     </span>
                   )}
@@ -1104,65 +1160,65 @@ export default function SurveyPage() {
               </DialogHeader>
 
               {(selectedItem || isBulk) && (
-                <div className="p-6 space-y-6">
+                <div className="p-6 space-y-8 bg-slate-50/30">
                   {/* PREFILLED BENEFICIARY DETAILS CARD */}
                   {selectedItem && !isBulk && (
-                    <div className="rounded-xl border border-blue-100 bg-linear-to-br from-blue-50/50 to-cyan-50/30 p-5 shadow-sm">
-                      <h3 className="text-sm font-bold text-blue-900 mb-4 flex items-center gap-2 border-b border-blue-100 pb-2">
-                        <span className="bg-white p-1 rounded shadow-sm">
-                          <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                        </span>
+                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                      <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
+                        <div className="p-1 bg-emerald-50 rounded shadow-sm border border-emerald-100">
+                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                        </div>
                         BENEFICIARY DETAILS
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-6">
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase font-bold text-blue-900/60 block mb-1">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-8">
+                        <div className="space-y-1.5">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
                             Reg ID
                           </span>
-                          <div className="font-medium text-slate-700 font-mono bg-white/50 px-2 py-1 rounded border border-blue-100/50 inline-block break-all">
+                          <div className="font-semibold text-slate-800 font-mono bg-slate-50 px-2.5 py-1 rounded border border-slate-200 inline-block break-all text-sm">
                             {selectedItem.regId}
                           </div>
                         </div>
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase font-bold text-blue-900/60 block mb-1">
+                        <div className="space-y-1.5">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
                             Father's Name
                           </span>
-                          <p className="font-medium text-slate-700">
+                          <p className="font-medium text-slate-800 text-sm">
                             {selectedItem.fatherName}
                           </p>
                         </div>
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase font-bold text-blue-900/60 block mb-1">
+                        <div className="space-y-1.5">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
                             Village & Block
                           </span>
-                          <p className="font-medium text-slate-700">
+                          <p className="font-medium text-slate-800 text-sm">
                             {selectedItem.village}, {selectedItem.block}
                           </p>
                         </div>
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase font-bold text-blue-900/60 block mb-1">
+                        <div className="space-y-1.5">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
                             District
                           </span>
-                          <p className="font-medium text-slate-700">
+                          <p className="font-medium text-slate-800 text-sm">
                             {selectedItem.district}
                           </p>
                         </div>
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase font-bold text-blue-900/60 block mb-1">
+                        <div className="space-y-1.5">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
                             Pump Type
                           </span>
                           <Badge
                             variant="secondary"
-                            className="whitespace-normal text-left h-auto leading-tight"
+                            className="bg-slate-100 text-slate-700 hover:bg-slate-200 border-none whitespace-normal text-left h-auto leading-tight group-hover:bg-slate-200 transition-colors"
                           >
                             {selectedItem.pumpCapacity}
                           </Badge>
                         </div>
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase font-bold text-blue-900/60 block mb-1">
+                        <div className="space-y-1.5">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
                             Company
                           </span>
-                          <p className="font-medium text-slate-700">
+                          <p className="font-medium text-slate-800 text-sm">
                             {selectedItem.ipName}
                           </p>
                         </div>
@@ -1171,72 +1227,71 @@ export default function SurveyPage() {
                   )}
 
                   {/* READ ONLY INFO GRID FOR BULK OR SINGLE */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-2">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-700">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-2">
+                    <div className="space-y-1.5 flex flex-col">
+                      <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                         Beneficiary Name
                       </Label>
                       <Input
                         value={isBulk ? "Multiple" : (selectedItem?.beneficiaryName || "")}
                         readOnly
-                        className="bg-slate-100/50 border-slate-200 text-slate-500"
+                        className="bg-slate-50 border-slate-200 text-slate-700 h-10 font-medium cursor-not-allowed shadow-none"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-700">
+                    <div className="space-y-1.5 flex flex-col">
+                      <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                         Mobile Number
                       </Label>
                       <Input
                         value={isBulk ? "Multiple" : (selectedItem?.mobileNumber || "")}
                         readOnly
-                        className="bg-slate-100/50 border-slate-200 text-slate-500"
+                        className="bg-slate-50 border-slate-200 text-slate-700 h-10 font-medium cursor-not-allowed shadow-none"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-700">
+                    <div className="space-y-1.5 flex flex-col">
+                      <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                         Village
                       </Label>
                       <Input
                         value={isBulk ? "Multiple" : (selectedItem?.village || "")}
                         readOnly
-                        className="bg-slate-100/50 border-slate-200 text-slate-500"
+                        className="bg-slate-50 border-slate-200 text-slate-700 h-10 font-medium cursor-not-allowed shadow-none"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-700">
+                    <div className="space-y-1.5 flex flex-col">
+                      <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                         Pump Capacity
                       </Label>
                       <Input
                         value={isBulk ? "Multiple" : (selectedItem?.pumpCapacity || "")}
                         readOnly
-                        className="bg-slate-100/50 border-slate-200 text-slate-500"
+                        className="bg-slate-50 border-slate-200 text-slate-700 h-10 font-medium cursor-not-allowed shadow-none"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-700">
+                    <div className="space-y-1.5 flex flex-col">
+                      <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                         IP Name
                       </Label>
                       <Input
                         value={isBulk ? "Multiple" : (selectedItem?.ipName || "")}
                         readOnly
-                        className="bg-slate-100/50 border-slate-200 text-slate-500"
+                        className="bg-slate-50 border-slate-200 text-slate-700 h-10 font-medium cursor-not-allowed shadow-none"
                       />
                     </div>
-
                   </div>
 
                   {/* SURVEY INPUT FORM */}
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="h-5 w-1 bg-cyan-500 rounded-full"></div>
+                  <div className="space-y-6 pt-6 border-t border-slate-200 mt-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="h-5 w-1.5 bg-blue-600 rounded-full"></div>
                       <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
                         Survey Details
                       </h3>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium text-slate-700">
+                      <div className="space-y-1.5 flex flex-col">
+                        <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                           Actual Survey Date
                         </Label>
                         <Input
@@ -1248,13 +1303,14 @@ export default function SurveyPage() {
                               actual2: e.target.value,
                             })
                           }
-                          className="h-10 border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 transition-all bg-white"
+                          className="h-10 border-slate-200 focus:border-blue-500 focus-visible:ring-blue-500/20 transition-all bg-white shadow-sm"
                         />
                       </div>
                       <div className="space-y-2">
+                        {/* Empty placeholder to align grid correctly if needed */}
                       </div>
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium text-slate-700">
+                      <div className="space-y-1.5 flex flex-col">
+                        <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                           Survey Status
                         </Label>
                         <select
@@ -1265,7 +1321,8 @@ export default function SurveyPage() {
                               surveyStatus: e.target.value,
                             })
                           }
-                          className="h-10 border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 transition-all bg-white border px-3 rounded-md"
+                          className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-slate-300 transition-colors shadow-sm appearance-none cursor-pointer"
+                          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
                         >
                           <option value="Pending">Pending</option>
                           <option value="Completed">Completed</option>
@@ -1275,46 +1332,52 @@ export default function SurveyPage() {
                       </div>
                       <div className="space-y-2 md:col-span-2">
                       </div>
-                      <div className="space-y-2 md:col-span-2">
-                        <Label className="text-sm font-medium text-slate-700">
+                      <div className="space-y-1.5 flex flex-col md:col-span-2">
+                        <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">
                           Survey Document
                         </Label>
                         {selectedItem?.surveyFile && (
-                          <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                            <p className="text-xs text-slate-600 mb-1">Current Document:</p>
-                            <a
-                              href={selectedItem.surveyFile}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 underline text-sm flex items-center gap-1 hover:text-blue-800"
-                            >
-                              <Upload className="h-4 w-4" />
-                              View Current Survey Document
-                            </a>
+                          <div className="mb-4 p-3.5 bg-blue-50/50 rounded-lg border border-blue-100 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-blue-100/50 rounded text-blue-600">
+                                <FileCheck className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <p className="text-xs text-slate-500 font-medium mb-0.5">Current Document</p>
+                                <a
+                                  href={selectedItem.surveyFile}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:text-blue-800 text-sm font-semibold hover:underline"
+                                >
+                                  View Uploaded File
+                                </a>
+                              </div>
+                            </div>
                           </div>
                         )}
                         <div
-                          className="border-2 border-dashed border-slate-200 rounded-2xl p-8 bg-slate-50/30 flex flex-col items-center justify-center gap-4 hover:bg-slate-50 hover:border-blue-400/50 transition-all cursor-pointer group"
+                          className="border-2 border-dashed border-slate-200 rounded-xl p-8 bg-slate-50/50 flex flex-col items-center justify-center gap-4 hover:bg-blue-50/30 hover:border-blue-400/50 transition-all cursor-pointer group"
                           onClick={() =>
                             document.getElementById("survey-file")?.click()
                           }
                         >
-                          <div className="h-16 w-16 bg-white rounded-full flex items-center justify-center shadow-xl border border-slate-50 group-hover:scale-110 transition-transform duration-300">
-                            <Upload className="h-8 w-8 text-[#0EA5E9]" />
+                          <div className="h-14 w-14 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 group-hover:scale-110 group-hover:border-blue-200 group-hover:shadow-blue-100 transition-all duration-300">
+                            <Upload className="h-6 w-6 text-slate-400 group-hover:text-blue-500 transition-colors" />
                           </div>
-                          <div className="text-center space-y-1">
-                            <span className="text-lg font-semibold text-[#0369a1] block">
+                          <div className="text-center space-y-1.5">
+                            <span className="text-base font-semibold text-slate-700 group-hover:text-blue-700 transition-colors block">
                               {formData.surveyFile
                                 ? formData.surveyFile
-                                : "Upload Survey Photo"}
+                                : "Click or drag to upload"}
                             </span>
-                            <p className="text-sm text-slate-400 font-medium">
-                              PNG, JPG or JPEG (max. 10MB)
+                            <p className="text-xs text-slate-500 font-medium">
+                              PNG, JPG, PDF up to 10MB
                             </p>
                           </div>
                           <Input
                             type="file"
-                            accept="image/*"
+                            accept="image/*,application/pdf"
                             onChange={handleFileUpload}
                             className="hidden"
                             id="survey-file"
@@ -1324,19 +1387,19 @@ export default function SurveyPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-center gap-6 mt-8">
+                  <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-slate-100">
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       onClick={() => setIsDialogOpen(false)}
                       disabled={isSubmitting}
-                      className="text-slate-600 hover:text-slate-900 font-semibold text-base transition-colors"
+                      className="text-slate-600 hover:bg-slate-50 h-10 px-6 font-medium border-slate-200 shadow-sm"
                     >
                       Cancel
                     </Button>
                     <Button
                       onClick={handleSubmit}
                       disabled={isSubmitting}
-                      className="h-14 px-12 bg-gradient-to-r from-[#0EA5E9] to-[#2563EB] hover:from-[#0284C7] hover:to-[#1D4ED8] text-white font-bold text-lg rounded-2xl shadow-xl shadow-blue-500/20 hover:shadow-blue-500/40 transition-all duration-300 transform active:scale-95"
+                      className="h-10 px-6 bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm hover:shadow transition-all"
                     >
                       {isSubmitting ? "Processing..." : "Submit Survey"}
                     </Button>
@@ -1347,6 +1410,6 @@ export default function SurveyPage() {
           )}
         </DialogContent>
       </Dialog>
-    </div >
+    </div>
   );
 }
