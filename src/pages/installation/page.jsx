@@ -36,6 +36,7 @@ import {
   Loader2,
   CheckCircle2,
   Search,
+  X,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -124,7 +125,8 @@ export default function InstallationPage() {
   const [formData, setFormData] = useState({
     installationStatus: "Done",
     installationDate: "",
-    photoUploadedOnUpadApp: null,
+    existingPhotos: [],
+    photoFileObjs: [],
     delay4: "",
   });
 
@@ -135,6 +137,12 @@ export default function InstallationPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
+      // Get logged in user details
+      const loggedInUserStr = localStorage.getItem("loggedInUser");
+      const loggedInUser = loggedInUserStr ? JSON.parse(loggedInUserStr) : null;
+      const isIpRole = loggedInUser?.role === "IP";
+      const userIpName = loggedInUser?.ipName || "";
+
       // 1. Fetch dispatch_material to identify pending reg_ids and history records
       const { data: insData, error: insError } = await supabase.from("installation").select("*");
       if (insError) throw insError;
@@ -173,10 +181,14 @@ export default function InstallationPage() {
       // 2. Fetch portal records matching pending reg_ids
       let parsedPending = [];
       if (pendingRegIds.length > 0) {
-        const { data: portalData, error: portalError } = await supabase
-          .from("portal")
-          .select("*")
-          .in("reg_id", pendingRegIds);
+        let portalQuery = supabase.from("portal").select("*").in("reg_id", pendingRegIds);
+
+        // Apply IP role filter if necessary
+        if (isIpRole && userIpName) {
+          portalQuery = portalQuery.eq("ip_name", userIpName);
+        }
+
+        const { data: portalData, error: portalError } = await portalQuery;
 
         if (portalError) throw portalError;
 
@@ -207,29 +219,53 @@ export default function InstallationPage() {
       // 3. For History records, we need some portal info too
       if (historyItemsParsed.length > 0) {
         const historyRegIds = historyItemsParsed.map((i) => i.regId);
-        const { data: portalHistData, error: portalHistError } = await supabase
+
+        // Base query for history portal data
+        let portalHistQuery = supabase
           .from("portal")
           .select("reg_id, beneficiary_name, mobile_number, village, pump_capacity, pump_head, ip_name")
           .in("reg_id", historyRegIds);
+
+        // Apply IP role filter if necessary
+        if (isIpRole && userIpName) {
+          portalHistQuery = portalHistQuery.eq("ip_name", userIpName);
+        }
+
+        const { data: portalHistData, error: portalHistError } = await portalHistQuery;
 
         if (!portalHistError && portalHistData) {
           const portalHistMap = {};
           portalHistData.forEach((p) => (portalHistMap[p.reg_id] = p));
 
+          // Filter out history items that do not belong to the IP user (if IP role)
+          const validHistoryItems = [];
+
           historyItemsParsed.forEach((item) => {
-            const pData = portalHistMap[item.regId] || {};
-            item.beneficiaryName = pData.beneficiary_name || "-";
-            item.mobileNumber = pData.mobile_number || "-";
-            item.village = pData.village || "-";
-            item.pumpCapacity = pData.pump_capacity || "-";
-            item.pumpHead = pData.pump_head || "-";
-            item.ipName = pData.ip_name || "-";
+            const pData = portalHistMap[item.regId];
+
+            // If IP role and the record isn't in filtered portal data, skip it
+            if (isIpRole && !pData) return;
+
+            item.beneficiaryName = pData?.beneficiary_name || "-";
+            item.mobileNumber = pData?.mobile_number || "-";
+            item.village = pData?.village || "-";
+            item.pumpCapacity = pData?.pump_capacity || "-";
+            item.pumpHead = pData?.pump_head || "-";
+            item.ipName = pData?.ip_name || "-";
+
+            validHistoryItems.push(item);
           });
+
+          setHistoryItems(validHistoryItems);
+        } else {
+          // If there's an error or no data, and it's an IP role, show nothing (filtered out)
+          setHistoryItems(isIpRole ? [] : historyItemsParsed);
         }
+      } else {
+        setHistoryItems([]);
       }
 
       setPendingItems(parsedPending);
-      setHistoryItems(historyItemsParsed);
     } catch (err) {
       console.error("Installation fetch error:", err);
     } finally {
@@ -257,10 +293,16 @@ export default function InstallationPage() {
     setSelectedItem(item);
     setIsSuccess(false);
     setIsBulk(false);
+    let photos = [];
+    if (item.photoUploadedOnUpadApp && typeof item.photoUploadedOnUpadApp === 'string') {
+      photos = item.photoUploadedOnUpadApp.split(',').filter(Boolean).map(s => s.trim());
+    }
+
     setFormData({
       installationStatus: item.installationStatus === "Completed" ? "Done" : (item.installationStatus || "Done"),
       installationDate: item.installationDate || "",
-      photoUploadedOnUpadApp: item.photoUploadedOnUpadApp || null,
+      existingPhotos: photos,
+      photoFileObjs: [],
       delay4: item.delay4 || "",
     });
     setIsDialogOpen(true);
@@ -317,7 +359,8 @@ export default function InstallationPage() {
     setFormData({
       installationStatus: "Done",
       installationDate: "",
-      photoUploadedOnUpadApp: null,
+      existingPhotos: [],
+      photoFileObjs: [],
       delay4: "",
     });
     setIsDialogOpen(true);
@@ -326,13 +369,37 @@ export default function InstallationPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleFileUpload = (e) => {
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      const currentNewFiles = formData.photoFileObjs || [];
+      const currentExisting = formData.existingPhotos || [];
+
+      if (currentExisting.length + currentNewFiles.length + newFiles.length > 5) {
+        alert("You can only upload a maximum of 5 photos.");
+        return;
+      }
+
       setFormData({
         ...formData,
-        photoUploadedOnUpadApp: e.target.files[0].name,
-        photoFileObj: e.target.files[0],
+        photoFileObjs: [...currentNewFiles, ...newFiles],
       });
     }
+  };
+
+  const removeNewFile = (indexToRemove) => {
+    const newFileObjs = (formData.photoFileObjs || []).filter((_, index) => index !== indexToRemove);
+    setFormData({
+      ...formData,
+      photoFileObjs: newFileObjs,
+    });
+  };
+
+  const removeExistingFile = (indexToRemove) => {
+    const newExisting = (formData.existingPhotos || []).filter((_, index) => index !== indexToRemove);
+    setFormData({
+      ...formData,
+      existingPhotos: newExisting,
+    });
   };
 
   const getBase64 = (file) => {
@@ -350,23 +417,28 @@ export default function InstallationPage() {
 
     try {
       // 1. UPLOAD FILE ONCE (if any)
-      let finalFileUrl = "";
-      if (formData.photoFileObj) {
-        const file = formData.photoFileObj;
-        const filePath = `installation-photos/${Date.now()}_${file.name}`;
+      let uploadedUrls = [...(formData.existingPhotos || [])];
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("Image_bucket")
-          .upload(filePath, file);
+      if (formData.photoFileObjs && formData.photoFileObjs.length > 0) {
+        for (const file of formData.photoFileObjs) {
+          const filePath = `installation-photos/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from("Image_bucket")
+            .upload(filePath, file);
 
-        if (uploadError) throw uploadError;
+          if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabase.storage
-          .from("Image_bucket")
-          .getPublicUrl(filePath);
+          const { data: urlData } = supabase.storage
+            .from("Image_bucket")
+            .getPublicUrl(filePath);
 
-        finalFileUrl = urlData?.publicUrl || "";
+          if (urlData?.publicUrl) {
+            uploadedUrls.push(urlData.publicUrl);
+          }
+        }
       }
+
+      const finalFileUrl = uploadedUrls.length > 0 ? uploadedUrls.join(",") : "";
 
       // 2. IDENTIFY ITEMS
       let itemsToProcess = [];
@@ -387,8 +459,12 @@ export default function InstallationPage() {
           delay_4: formData.delay4,
         };
 
-        if (finalFileUrl) {
-          rowUpdate.photo_uploaded_on_upad_app = finalFileUrl;
+        if (isBulk) {
+          if (formData.photoFileObjs && formData.photoFileObjs.length > 0) {
+            rowUpdate.photo_uploaded_on_upad_app = finalFileUrl;
+          }
+        } else {
+          rowUpdate.photo_uploaded_on_upad_app = finalFileUrl || null;
         }
 
         // Set actual_4 if missing (first installation)
@@ -987,6 +1063,13 @@ export default function InstallationPage() {
                           <TableCell className="px-4 py-3 align-middle text-slate-600">{item.installationDate}</TableCell>
                           <TableCell className="px-4 py-3 align-middle text-center">
                             {item.photoUploadedOnUpadApp ? (
+                              <div className="flex flex-wrap items-center justify-center gap-2">
+                                {item.photoUploadedOnUpadApp.split(',').filter(Boolean).map((url, i) => (
+                                  <a key={i} href={getPreviewUrl(url.trim())} title={url.trim()} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline hover:bg-blue-50 px-2 py-1 rounded transition-colors text-xs font-medium border border-blue-100 bg-white shadow-sm">
+                                    <FileCheck className="h-3.5 w-3.5" /> Photo {i + 1}
+                                  </a>
+                                ))}
+                              </div>
                               <a href={getPreviewUrl(item.photoUploadedOnUpadApp)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 hover:underline hover:bg-blue-50 px-2 py-1 rounded transition-colors text-sm font-medium">
                                 <FileCheck className="h-4 w-4" /> View
                               </a>

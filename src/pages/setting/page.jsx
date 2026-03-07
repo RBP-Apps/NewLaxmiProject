@@ -60,8 +60,11 @@ export default function SettingPage() {
         userId: "",
         password: "",
         role: "User",
+        ipName: "",
         pageAccess: [],
     });
+
+    const [ipNames, setIpNames] = useState([]);
 
     const [searchTerm, setSearchTerm] = useState("");
     const [pageAccessOpen, setPageAccessOpen] = useState(false);
@@ -102,6 +105,7 @@ export default function SettingPage() {
                 userId: row.user_id || "",
                 password: row.pass || "",
                 role: row.role || "User",
+                ipName: row.ip_name || "-",
                 pageAccess: row.page_access
                     ? String(row.page_access).split(",").map((s) => s.trim()).filter(Boolean)
                     : [],
@@ -116,8 +120,24 @@ export default function SettingPage() {
         }
     };
 
+    const fetchIpNames = async () => {
+        try {
+            const { data, error } = await supabase
+                .from("portal")
+                .select("ip_name");
+
+            if (error) throw error;
+
+            const uniqueIps = [...new Set(data.map(item => item.ip_name).filter(Boolean))].sort();
+            setIpNames(uniqueIps);
+        } catch (e) {
+            console.error("Fetch IP Names Error:", e);
+        }
+    };
+
     useEffect(() => {
         fetchData();
+        fetchIpNames();
     }, []);
 
     const handlePageAccessToggle = (page) => {
@@ -138,6 +158,7 @@ export default function SettingPage() {
             userId: "",
             password: "",
             role: "User",
+            ipName: "",
             pageAccess: [],
         });
         setIsDialogOpen(true);
@@ -150,6 +171,7 @@ export default function SettingPage() {
             userId: user.userId,
             password: user.password,
             role: user.role,
+            ipName: user.ipName !== "-" ? user.ipName : "",
             pageAccess: user.pageAccess || [],
         });
         setIsDialogOpen(true);
@@ -163,6 +185,7 @@ export default function SettingPage() {
                 user_id: formData.userId,
                 pass: formData.password,
                 role: formData.role,
+                ip_name: formData.ipName || null,
                 page_access: formData.pageAccess.join(", "),
                 status: "Active",
             };
@@ -191,6 +214,7 @@ export default function SettingPage() {
                 userId: "",
                 password: "",
                 role: "User",
+                ipName: "",
                 pageAccess: [],
             });
             fetchData(); // Refresh
@@ -260,6 +284,7 @@ export default function SettingPage() {
                                     <TableHead className="h-12 font-bold text-slate-600 w-[120px]">User ID</TableHead>
                                     <TableHead className="h-12 font-bold text-slate-600 w-[120px]">Password</TableHead>
                                     <TableHead className="h-12 font-bold text-slate-600 w-[100px]">Role</TableHead>
+                                    <TableHead className="h-12 font-bold text-slate-600 w-[150px]">IP Name</TableHead>
                                     <TableHead className="h-12 font-bold text-slate-600 w-[250px]">Page Access</TableHead>
                                     <TableHead className="h-12 font-bold text-slate-600 w-[120px]">Actions</TableHead>
                                 </TableRow>
@@ -268,14 +293,14 @@ export default function SettingPage() {
                                 {isLoading ? (
                                     Array.from({ length: 5 }).map((_, i) => (
                                         <TableRow key={i} className="animate-pulse">
-                                            {Array.from({ length: 6 }).map((__, j) => (
+                                            {Array.from({ length: 7 }).map((__, j) => (
                                                 <TableCell key={j}><div className="h-4 bg-slate-100 rounded w-2/3 mx-auto"></div></TableCell>
                                             ))}
                                         </TableRow>
                                     ))
                                 ) : filteredUsers.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={6} className="h-32 text-center text-slate-500">
+                                        <TableCell colSpan={7} className="h-32 text-center text-slate-500">
                                             {users.length === 0 ? "No users found." : "No users found matching your search."}
                                         </TableCell>
                                     </TableRow>
@@ -296,6 +321,9 @@ export default function SettingPage() {
                                                 )}>
                                                     {user.role}
                                                 </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-sm font-medium text-slate-700">
+                                                {user.ipName}
                                             </TableCell>
                                             <TableCell>
                                                 <div className="max-w-[250px] mx-auto text-xs text-slate-600 font-medium whitespace-normal break-words text-center">
@@ -381,20 +409,42 @@ export default function SettingPage() {
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label>Role</Label>
-                            <Select
-                                value={formData.role}
-                                onValueChange={(val) => setFormData({ ...formData, role: val })}
-                            >
-                                <SelectTrigger className="focus:ring-blue-500 hover:bg-transparent hover:text-slate-900 border-slate-200 hover:border-blue-300 transition-colors">
-                                    <SelectValue placeholder="Select Role" />
-                                </SelectTrigger>
-                                <SelectContent className="border-blue-50">
-                                    <SelectItem value="Admin" className="focus:bg-blue-50 focus:text-slate-900 cursor-pointer">Admin</SelectItem>
-                                    <SelectItem value="User" className="focus:bg-blue-50 focus:text-slate-900 cursor-pointer">User</SelectItem>
-                                </SelectContent>
-                            </Select>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Role</Label>
+                                <Select
+                                    value={formData.role}
+                                    onValueChange={(val) => setFormData({ ...formData, role: val })}
+                                >
+                                    <SelectTrigger className="focus:ring-blue-500 hover:bg-transparent hover:text-slate-900 border-slate-200 hover:border-blue-300 transition-colors">
+                                        <SelectValue placeholder="Select Role" />
+                                    </SelectTrigger>
+                                    <SelectContent className="border-blue-50">
+                                        <SelectItem value="Admin" className="focus:bg-blue-50 focus:text-slate-900 cursor-pointer">Admin</SelectItem>
+                                        <SelectItem value="User" className="focus:bg-blue-50 focus:text-slate-900 cursor-pointer">User</SelectItem>
+                                        <SelectItem value="IP" className="focus:bg-blue-50 focus:text-slate-900 cursor-pointer">IP</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>IP Name</Label>
+                                <Select
+                                    value={formData.ipName}
+                                    onValueChange={(val) => setFormData({ ...formData, ipName: val })}
+                                >
+                                    <SelectTrigger className="focus:ring-blue-500 hover:bg-transparent hover:text-slate-900 border-slate-200 hover:border-blue-300 transition-colors">
+                                        <SelectValue placeholder="Select IP Name" />
+                                    </SelectTrigger>
+                                    <SelectContent className="border-blue-50 max-h-[200px]">
+                                        {ipNames.map((ip) => (
+                                            <SelectItem key={ip} value={ip} className="focus:bg-blue-50 focus:text-slate-900 cursor-pointer">
+                                                {ip}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
 
                         <div className="space-y-2">

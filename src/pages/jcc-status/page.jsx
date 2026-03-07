@@ -1209,8 +1209,12 @@ export default function JccStatusPage() {
                                                 }
                                                 className="w-full h-10 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-slate-50 hover:bg-white transition-colors cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-size-[16px_16px] bg-position-[right_12px_center] bg-no-repeat pr-8"
                                             >
-                                                <option value="Done">Done</option>
-                                                <option value="Pending">Pending</option>
+                                                <option value="">Select Status</option>
+                                                <option value="IN TRANSIT WITH IP"> IN TRANSIT WITH IP</option>
+                                                <option value="HO">HO</option>
+                                                <option value="DO">DO</option>
+                                                <option value="PAYMENT DONE">PAYMENT DONE</option>
+                                                <option value="RBP OFFICE">RBP OFFICE</option>
                                             </select>
                                         </div>
 
