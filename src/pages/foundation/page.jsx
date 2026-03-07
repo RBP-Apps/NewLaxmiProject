@@ -376,7 +376,7 @@ export default function FoundationPage() {
       <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
       <TableCell className="whitespace-nowrap text-slate-600 font-mono text-xs">{item.mobileNumber}</TableCell>
       <TableCell className="whitespace-nowrap text-slate-600">{item.village}</TableCell>
-      <TableCell className="whitespace-nowrap text-slate-600 font-medium text-blue-600 uppercase text-xs">{item.pumpCapacity}</TableCell>
+      <TableCell className="whitespace-nowrap font-medium text-blue-600 uppercase text-xs">{item.pumpCapacity}</TableCell>
       <TableCell className="whitespace-nowrap text-slate-600 text-xs">{item.pumpHead}</TableCell>
       <TableCell className="whitespace-nowrap text-slate-600 font-medium text-xs">{item.ipName}</TableCell>
       <TableCell className="whitespace-nowrap text-slate-600 text-xs">{item.invoiceNo || "-"}</TableCell>
@@ -414,7 +414,7 @@ export default function FoundationPage() {
   // historyHeaders[0] is "Action". So +1 for Checkbox.
 
   return (
-    <div className="space-y-8 p-6 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
+    <div className="space-y-8 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
       <Tabs defaultValue="pending" className="w-full" onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2 relative p-1 bg-slate-100/80 h-14 rounded-xl border border-slate-200">
           <div className={`absolute top-1 bottom-1 left-1 w-[calc(50%-0.5rem)] rounded-lg bg-white shadow-sm transition-all duration-300 ease-in-out ${activeTab === "history" ? "translate-x-full" : "translate-x-0"}`} />
@@ -424,60 +424,75 @@ export default function FoundationPage() {
 
         {/* PENDING TAB */}
         <TabsContent value="pending" className="mt-6 focus-visible:ring-0 focus-visible:outline-none animate-in fade-in-0 slide-in-from-left-4 duration-500 ease-out">
-          <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-            <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
-              <div className="flex items-center gap-2 w-full md:w-auto justify-between">
-                <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
-                  <div className="p-1 bg-blue-100 rounded-lg"><Hammer className="h-4 w-4 text-blue-600" /></div>
+          <Card className="border border-slate-200 shadow-sm bg-white overflow-hidden rounded-xl">
+            <CardHeader className="border-b border-slate-100 bg-white px-6 py-5 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto">
+              <div className="flex items-center gap-3 w-full md:w-auto justify-between">
+                <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                  <div className="p-2.5 bg-blue-50 rounded-xl border border-blue-100/50">
+                    <Hammer className="h-5 w-5 text-blue-600" />
+                  </div>
                   Pending Foundation
                 </CardTitle>
               </div>
               <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                <div className="relative w-full md:w-100">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <Input placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200" />
+                <div className="relative w-full md:w-64 group">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                  <Input placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 h-10 transition-all rounded-lg" />
                 </div>
                 <div className="flex items-center gap-3 w-full md:w-auto justify-end">
                   {selectedRows.length >= 2 && (
-                    <Button onClick={handleBulkClick} className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9" size="sm">
-                      <Pencil className="h-4 w-4 mr-2" /> Foundation Selected ({selectedRows.length})
+                    <Button onClick={handleBulkClick} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-10 px-4 rounded-lg font-medium" size="sm">
+                      <Pencil className="h-4 w-4 mr-2" /> Process Selected ({selectedRows.length})
                     </Button>
                   )}
-                  <Badge variant="outline" className="bg-yellow-100 text-yellow-700 border-yellow-200 px-3 py-1 h-9 flex items-center">{filteredPendingItems.length} Pending</Badge>
+                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 px-3 py-1.5 h-10 flex items-center rounded-lg font-medium shadow-sm">{filteredPendingItems.length} Pending</Badge>
                 </div>
               </div>
             </CardHeader>
 
             {/* Filter Dropdowns */}
-            <div className="px-6 py-4 bg-slate-50/50 border-b border-blue-50">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="px-6 py-5 bg-slate-50/30 border-b border-slate-100">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="h-4 w-1 bg-blue-600 rounded-full"></div>
+                <h3 className="text-sm font-semibold text-slate-700">Filter Records</h3>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {pendingFilterConfig.map(({ key, label }) => (
-                  <div key={key} className="space-y-1.5">
-                    <Label className="text-xs text-slate-600">{label}</Label>
-                    <select value={filters[key]} onChange={(e) => setFilters({ ...filters, [key]: e.target.value })} className="w-full h-9 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                  <div key={key} className="space-y-1.5 flex flex-col">
+                    <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{label}</Label>
+                    <select
+                      value={filters[key]}
+                      onChange={(e) => setFilters({ ...filters, [key]: e.target.value })}
+                      className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-slate-300 transition-colors shadow-sm appearance-none cursor-pointer"
+                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
+                    >
                       <option value="">All</option>
                       {getUniquePendingValues(key).map((val) => (<option key={val} value={val}>{val}</option>))}
                     </select>
                   </div>
                 ))}
               </div>
-              <Button variant="outline" size="sm" onClick={clearFilters} className="mt-3 text-xs">Clear All Filters</Button>
+              <div className="flex justify-end mt-4">
+                <Button variant="ghost" size="sm" onClick={clearFilters} className="text-sm font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 h-8 px-3 rounded-md transition-colors">
+                  Clear Filters
+                </Button>
+              </div>
             </div>
 
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
+              <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
                 <Table className="[&_th]:text-center [&_td]:text-center">
-                  <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
-                    <TableRow className="border-b border-blue-100 hover:bg-transparent">
-                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
+                  <TableHeader className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm">
+                    <TableRow className="border-b border-slate-200 hover:bg-transparent">
+                      <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-12">
                         <div className="flex justify-center">
-                          <Checkbox checked={filteredPendingItems.length > 0 && selectedRows.length === filteredPendingItems.length} onCheckedChange={handleSelectAll} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out" />
+                          <Checkbox checked={filteredPendingItems.length > 0 && selectedRows.length === filteredPendingItems.length} onCheckedChange={handleSelectAll} className="checkbox-3d border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out rounded" />
                         </div>
                       </TableHead>
-                      <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[150px]">Action</TableHead>
-                      <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">Action</TableHead>
+                      <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
                       {pendingHeaders.map((h) => (
-                        <TableHead key={h} className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">{h}</TableHead>
+                        <TableHead key={h} className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">{h}</TableHead>
                       ))}
                     </TableRow>
                   </TableHeader>
@@ -501,15 +516,15 @@ export default function FoundationPage() {
                       </TableRow>
                     ) : (
                       filteredPendingItems.map((item, index) => (
-                        <TableRow key={item.id} className="hover:bg-blue-50/30 transition-colors">
+                        <TableRow key={item.id} className="hover:bg-blue-50/40 transition-colors group border-b border-slate-100">
                           <TableCell className="px-4">
                             <div className="flex justify-center">
-                              <Checkbox checked={selectedRows.includes(item.id)} onCheckedChange={(checked) => handleSelectRow(item.id, checked)} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out" />
+                              <Checkbox checked={selectedRows.includes(item.id)} onCheckedChange={(checked) => handleSelectRow(item.id, checked)} className="checkbox-3d border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out rounded" />
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Button variant="ghost" size="sm" onClick={() => handleActionClick(item)} disabled={selectedRows.length >= 2} className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed">
-                              <Hammer className="h-3.5 w-3.5" /> Process
+                            <Button variant="ghost" size="sm" onClick={() => handleActionClick(item)} disabled={selectedRows.length >= 2} className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200/50 shadow-sm text-[11px] font-semibold h-7 px-3 rounded-md flex items-center gap-1.5 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed">
+                              <Hammer className="h-3 w-3" /> Process
                             </Button>
                           </TableCell>
                           <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
@@ -526,58 +541,73 @@ export default function FoundationPage() {
 
         {/* HISTORY TAB */}
         <TabsContent value="history" className="mt-6 focus-visible:ring-0 focus-visible:outline-none animate-in fade-in-0 slide-in-from-right-4 duration-500 ease-out">
-          <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-            <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
-              <div className="flex items-center gap-2 w-full md:w-auto">
-                <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
-                  <div className="p-1 bg-blue-100 rounded-lg"><FileCheck className="h-4 w-4 text-blue-600" /></div>
+          <Card className="border border-slate-200 shadow-sm bg-white overflow-hidden rounded-xl">
+            <CardHeader className="border-b border-slate-100 bg-white px-6 py-5 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto">
+              <div className="flex items-center gap-3 w-full md:w-auto justify-between">
+                <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                  <div className="p-2.5 bg-blue-50 rounded-xl border border-blue-100/50">
+                    <FileCheck className="h-5 w-5 text-blue-600" />
+                  </div>
                   Foundation History
                 </CardTitle>
               </div>
               <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                <div className="relative w-full md:w-100">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <Input placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200" />
+                <div className="relative w-full md:w-64 group">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                  <Input placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 h-10 transition-all rounded-lg" />
                 </div>
                 <div className="flex items-center gap-3 w-full md:w-auto justify-end">
                   {selectedRows.length >= 2 && (
-                    <Button onClick={handleBulkClick} className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9" size="sm">
-                      <Pencil className="h-4 w-4 mr-2" /> Foundation Selected ({selectedRows.length})
+                    <Button onClick={handleBulkClick} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-10 px-4 rounded-lg font-medium" size="sm">
+                      <Pencil className="h-4 w-4 mr-2" /> Action Selected ({selectedRows.length})
                     </Button>
                   )}
-                  <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 h-9 flex items-center whitespace-nowrap">{filteredHistoryItems.length} Records</Badge>
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 px-3 py-1.5 h-10 flex items-center rounded-lg font-medium shadow-sm whitespace-nowrap">{filteredHistoryItems.length} Records</Badge>
                 </div>
               </div>
             </CardHeader>
 
             {/* Filter Dropdowns */}
-            <div className="px-6 py-4 bg-slate-50/50 border-b border-blue-50">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="px-6 py-5 bg-slate-50/30 border-b border-slate-100">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="h-4 w-1 bg-blue-600 rounded-full"></div>
+                <h3 className="text-sm font-semibold text-slate-700">Filter Records</h3>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {pendingFilterConfig.map(({ key, label }) => (
-                  <div key={key} className="space-y-1.5">
-                    <Label className="text-xs text-slate-600">{label}</Label>
-                    <select value={filters[key]} onChange={(e) => setFilters({ ...filters, [key]: e.target.value })} className="w-full h-9 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                  <div key={key} className="space-y-1.5 flex flex-col">
+                    <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{label}</Label>
+                    <select
+                      value={filters[key]}
+                      onChange={(e) => setFilters({ ...filters, [key]: e.target.value })}
+                      className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-slate-300 transition-colors shadow-sm appearance-none cursor-pointer"
+                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
+                    >
                       <option value="">All</option>
                       {getUniqueHistoryValues(key).map((val) => (<option key={val} value={val}>{val}</option>))}
                     </select>
                   </div>
                 ))}
               </div>
-              <Button variant="outline" size="sm" onClick={clearFilters} className="mt-3 text-xs">Clear All Filters</Button>
+              <div className="flex justify-end mt-4">
+                <Button variant="ghost" size="sm" onClick={clearFilters} className="text-sm font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 h-8 px-3 rounded-md transition-colors">
+                  Clear Filters
+                </Button>
+              </div>
             </div>
 
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
+              <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
                 <Table className="[&_th]:text-center [&_td]:text-center">
-                  <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
-                    <TableRow className="border-b border-blue-100 hover:bg-transparent">
-                       <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
+                  <TableHeader className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm">
+                    <TableRow className="border-b border-slate-200 hover:bg-transparent">
+                      <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-12">
                         <div className="flex justify-center">
-                          <Checkbox checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length} onCheckedChange={handleSelectAll} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out" />
+                          <Checkbox checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length} onCheckedChange={handleSelectAll} className="checkbox-3d border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out rounded" />
                         </div>
                       </TableHead>
                       {historyHeaders.map((h) => (
-                        <TableHead key={h} className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">{h}</TableHead>
+                        <TableHead key={h} className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">{h}</TableHead>
                       ))}
                     </TableRow>
                   </TableHeader>
@@ -598,7 +628,7 @@ export default function FoundationPage() {
                       </TableRow>
                     ) : (
                       filteredHistoryItems.map((item, index) => (
-                        <TableRow key={item.id} className="hover:bg-blue-50/30 transition-colors">{renderHistoryRow(item, index)}</TableRow>
+                        <TableRow key={item.id} className="hover:bg-blue-50/40 transition-colors group border-b border-slate-100">{renderHistoryRow(item, index)}</TableRow>
                       ))
                     )}
                   </TableBody>
@@ -611,121 +641,227 @@ export default function FoundationPage() {
 
       {/* FOUNDATION DIALOG */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent showCloseButton={!isSuccess} className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isSuccess ? "bg-transparent !shadow-none !border-none" : ""}`}>
+        <DialogContent
+          showCloseButton={!isSuccess}
+          className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] sm:rounded-2xl ${isSuccess ? "bg-transparent shadow-none! border-none!" : ""
+            }`}
+        >
           {isSuccess ? (
             <div className="flex flex-col items-center justify-center w-full p-8 text-center space-y-6 animate-in fade-in duration-300">
               <div className="rounded-full bg-white p-5 shadow-2xl shadow-white/20 ring-8 ring-white/10 animate-in zoom-in duration-500 ease-out">
-                <CheckCircle2 className="h-16 w-16 text-green-600 scale-110" />
+                <CheckCircle2 className="h-16 w-16 text-emerald-600 scale-110" />
               </div>
-              <h2 className="text-3xl font-bold text-white drop-shadow-md animate-in slide-in-from-bottom-4 fade-in duration-500 delay-150 ease-out tracking-wide">Submitted Successfully!</h2>
+              <h2 className="text-3xl font-bold text-white drop-shadow-md animate-in slide-in-from-bottom-4 fade-in duration-500 delay-150 ease-out tracking-wide">
+                Submitted Successfully!
+              </h2>
             </div>
           ) : (
             <>
-              <DialogHeader className="p-6 pb-2 border-b border-blue-100 bg-blue-50/30">
-                <DialogTitle className="text-xl font-bold bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent flex items-center gap-2">
-                  <span className="bg-blue-100 p-1.5 rounded-md"><Hammer className="h-4 w-4 text-blue-600" /></span>
+              <DialogHeader className="p-6 pb-4 border-b border-slate-100 bg-white sticky top-0 z-10 shadow-sm">
+                <DialogTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                  <div className="p-2 bg-blue-50 rounded-lg border border-blue-100/50">
+                    <Hammer className="h-5 w-5 text-blue-600" />
+                  </div>
                   Process Foundation Work
                 </DialogTitle>
-                <DialogDescription className="text-slate-500 ml-10">
+                <DialogDescription className="text-slate-500 ml-12 text-sm">
                   {isBulk ? (
-                    <span>Applying changes to <span className="font-bold text-blue-700">{selectedRows.length} selected items</span>.</span>
+                    <span>
+                      Applying changes to{" "}
+                      <span className="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">
+                        {selectedRows.length} selected items
+                      </span>
+                      . All fields below will be updated for these items.
+                    </span>
                   ) : (
-                    <span>Processing foundation for <span className="font-semibold text-slate-700">{selectedItem?.beneficiaryName}</span> <span className="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded text-slate-600 border border-slate-200">{selectedItem?.regId}</span></span>
+                    <span className="flex items-center gap-2">
+                      Processing foundation for{" "}
+                      <span className="font-semibold text-slate-700">
+                        {selectedItem?.beneficiaryName}
+                      </span>{" "}
+                      <span className="font-mono text-xs bg-slate-100 px-2 py-0.5 rounded-md text-slate-600 border border-slate-200">
+                        Reg ID: {selectedItem?.regId}
+                      </span>
+                    </span>
                   )}
                 </DialogDescription>
               </DialogHeader>
 
               {(selectedItem || isBulk) && (
-                <>
-                  <div className="p-6 space-y-6">
-                    {(isBulk || selectedItem) && (
-                      <div className="rounded-xl border border-blue-100 bg-linear-to-br from-blue-50/50 to-cyan-50/30 p-5 shadow-sm">
-                        <h3 className="text-sm font-bold text-blue-900 mb-4 flex items-center gap-2 border-b border-blue-100 pb-2">
-                          <span className="bg-white p-1 rounded shadow-sm"><CheckCircle2 className="h-4 w-4 text-blue-500" /></span>
-                          BENEFICIARY DETAILS
-                        </h3>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-6">
-                          {[
-                            { label: "Reg ID", value: isBulk ? "Multiple" : selectedItem?.regId, mono: true },
-                            { label: "Beneficiary Name", value: isBulk ? "Multiple" : selectedItem?.beneficiaryName },
-                            { label: "Village & Block", value: isBulk ? "Multiple" : `${selectedItem?.village}, ${selectedItem?.block}` },
-                            { label: "District", value: isBulk ? "Multiple" : selectedItem?.district },
-                            { label: "Pump Capacity", value: isBulk ? "Multiple" : selectedItem?.pumpCapacity },
-                            { label: "Pump Head", value: isBulk ? "Multiple" : selectedItem?.pumpHead },
-                            { label: "IP Name", value: isBulk ? "Multiple" : selectedItem?.ipName },
-                            { label: "Mobile", value: isBulk ? "Multiple" : selectedItem?.mobileNumber, mono: true },
-                          ].map(({ label, value, mono }) => (
-
-                            <div key={label} className="space-y-1">
-                              <span className="text-[10px] uppercase font-bold text-blue-900/60 block mb-1">{label}</span>
-                              <p className={`font-medium text-slate-700 ${mono ? "font-mono break-all" : ""}`}>{value || "-"}</p>
+                <div className="p-6 space-y-8 bg-slate-50/30">
+                  {(isBulk || selectedItem) && (
+                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                      <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
+                        <div className="p-1 bg-emerald-50 rounded shadow-sm border border-emerald-100">
+                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                        </div>
+                        BENEFICIARY DETAILS
+                      </h3>
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-8">
+                        {[
+                          { label: "Reg ID", value: isBulk ? "Multiple" : selectedItem?.regId, mono: true },
+                          { label: "Beneficiary Name", value: isBulk ? "Multiple" : selectedItem?.beneficiaryName },
+                          { label: "Village & Block", value: isBulk ? "Multiple" : `${selectedItem?.village}, ${selectedItem?.block}` },
+                          { label: "District", value: isBulk ? "Multiple" : selectedItem?.district },
+                          { label: "Pump Capacity", value: isBulk ? "Multiple" : selectedItem?.pumpCapacity },
+                          { label: "Pump Head", value: isBulk ? "Multiple" : selectedItem?.pumpHead },
+                          { label: "IP Name", value: isBulk ? "Multiple" : selectedItem?.ipName },
+                          { label: "Mobile", value: isBulk ? "Multiple" : selectedItem?.mobileNumber, mono: true },
+                        ].map(({ label, value, mono }) => (
+                          <div key={label} className="space-y-1.5">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
+                              {label}
+                            </span>
+                            <div className={`font-medium ${mono ? "font-mono bg-slate-50 px-2 py-0.5 rounded border border-slate-200 inline-block break-all text-sm" : "text-slate-800 text-sm"}`}>
+                              {value || "-"}
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="space-y-6">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="h-5 w-1 bg-cyan-500 rounded-full"></div>
-                        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Work Details</h3>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium text-slate-700">Dispatched Plan</Label>
-                          <select value={formData.dispatchedPlan} onChange={(e) => setFormData({ ...formData, dispatchedPlan: e.target.value })} className="h-10 w-full border border-slate-200 rounded-md px-3 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-400 transition-all">
-                            <option value="Done">Done</option>
-                            <option value="Pending">Pending</option>
-                          </select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium text-slate-700">Plan Date</Label>
-                          <Input type="date" value={formData.planDate} onChange={(e) => setFormData({ ...formData, planDate: e.target.value })} className="h-10 border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 transition-all bg-white" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium text-slate-700">Material Received Status</Label>
-                          <select value={formData.materialReceived} onChange={(e) => setFormData({ ...formData, materialReceived: e.target.value })} className="h-10 w-full border border-slate-200 rounded-md px-3 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-400 transition-all">
-                            <option value="Done">Done</option>
-                            <option value="Pending">Pending</option>
-                          </select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium text-slate-700">Material Received Date</Label>
-                          <Input type="date" value={formData.materialReceivedDate} onChange={(e) => setFormData({ ...formData, materialReceivedDate: e.target.value })} className="h-10 border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 transition-all bg-white" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium text-slate-700">Invoice No</Label>
-                          <Input value={formData.invoiceNo} onChange={(e) => setFormData({ ...formData, invoiceNo: e.target.value })} placeholder="Enter invoice number" className="h-10 border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 transition-all bg-white" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium text-slate-700">Way Bill No</Label>
-                          <Input value={formData.wayBillNo} onChange={(e) => setFormData({ ...formData, wayBillNo: e.target.value })} placeholder="Enter way bill number" className="h-10 border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 transition-all bg-white" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium text-slate-700">Date</Label>
-                          <Input type="date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} className="h-10 border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 transition-all bg-white" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium text-slate-700">Upload Challan</Label>
-                          <div className="border-2 border-dashed border-slate-200 rounded-xl p-3 bg-slate-50/50 flex flex-col items-center justify-center gap-1 hover:bg-slate-50 transition-all cursor-pointer group border-blue-100/50 hover:border-blue-200 h-24" onClick={() => document.getElementById("challan-file")?.click()}>
-                            <div className="h-8 w-8 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-100 group-hover:scale-110 transition-transform">
-                              <Upload className="h-4 w-4 text-blue-500" />
-                            </div>
-                            <span className="text-xs font-medium text-slate-600 group-hover:text-blue-600 transition-colors w-full text-center truncate px-2">{formData.materialChalanLink || "Click to Upload"}</span>
-                            <Input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleFileUpload} className="hidden" id="challan-file" />
                           </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* WORK DETAILS FORM */}
+                  <div className="space-y-6 pt-6 border-t border-slate-200 mt-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="h-5 w-1.5 bg-blue-600 rounded-full"></div>
+                      <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
+                        Work Details
+                      </h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-1.5 flex flex-col">
+                        <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                          Dispatched Plan
+                        </Label>
+                        <select
+                          value={formData.dispatchedPlan}
+                          onChange={(e) => setFormData({ ...formData, dispatchedPlan: e.target.value })}
+                          className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-slate-300 transition-colors shadow-sm appearance-none cursor-pointer"
+                          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
+                        >
+                          <option value="Done">Done</option>
+                          <option value="Pending">Pending</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1.5 flex flex-col">
+                        <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                          Plan Date
+                        </Label>
+                        <Input
+                          type="date"
+                          value={formData.planDate}
+                          onChange={(e) => setFormData({ ...formData, planDate: e.target.value })}
+                          className="h-10 border-slate-200 focus:border-blue-500 focus-visible:ring-blue-500/20 transition-all bg-white shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5 flex flex-col">
+                        <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                          Material Received Status
+                        </Label>
+                        <select
+                          value={formData.materialReceived}
+                          onChange={(e) => setFormData({ ...formData, materialReceived: e.target.value })}
+                          className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-slate-300 transition-colors shadow-sm appearance-none cursor-pointer"
+                          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
+                        >
+                          <option value="Done">Done</option>
+                          <option value="Pending">Pending</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1.5 flex flex-col">
+                        <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                          Material Received Date
+                        </Label>
+                        <Input
+                          type="date"
+                          value={formData.materialReceivedDate}
+                          onChange={(e) => setFormData({ ...formData, materialReceivedDate: e.target.value })}
+                          className="h-10 border-slate-200 focus:border-blue-500 focus-visible:ring-blue-500/20 transition-all bg-white shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5 flex flex-col">
+                        <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                          Invoice No
+                        </Label>
+                        <Input
+                          value={formData.invoiceNo}
+                          onChange={(e) => setFormData({ ...formData, invoiceNo: e.target.value })}
+                          placeholder="Enter invoice number"
+                          className="h-10 border-slate-200 focus:border-blue-500 focus-visible:ring-blue-500/20 transition-all bg-white shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5 flex flex-col">
+                        <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                          Way Bill No
+                        </Label>
+                        <Input
+                          value={formData.wayBillNo}
+                          onChange={(e) => setFormData({ ...formData, wayBillNo: e.target.value })}
+                          placeholder="Enter way bill number"
+                          className="h-10 border-slate-200 focus:border-blue-500 focus-visible:ring-blue-500/20 transition-all bg-white shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5 flex flex-col">
+                        <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                          Date
+                        </Label>
+                        <Input
+                          type="date"
+                          value={formData.date}
+                          onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                          className="h-10 border-slate-200 focus:border-blue-500 focus-visible:ring-blue-500/20 transition-all bg-white shadow-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5 flex flex-col">
+                        <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                          Upload Challan
+                        </Label>
+                        {formData.materialChalanLink && typeof formData.materialChalanLink === "string" && formData.materialChalanLink.startsWith("http") && (
+                          <div className="mb-2 p-2.5 bg-blue-50/50 rounded-lg border border-blue-100 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <FileCheck className="h-4 w-4 text-blue-600" />
+                              <a href={getPreviewUrl(formData.materialChalanLink)} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 text-xs font-semibold hover:underline">
+                                View Current Document
+                              </a>
+                            </div>
+                          </div>
+                        )}
+                        <div
+                          className="border-2 border-dashed border-slate-200 rounded-xl p-4 bg-slate-50/50 flex flex-col items-center justify-center gap-2 hover:bg-blue-50/30 hover:border-blue-400/50 transition-all cursor-pointer group h-24"
+                          onClick={() => document.getElementById("challan-file")?.click()}
+                        >
+                          <div className="h-8 w-8 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 group-hover:scale-110 group-hover:border-blue-200 transition-all duration-300">
+                            <Upload className="h-4 w-4 text-slate-400 group-hover:text-blue-500" />
+                          </div>
+                          <span className="text-xs font-medium text-slate-600 group-hover:text-blue-600 transition-colors w-full text-center truncate px-2">
+                            {formData.challanFileObj ? formData.challanFileObj.name : "Click to Upload"}
+                          </span>
+                          <Input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleFileUpload} className="hidden" id="challan-file" />
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 pb-6 pr-6">
-                    <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="h-10 px-6 text-slate-600 hover:text-slate-800 hover:bg-slate-100/50" disabled={isSubmitting}>Cancel</Button>
-                    <Button onClick={handleSubmit} className="h-10 px-6 bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md transition-all hover:shadow-lg" disabled={isSubmitting}>
+                  <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-slate-100">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsDialogOpen(false)}
+                      disabled={isSubmitting}
+                      className="text-slate-600 hover:bg-slate-50 h-10 px-6 font-medium border-slate-200 shadow-sm"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={isSubmitting}
+                      className="h-10 px-6 bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm hover:shadow transition-all"
+                    >
                       {isSubmitting ? "Processing..." : "Complete Foundation"}
                     </Button>
                   </div>
-                </>
+                </div>
               )}
             </>
           )}

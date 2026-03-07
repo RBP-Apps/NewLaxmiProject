@@ -326,7 +326,7 @@ export default function SystemInfoPage() {
     };
 
     return (
-        <div className="space-y-8 p-6 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
+        <div className="space-y-8 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
             <Tabs
                 defaultValue="pending"
                 className="w-full"
@@ -450,7 +450,7 @@ export default function SystemInfoPage() {
                         </div>
 
                         <CardContent className="p-0">
-                            <div className="overflow-x-auto">
+                            <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
                                 <Table className="[&_th]:text-center [&_td]:text-center">
                                     <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                                         <TableRow className="border-b border-blue-100 hover:bg-transparent">
@@ -578,7 +578,7 @@ export default function SystemInfoPage() {
                             </div>
                         </CardHeader>
                         <CardContent className="p-0">
-                            <div className="overflow-x-auto">
+                            <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
                                 <Table className="[&_th]:text-center [&_td]:text-center">
                                     <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
                                         <TableRow>
@@ -607,38 +607,38 @@ export default function SystemInfoPage() {
                                                 <TableCell colSpan={8} className="h-48 text-center text-slate-500">No history records.</TableCell>
                                             </TableRow>
                                         ) : (
-                                        filteredHistoryItems.map((item, index) => (
-                                            <TableRow key={item.regId} className="hover:bg-blue-50/30 transition-colors">
-                                                <TableCell className="px-4">
-                                                    <div className="flex justify-center">
-                                                        <Checkbox
-                                                            checked={selectedRows.includes(item.regId)}
-                                                            onCheckedChange={(checked) => handleSelectRow(item.regId, checked)}
-                                                            className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
-                                                        />
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => handleActionClick(item)}
-                                                        disabled={selectedRows.length >= 2}
-                                                        className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    >
-                                                        <Pencil className="h-3.5 w-3.5" />
-                                                        Edit
-                                                    </Button>
-                                                </TableCell>
-                                                <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
-                                                <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500">{item.regId}</TableCell>
-                                                <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
-                                                <TableCell className="whitespace-nowrap text-slate-600">{item.village}</TableCell>
-                                                <TableCell className="whitespace-nowrap text-slate-600">{item.imei_no || "-"}</TableCell>
-                                                <TableCell className="whitespace-nowrap text-slate-600">{item.rid_number || "-"}</TableCell>
+                                            filteredHistoryItems.map((item, index) => (
+                                                <TableRow key={item.regId} className="hover:bg-blue-50/30 transition-colors">
+                                                    <TableCell className="px-4">
+                                                        <div className="flex justify-center">
+                                                            <Checkbox
+                                                                checked={selectedRows.includes(item.regId)}
+                                                                onCheckedChange={(checked) => handleSelectRow(item.regId, checked)}
+                                                                className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
+                                                            />
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => handleActionClick(item)}
+                                                            disabled={selectedRows.length >= 2}
+                                                            className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        >
+                                                            <Pencil className="h-3.5 w-3.5" />
+                                                            Edit
+                                                        </Button>
+                                                    </TableCell>
+                                                    <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                                                    <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500">{item.regId}</TableCell>
+                                                    <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
+                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.village}</TableCell>
+                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.imei_no || "-"}</TableCell>
+                                                    <TableCell className="whitespace-nowrap text-slate-600">{item.rid_number || "-"}</TableCell>
 
-                                            </TableRow>
-                                        )))}
+                                                </TableRow>
+                                            )))}
                                     </TableBody>
                                 </Table>
                             </div>

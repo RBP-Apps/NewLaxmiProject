@@ -31,6 +31,7 @@ import {
     ShieldCheck,
     Edit,
     Pencil,
+    FileText,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -47,6 +48,7 @@ export default function InsurancesPage() {
     const [selectedRows, setSelectedRows] = useState([]);
     const [isBulk, setIsBulk] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const [historySearchTerm, setHistorySearchTerm] = useState("");
 
     const [filters, setFilters] = useState({
         regId: "",
@@ -361,7 +363,7 @@ export default function InsurancesPage() {
     };
 
     return (
-        <div className="space-y-8 p-6 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
+        <div className="space-y-8 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
             <Tabs
                 defaultValue="pending"
                 className="w-full"
@@ -391,11 +393,11 @@ export default function InsurancesPage() {
                     value="pending"
                     className="mt-6 focus-visible:ring-0 focus-visible:outline-none animate-in fade-in-0 slide-in-from-left-4 duration-500 ease-out"
                 >
-                    <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-                        <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
-                            <div className="flex items-center gap-2 w-full md:w-auto justify-between">
-                                <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
-                                    <div className="p-1 bg-blue-100 rounded-lg">
+                    <Card className="border border-slate-200 shadow-sm bg-white overflow-hidden">
+                        <CardHeader className="border-b border-slate-100 bg-slate-50/80 px-6 py-4 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between">
+                            <div className="flex items-center gap-2 w-full md:w-auto">
+                                <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                                    <div className="p-1.5 bg-blue-100/50 rounded-lg border border-blue-200/50 shadow-sm">
                                         <ShieldPlus className="h-4 w-4 text-blue-600" />
                                     </div>
                                     Pending Insurance
@@ -403,13 +405,13 @@ export default function InsurancesPage() {
                             </div>
 
                             <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                                <div className="relative w-full md:w-100">
+                                <div className="relative w-full md:w-72">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                     <Input
-                                        placeholder="Search..."
+                                        placeholder="Search records..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
+                                        className="pl-9 bg-white border-slate-200 focus-visible:ring-blue-500/20 h-9 transition-all hover:border-slate-300 text-sm shadow-sm"
                                     />
                                 </div>
 
@@ -417,7 +419,7 @@ export default function InsurancesPage() {
                                     {selectedRows.length >= 2 && (
                                         <Button
                                             onClick={handleBulkClick}
-                                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
+                                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9 px-4"
                                             size="sm"
                                         >
                                             <ClipboardCheck className="h-4 w-4 mr-2" />
@@ -426,8 +428,9 @@ export default function InsurancesPage() {
                                     )}
                                     <Badge
                                         variant="outline"
-                                        className="bg-yellow-100 text-yellow-700 border-yellow-200 px-3 py-1 h-9 flex items-center"
+                                        className="bg-amber-50 text-amber-700 border-amber-200 px-3 py-1.5 h-9 flex items-center font-medium shadow-sm transition-all hover:bg-amber-100"
                                     >
+                                        <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
                                         {filteredPendingItems.length} Pending
                                     </Badge>
                                 </div>
@@ -435,8 +438,8 @@ export default function InsurancesPage() {
                         </CardHeader>
 
                         {/* Filter Dropdowns */}
-                        <div className="px-6 py-4 bg-slate-50/50 border-b border-blue-50">
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <div className="px-6 py-4 bg-white border-b border-slate-100 flex flex-col gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                                 {[
                                     { key: "regId", label: "Reg ID" },
                                     { key: "village", label: "Village" },
@@ -446,15 +449,15 @@ export default function InsurancesPage() {
                                     { key: "ipName", label: "IP Name" },
                                 ].map(({ key, label }) => (
                                     <div key={key} className="space-y-1.5">
-                                        <Label className="text-xs text-slate-600">{label}</Label>
+                                        <Label className="text-xs font-medium text-slate-600 tracking-wide">{label}</Label>
                                         <select
                                             value={filters[key]}
                                             onChange={(e) =>
                                                 setFilters({ ...filters, [key]: e.target.value })
                                             }
-                                            className="w-full h-9 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                            className="w-full h-9 px-3 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-slate-50 hover:bg-white transition-colors cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-size-[16px_16px] bg-position-[right_12px_center] bg-no-repeat pr-8"
                                         >
-                                            <option value="">All</option>
+                                            <option value="">All {label}s</option>
                                             {getUniquePendingValues(key).map((val) => (
                                                 <option key={val} value={val}>
                                                     {val}
@@ -465,32 +468,34 @@ export default function InsurancesPage() {
                                 ))}
                             </div>
 
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                    setFilters({
-                                        regId: "",
-                                        village: "",
-                                        block: "",
-                                        district: "",
-                                        pumpCapacity: "",
-                                        ipName: "",
-                                    })
-                                }
-                                className="mt-3 text-xs"
-                            >
-                                Clear All Filters
-                            </Button>
+                            <div className="flex justify-end">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() =>
+                                        setFilters({
+                                            regId: "",
+                                            village: "",
+                                            block: "",
+                                            district: "",
+                                            pumpCapacity: "",
+                                            ipName: "",
+                                        })
+                                    }
+                                    className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 h-8 px-3 text-xs font-medium transition-colors"
+                                >
+                                    Clear Filters
+                                </Button>
+                            </div>
                         </div>
 
                         <CardContent className="p-0">
                             {/* Desktop Table */}
-                            <div className="overflow-x-auto">
+                            <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
                                 <Table className="[&_th]:text-center [&_td]:text-center">
-                                    <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
-                                        <TableRow className="border-b border-blue-100 hover:bg-transparent">
-                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
+                                    <TableHeader className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm">
+                                        <TableRow className="border-b border-slate-200 hover:bg-transparent">
+                                            <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-12">
                                                 <div className="flex justify-center">
                                                     <Checkbox
                                                         checked={
@@ -500,45 +505,45 @@ export default function InsurancesPage() {
                                                         }
                                                         onCheckedChange={handleSelectAll}
                                                         aria-label="Select all rows"
-                                                        className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
+                                                        className="checkbox-3d border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out rounded"
                                                     />
                                                 </div>
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                                                 Action
                                             </TableHead>
-                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Reg ID
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Beneficiary Name
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Father's Name
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Mobile Number
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Village
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Block
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 District
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Pincode
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Pump Capacity
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Planned Date
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 IP Name
                                             </TableHead>
                                         </TableRow>
@@ -577,7 +582,7 @@ export default function InsurancesPage() {
                                             filteredPendingItems.map((item, index) => (
                                                 <TableRow
                                                     key={item.regId}
-                                                    className="hover:bg-blue-50/30 transition-colors"
+                                                    className="hover:bg-blue-50/40 transition-colors group border-b border-slate-100"
                                                 >
                                                     <TableCell className="px-4">
                                                         <div className="flex justify-center">
@@ -587,7 +592,7 @@ export default function InsurancesPage() {
                                                                     handleSelectRow(item.regId, checked)
                                                                 }
                                                                 aria-label={`Select row ${item.regId}`}
-                                                                className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110"
+                                                                className="checkbox-3d border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110 rounded"
                                                             />
                                                         </div>
                                                     </TableCell>
@@ -597,9 +602,9 @@ export default function InsurancesPage() {
                                                             size="sm"
                                                             onClick={() => handleActionClick(item)}
                                                             disabled={selectedRows.length >= 2}
-                                                            className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200/50 shadow-sm text-[11px] font-semibold h-7 px-3 rounded-md flex items-center gap-1.5 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
-                                                            <ShieldCheck className="h-3.5 w-3.5" />
+                                                            <ShieldCheck className="h-3 w-3" />
                                                             Insure
                                                         </Button>
                                                     </TableCell>
@@ -607,34 +612,34 @@ export default function InsurancesPage() {
                                                     <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">
                                                         {item.regId}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap font-medium text-slate-800">
+                                                    <TableCell className="whitespace-nowrap font-medium text-slate-800 text-sm">
                                                         {item.beneficiaryName}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">
+                                                    <TableCell className="whitespace-nowrap text-slate-600 text-sm">
                                                         {item.fatherName}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600 font-mono">
+                                                    <TableCell className="whitespace-nowrap text-slate-600 font-mono text-sm">
                                                         {item.mobileNumber}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">
+                                                    <TableCell className="whitespace-nowrap text-slate-600 text-sm">
                                                         {item.village}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">
+                                                    <TableCell className="whitespace-nowrap text-slate-600 text-sm">
                                                         {item.block}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">
+                                                    <TableCell className="whitespace-nowrap text-slate-600 text-sm">
                                                         {item.district}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600 font-mono">
+                                                    <TableCell className="whitespace-nowrap text-slate-600 font-mono text-sm">
                                                         {item.pincode}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600">
+                                                    <TableCell className="whitespace-nowrap text-slate-600 text-sm">
                                                         {item.pumpCapacity}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600 font-medium">
+                                                    <TableCell className="whitespace-nowrap text-slate-600 font-medium text-sm">
                                                         {item.planned10 || "-"}
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap text-slate-600 font-medium">
+                                                    <TableCell className="whitespace-nowrap text-slate-600 font-medium text-sm">
                                                         {item.ipName}
                                                     </TableCell>
                                                 </TableRow>
@@ -654,18 +659,18 @@ export default function InsurancesPage() {
                                     filteredPendingItems.map((item) => (
                                         <Card
                                             key={item.regId}
-                                            className="bg-white border text-sm shadow-sm"
+                                            className="bg-white border text-sm shadow-sm hover:shadow-md transition-shadow"
                                         >
                                             <CardContent className="p-4 space-y-3">
                                                 <div className="flex justify-between items-start">
                                                     <div className="space-y-1">
                                                         <Badge
                                                             variant="secondary"
-                                                            className="bg-slate-100 text-slate-600"
+                                                            className="bg-slate-100 text-slate-600 font-mono text-[10px]"
                                                         >
                                                             {item.serialNo}
                                                         </Badge>
-                                                        <h4 className="font-semibold text-base text-slate-800">
+                                                        <h4 className="font-semibold text-base text-slate-800 leading-tight">
                                                             {item.beneficiaryName}
                                                         </h4>
                                                         <p className="text-muted-foreground text-xs font-mono">
@@ -674,13 +679,13 @@ export default function InsurancesPage() {
                                                     </div>
                                                     <Badge
                                                         variant="outline"
-                                                        className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs"
+                                                        className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] uppercase font-bold tracking-wider"
                                                     >
                                                         Pending
                                                     </Badge>
                                                 </div>
 
-                                                <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs border-t border-b py-3 my-2 border-slate-100">
+                                                <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs border-t border-b py-3 my-2 border-slate-100 bg-slate-50/50 rounded-lg px-3">
                                                     <div className="flex flex-col gap-1">
                                                         <span className="text-slate-400 text-[10px] uppercase font-semibold">
                                                             Father's Name
@@ -717,7 +722,7 @@ export default function InsurancesPage() {
                                                         <span className="text-slate-400 text-[10px] uppercase font-semibold">
                                                             Pump Capacity
                                                         </span>
-                                                        <span className="font-medium text-slate-700">
+                                                        <span className="font-medium text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200 w-fit">
                                                             {item.pumpCapacity}
                                                         </span>
                                                     </div>
@@ -725,7 +730,7 @@ export default function InsurancesPage() {
                                                         <span className="text-slate-400 text-[10px] uppercase font-semibold">
                                                             Amount
                                                         </span>
-                                                        <span className="font-medium text-slate-700">
+                                                        <span className="font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 w-fit">
                                                             {item.amount !== "-" ? `₹${item.amount}` : "-"}
                                                         </span>
                                                     </div>
@@ -734,7 +739,7 @@ export default function InsurancesPage() {
                                                 <Button
                                                     size="sm"
                                                     disabled={selectedRows.length >= 2}
-                                                    className="w-full bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    className="w-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 mt-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-9"
                                                     onClick={() => handleActionClick(item)}
                                                 >
                                                     <ShieldCheck className="h-4 w-4 mr-2" />
@@ -754,51 +759,40 @@ export default function InsurancesPage() {
                     value="history"
                     className="mt-6 focus-visible:ring-0 focus-visible:outline-none animate-in fade-in-0 slide-in-from-right-4 duration-500 ease-out"
                 >
-                    <Card className="border border-blue-100 shadow-xl shadow-blue-100/20 bg-white/80 backdrop-blur-sm overflow-hidden">
-                        <CardHeader className="border-b border-blue-50 bg-blue-50/30 px-6 py-3 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto min-h-[3.5rem]">
+                    <Card className="border border-slate-200 shadow-sm bg-white overflow-hidden">
+                        <CardHeader className="border-b border-slate-100 bg-slate-50/80 px-6 py-4 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between">
                             <div className="flex items-center gap-2 w-full md:w-auto">
-                                <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
-                                    <div className="p-1 bg-blue-100 rounded-lg">
-                                        <FileCheck className="h-4 w-4 text-blue-600" />
+                                <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                                    <div className="p-1.5 bg-blue-100/50 rounded-lg border border-blue-200/50 shadow-sm">
+                                        <FileText className="h-4 w-4 text-blue-600" />
                                     </div>
                                     Insurance History
                                 </CardTitle>
                             </div>
 
                             <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                                <div className="relative w-full md:w-100">
+                                <div className="relative w-full md:w-72">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                     <Input
-                                        placeholder="Search..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="pl-9 bg-white border-black focus-visible:ring-blue-200 h-9 transition-all hover:border-blue-200"
+                                        placeholder="Search records..."
+                                        value={historySearchTerm}
+                                        onChange={(e) => setHistorySearchTerm(e.target.value)}
+                                        className="pl-9 bg-white border-slate-200 focus-visible:ring-blue-500/20 h-9 transition-all hover:border-slate-300 text-sm shadow-sm"
                                     />
                                 </div>
-                                <div className="flex items-center gap-2 w-full md:w-auto justify-end">
-                                    {selectedRows.length >= 2 && (
-                                        <Button
-                                            onClick={handleBulkClick}
-                                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-9"
-                                            size="sm"
-                                        >
-                                            <ClipboardCheck className="h-4 w-4 mr-2" />
-                                            Update Selected ({selectedRows.length})
-                                        </Button>
-                                    )}
-                                    <Badge
-                                        variant="outline"
-                                        className="bg-blue-100 text-blue-700 border-blue-200 px-3 py-1 h-9 flex items-center whitespace-nowrap"
-                                    >
-                                        {filteredHistoryItems.length} Records
-                                    </Badge>
-                                </div>
+                                <Badge
+                                    variant="outline"
+                                    className="bg-emerald-50 text-emerald-700 border-emerald-200 px-3 py-1.5 h-9 flex items-center font-medium shadow-sm transition-all hover:bg-emerald-100"
+                                >
+                                    <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                                    {filteredHistoryItems.length} Records
+                                </Badge>
                             </div>
                         </CardHeader>
 
                         {/* Filter Dropdowns */}
-                        <div className="px-6 py-4 bg-slate-50/50 border-b border-blue-50">
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <div className="px-6 py-4 bg-white border-b border-slate-100 flex flex-col gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                                 {[
                                     { key: "regId", label: "Reg ID" },
                                     { key: "village", label: "Village" },
@@ -808,15 +802,15 @@ export default function InsurancesPage() {
                                     { key: "ipName", label: "IP Name" },
                                 ].map(({ key, label }) => (
                                     <div key={key} className="space-y-1.5">
-                                        <Label className="text-xs text-slate-600">{label}</Label>
+                                        <Label className="text-xs font-medium text-slate-600 tracking-wide">{label}</Label>
                                         <select
                                             value={filters[key]}
                                             onChange={(e) =>
                                                 setFilters({ ...filters, [key]: e.target.value })
                                             }
-                                            className="w-full h-9 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                            className="w-full h-9 px-3 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-slate-50 hover:bg-white transition-colors cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-size-[16px_16px] bg-position-[right_12px_center] bg-no-repeat pr-8"
                                         >
-                                            <option value="">All</option>
+                                            <option value="">All {label}s</option>
                                             {getUniqueHistoryValues(key).map((val) => (
                                                 <option key={val} value={val}>
                                                     {val}
@@ -827,63 +821,65 @@ export default function InsurancesPage() {
                                 ))}
                             </div>
 
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                    setFilters({
-                                        regId: "",
-                                        village: "",
-                                        block: "",
-                                        district: "",
-                                        pumpCapacity: "",
-                                        ipName: "",
-                                    })
-                                }
-                                className="mt-3 text-xs"
-                            >
-                                Clear All Filters
-                            </Button>
+                            <div className="flex justify-end">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() =>
+                                        setFilters({
+                                            regId: "",
+                                            village: "",
+                                            block: "",
+                                            district: "",
+                                            pumpCapacity: "",
+                                            ipName: "",
+                                        })
+                                    }
+                                    className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 h-8 px-3 text-xs font-medium transition-colors"
+                                >
+                                    Clear Filters
+                                </Button>
+                            </div>
                         </div>
 
                         <CardContent className="p-0">
                             {/* Desktop Table */}
-                            <div className="overflow-x-auto">
+                            <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
                                 <Table className="[&_th]:text-center [&_td]:text-center">
-                                    <TableHeader className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50">
-                                        <TableRow className="border-b border-blue-100 hover:bg-transparent">
-                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-12">
+                                    <TableHeader className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm">
+                                        <TableRow className="border-b border-slate-200 hover:bg-transparent">
+                                            <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-12">
                                                 <div className="flex justify-center">
                                                     <Checkbox
                                                         checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length}
                                                         onCheckedChange={handleSelectAll}
-                                                        className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
+                                                        className="checkbox-3d border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out rounded"
                                                     />
                                                 </div>
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                                                 Action
                                             </TableHead>
-                                            <TableHead className="h-14 px-4 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Reg ID
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Beneficiary Name
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Village
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 District
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 Insurance No
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 SCADA Upload
                                             </TableHead>
-                                            <TableHead className="h-14 px-6 text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">
+                                            <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                 File
                                             </TableHead>
                                         </TableRow>
@@ -921,14 +917,14 @@ export default function InsurancesPage() {
                                             filteredHistoryItems.map((item, index) => (
                                                 <TableRow
                                                     key={item.regId}
-                                                    className="hover:bg-blue-50/30 transition-colors"
+                                                    className="hover:bg-blue-50/40 transition-colors group border-b border-slate-100"
                                                 >
                                                     <TableCell className="px-4">
                                                         <div className="flex justify-center">
                                                             <Checkbox
                                                                 checked={selectedRows.includes(item.regId)}
                                                                 onCheckedChange={(checked) => handleSelectRow(item.regId, checked)}
-                                                                className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5 shadow-sm transition-all duration-300 ease-out"
+                                                                className="checkbox-3d border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110 rounded"
                                                             />
                                                         </div>
                                                     </TableCell>
@@ -938,32 +934,32 @@ export default function InsurancesPage() {
                                                             size="sm"
                                                             onClick={() => handleActionClick(item)}
                                                             disabled={selectedRows.length >= 2}
-                                                            className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-xs text-xs font-semibold h-8 px-4 rounded-full flex items-center gap-2 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200/50 shadow-sm text-[11px] font-semibold h-7 px-3 rounded-md flex items-center gap-1.5 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
-                                                            <Pencil className="h-3.5 w-3.5" />
+                                                            <Pencil className="h-3 w-3" />
                                                             Edit
                                                         </Button>
                                                     </TableCell>
                                                     <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
                                                     <TableCell>
-                                                        <span className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md">
+                                                        <span className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">
                                                             {item.regId}
                                                         </span>
                                                     </TableCell>
-                                                    <TableCell className="whitespace-nowrap font-medium text-slate-800">
+                                                    <TableCell className="whitespace-nowrap font-medium text-slate-800 text-sm">
                                                         {item.beneficiaryName}
                                                     </TableCell>
-                                                    <TableCell className="text-slate-600">
+                                                    <TableCell className="text-slate-600 text-sm">
                                                         {item.village}
                                                     </TableCell>
-                                                    <TableCell className="text-slate-600">
+                                                    <TableCell className="text-slate-600 text-sm">
                                                         {item.district}
                                                     </TableCell>
                                                     <TableCell className="text-slate-700 font-mono text-xs">
                                                         {item.insuranceNo || "-"}
                                                     </TableCell>
                                                     <TableCell>
-                                                        <Badge variant={item.scadaInsuranceUpload === "Done" ? "default" : "secondary"} className={item.scadaInsuranceUpload === "Done" ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-800"}>
+                                                        <Badge variant="outline" className={item.scadaInsuranceUpload === "Done" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-amber-50 text-amber-700 border-amber-200"}>
                                                             {item.scadaInsuranceUpload || "Pending"}
                                                         </Badge>
                                                     </TableCell>
@@ -973,9 +969,9 @@ export default function InsurancesPage() {
                                                                 href={item.insuranceFile}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
-                                                                className="text-blue-600 hover:text-blue-800 underline text-xs flex items-center justify-center gap-1"
+                                                                className="text-blue-600 hover:text-blue-800 hover:underline text-xs flex items-center justify-center gap-1.5 transition-colors bg-blue-50 hover:bg-blue-100 py-1 px-2 rounded-md"
                                                             >
-                                                                <ShieldCheck className="h-3 w-3" /> View
+                                                                <ShieldCheck className="h-3.5 w-3.5" /> View
                                                             </a>
                                                         ) : (
                                                             <span className="text-slate-400 text-xs">-</span>
@@ -987,57 +983,6 @@ export default function InsurancesPage() {
                                     </TableBody>
                                 </Table>
                             </div>
-
-                            {/* Mobile Card View */}
-                            <div className="block md:hidden space-y-4 p-4 bg-slate-50">
-                                {filteredHistoryItems.map((item) => (
-                                    <Card
-                                        key={item.regId}
-                                        className="bg-white border text-sm shadow-sm"
-                                    >
-                                        <CardContent className="p-4 space-y-3">
-                                            <div className="flex justify-between items-start">
-                                                <div className="space-y-1">
-                                                    <p className="font-semibold text-blue-900">
-                                                        {item.regId}
-                                                    </p>
-                                                    <p className="text-base font-medium text-slate-800">
-                                                        {item.beneficiaryName}
-                                                    </p>
-                                                    <p className="text-muted-foreground text-xs">
-                                                        {item.district} • {item.village}
-                                                    </p>
-                                                </div>
-                                                <Badge className={item.scadaInsuranceUpload === "Done" ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-800"}>
-                                                    {item.scadaInsuranceUpload || "Pending"}
-                                                </Badge>
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-2 text-xs border-t border-slate-100 pt-2 mt-2">
-                                                <div>
-                                                    <span className="font-medium text-slate-500">
-                                                        Insurance No:
-                                                    </span>{" "}
-                                                    {item.insuranceNo || "-"}
-                                                </div>
-                                                <div>
-                                                    <span className="font-medium text-slate-500">
-                                                        File:
-                                                    </span>{" "}
-                                                    {item.insuranceFile ? (
-                                                        <a href={item.insuranceFile} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">View</a>
-                                                    ) : "-"}
-                                                </div>
-                                            </div>
-                                            <div className="flex justify-end pt-2">
-                                                <Button size="sm" variant="outline" onClick={() => handleActionClick(item)} className="h-8 gap-2">
-                                                    <Edit className="h-3.5 w-3.5" /> Edit
-                                                </Button>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -1047,13 +992,13 @@ export default function InsurancesPage() {
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent
                     showCloseButton={!isSuccess}
-                    className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isSuccess ? "bg-transparent !shadow-none !border-none" : "bg-white"
+                    className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isSuccess ? "bg-transparent shadow-none! border-none!" : "bg-white"
                         }`}
                 >
                     {isSuccess ? (
                         <div className="flex flex-col items-center justify-center w-full p-8 text-center space-y-6 animate-in fade-in duration-300">
                             <div className="rounded-full bg-white p-5 shadow-2xl shadow-white/20 ring-8 ring-white/10 animate-in zoom-in duration-500 ease-out">
-                                <CheckCircle2 className="h-16 w-16 text-green-600 scale-110" />
+                                <CheckCircle2 className="h-16 w-16 text-emerald-500 scale-110" />
                             </div>
                             <h2 className="text-3xl font-bold text-white drop-shadow-md animate-in slide-in-from-bottom-4 fade-in duration-500 delay-150 ease-out tracking-wide">
                                 Submitted Successfully!
@@ -1061,18 +1006,18 @@ export default function InsurancesPage() {
                         </div>
                     ) : (
                         <>
-                            <DialogHeader className="p-6 pb-2 border-b border-blue-100 bg-blue-50/30">
-                                <DialogTitle className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent flex items-center gap-2">
-                                    <span className="bg-blue-100 p-1.5 rounded-md">
+                            <DialogHeader className="p-6 pb-4 border-b border-slate-100 bg-slate-50/50">
+                                <DialogTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                    <div className="p-1.5 bg-blue-100/50 rounded-lg border border-blue-200/50 shadow-sm">
                                         <ShieldPlus className="h-4 w-4 text-blue-600" />
-                                    </span>
+                                    </div>
                                     Enter Insurance Information
                                 </DialogTitle>
-                                <DialogDescription className="text-slate-500 ml-10">
+                                <DialogDescription className="text-slate-500 mt-1 ml-11">
                                     {isBulk ? (
                                         <span>
                                             Applying changes to{" "}
-                                            <span className="font-bold text-blue-700">
+                                            <span className="font-semibold text-blue-600">
                                                 {selectedRows.length} selected items
                                             </span>
                                             . All fields below will be updated for these items.
@@ -1092,85 +1037,85 @@ export default function InsurancesPage() {
                                 <div className="grid gap-6 p-6">
                                     {/* PREFILLED BENEFICIARY DETAILS CARD - Hide in Bulk */}
                                     {!isBulk && selectedItem && (
-                                        <div className="rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50/50 to-cyan-50/30 p-5 shadow-sm">
-                                            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-blue-100/50">
-                                                <span className="bg-white p-1 rounded shadow-sm">
-                                                    <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                                                </span>
-                                                <h4 className="font-semibold text-blue-900">
+                                        <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-5 shadow-sm">
+                                            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-200/60">
+                                                <div className="p-1.5 bg-white rounded-md shadow-sm border border-slate-100">
+                                                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                                                </div>
+                                                <h4 className="font-semibold text-slate-800">
                                                     Beneficiary Details
                                                 </h4>
                                             </div>
-                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 text-sm">
-                                                <div>
-                                                    <span className="text-xs font-medium text-blue-600/70 uppercase tracking-wider block mb-1">
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-6">
+                                                <div className="space-y-1">
+                                                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
                                                         Serial No
                                                     </span>
-                                                    <p className="font-semibold text-slate-700">
+                                                    <p className="text-sm font-medium text-slate-800">
                                                         {selectedItem.serialNo}
                                                     </p>
                                                 </div>
-                                                <div>
-                                                    <span className="text-xs font-medium text-blue-600/70 uppercase tracking-wider block mb-1">
+                                                <div className="space-y-1">
+                                                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
                                                         Reg ID
                                                     </span>
-                                                    <p className="font-semibold text-slate-700">
+                                                    <p className="text-sm font-medium font-mono text-slate-800">
                                                         {selectedItem.regId}
                                                     </p>
                                                 </div>
-                                                <div>
-                                                    <span className="text-xs font-medium text-blue-600/70 uppercase tracking-wider block mb-1">
+                                                <div className="space-y-1">
+                                                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
                                                         Beneficiary Name
                                                     </span>
-                                                    <p className="font-semibold text-slate-700">
+                                                    <p className="text-sm font-medium text-slate-800">
                                                         {selectedItem.beneficiaryName}
                                                     </p>
                                                 </div>
-                                                <div>
-                                                    <span className="text-xs font-medium text-blue-600/70 uppercase tracking-wider block mb-1">
+                                                <div className="space-y-1">
+                                                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
                                                         Father's Name
                                                     </span>
-                                                    <p className="font-semibold text-slate-700">
+                                                    <p className="text-sm font-medium text-slate-800">
                                                         {selectedItem.fatherName}
                                                     </p>
                                                 </div>
-                                                <div>
-                                                    <span className="text-xs font-medium text-blue-600/70 uppercase tracking-wider block mb-1">
+                                                <div className="space-y-1">
+                                                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
                                                         Village
                                                     </span>
-                                                    <p className="font-semibold text-slate-700">
+                                                    <p className="text-sm font-medium text-slate-800">
                                                         {selectedItem.village}
                                                     </p>
                                                 </div>
-                                                <div>
-                                                    <span className="text-xs font-medium text-blue-600/70 uppercase tracking-wider block mb-1">
+                                                <div className="space-y-1">
+                                                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
                                                         Block
                                                     </span>
-                                                    <p className="font-semibold text-slate-700">
+                                                    <p className="text-sm font-medium text-slate-800">
                                                         {selectedItem.block}
                                                     </p>
                                                 </div>
-                                                <div>
-                                                    <span className="text-xs font-medium text-blue-600/70 uppercase tracking-wider block mb-1">
+                                                <div className="space-y-1">
+                                                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
                                                         District
                                                     </span>
-                                                    <p className="font-semibold text-slate-700">
+                                                    <p className="text-sm font-medium text-slate-800">
                                                         {selectedItem.district}
                                                     </p>
                                                 </div>
-                                                <div>
-                                                    <span className="text-xs font-medium text-blue-600/70 uppercase tracking-wider block mb-1">
+                                                <div className="space-y-1">
+                                                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
                                                         Pump Capacity
                                                     </span>
-                                                    <p className="font-medium text-slate-700">
+                                                    <p className="text-sm font-medium text-slate-800">
                                                         {selectedItem.pumpCapacity}
                                                     </p>
                                                 </div>
-                                                <div>
-                                                    <span className="text-xs font-medium text-blue-600/70 uppercase tracking-wider block mb-1">
+                                                <div className="space-y-1 col-span-2">
+                                                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
                                                         IP Name
                                                     </span>
-                                                    <p className="font-medium text-slate-700">
+                                                    <p className="text-sm font-medium text-slate-800">
                                                         {selectedItem.ipName}
                                                     </p>
                                                 </div>
@@ -1179,17 +1124,18 @@ export default function InsurancesPage() {
                                     )}
 
                                     {/* INSURANCE INPUT FORM */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
+                                        <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
                                         <div className="space-y-2">
-                                            <Label className="text-slate-700 font-medium">
-                                                SCADA INSURANCE UPLOAD
+                                            <Label className="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                                                SCADA Insurance Upload
                                             </Label>
                                             <select
                                                 value={formData.scadaInsuranceUpload}
                                                 onChange={(e) =>
                                                     setFormData({ ...formData, scadaInsuranceUpload: e.target.value })
                                                 }
-                                                className="w-full h-10 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-400 bg-white"
+                                                className="w-full h-10 px-3 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white hover:border-slate-300 transition-colors shadow-sm appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-size-[16px_16px] bg-position-[right_12px_center] bg-no-repeat pr-8"
                                             >
                                                 <option value="Done">Done</option>
                                                 <option value="Pending">Pending</option>
@@ -1197,7 +1143,7 @@ export default function InsurancesPage() {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <Label className="text-slate-700 font-medium">
+                                            <Label className="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                                                 Insurance No.
                                             </Label>
                                             <Input
@@ -1206,33 +1152,40 @@ export default function InsurancesPage() {
                                                     setFormData({ ...formData, insuranceNo: e.target.value })
                                                 }
                                                 placeholder="Enter insurance number"
-                                                className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white"
+                                                className="h-10 border-slate-200 focus:border-blue-500 focus-visible:ring-blue-500/20 bg-white shadow-sm font-mono text-sm"
                                             />
                                         </div>
 
-                                        <div className="space-y-2 md:col-span-2">
-                                            <Label className="text-slate-700 font-medium">
+                                        <div className="space-y-4 md:col-span-2 pt-2">
+                                            <Label className="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                                                <ShieldCheck className="h-4 w-4 text-blue-500" />
                                                 Insurance File Upload
                                             </Label>
-                                            <div className="space-y-2">
-                                                <Input
-                                                    type="file"
-                                                    onChange={(e) => handleFileUpload(e, 'file_insuranceFile')}
-                                                    className="border-slate-200 focus:border-cyan-400 focus-visible:ring-cyan-100 bg-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                                                />
+                                            <div className="space-y-3">
+                                                <div className="border border-dashed border-slate-300 rounded-xl p-4 bg-slate-50/50 hover:bg-slate-50 transition-colors flex items-center justify-center">
+                                                    <Input
+                                                        type="file"
+                                                        onChange={(e) => handleFileUpload(e, 'file_insuranceFile')}
+                                                        className="border-0 bg-transparent file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer h-auto py-0"
+                                                    />
+                                                </div>
                                                 {/* Show link if file already exists */}
                                                 {(formData.insuranceFile && typeof formData.insuranceFile === 'string' && formData.insuranceFile.trim() !== "") && (
-                                                    <div className="text-sm bg-blue-50 p-2 rounded border border-blue-100 text-blue-700 flex items-center gap-2">
-                                                        <ShieldCheck className="h-4 w-4" />
-                                                        <span>Existing File: </span>
-                                                        <a 
-                                                            href={formData.insuranceFile} 
-                                                            target="_blank" 
-                                                            rel="noopener noreferrer" 
-                                                            className="font-medium underline hover:text-blue-900"
-                                                        >
-                                                            View Document
-                                                        </a>
+                                                    <div className="text-sm bg-blue-50/80 p-3 rounded-lg border border-blue-100/50 text-blue-700 flex items-center gap-3">
+                                                        <div className="p-1.5 bg-white rounded-md shadow-sm">
+                                                            <ShieldCheck className="h-4 w-4 text-blue-600" />
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-0.5">Existing File</p>
+                                                            <a
+                                                                href={formData.insuranceFile}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="font-medium hover:underline flex items-center gap-1"
+                                                            >
+                                                                View Uploaded Document
+                                                            </a>
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
@@ -1240,19 +1193,19 @@ export default function InsurancesPage() {
                                     </div>
 
                                     {/* ACTION BUTTONS */}
-                                    <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-slate-100 pb-6 pr-6">
+                                    <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-slate-100">
                                         <Button
                                             variant="outline"
                                             onClick={() => setIsDialogOpen(false)}
                                             disabled={isSubmitting}
-                                            className="px-6 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200"
+                                            className="px-5 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 border-slate-200 h-10 transition-colors font-medium shadow-sm"
                                         >
                                             Cancel
                                         </Button>
                                         <Button
                                             onClick={handleSubmit}
                                             disabled={isSubmitting}
-                                            className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/20 px-8"
+                                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-600/20 px-6 h-10 transition-all font-medium"
                                         >
                                             {isSubmitting ? (
                                                 <>
@@ -1260,7 +1213,10 @@ export default function InsurancesPage() {
                                                     Saving...
                                                 </>
                                             ) : (
-                                                "Submit"
+                                                <div className="flex items-center gap-2">
+                                                    <CheckCircle2 className="h-4 w-4" />
+                                                    Submit Information
+                                                </div>
                                             )}
                                         </Button>
                                     </div>
