@@ -65,7 +65,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-slate-50">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-slate-50 px-4 sm:px-6">
       <style>{`
         @keyframes blob-1 {
           0% { transform: translate(0px, 0px) scale(1); }
@@ -97,21 +97,21 @@ export default function LoginPage() {
       `}</style>
       {/* Background Decor Elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-400/20 rounded-full blur-[100px] mix-blend-multiply animate-blob-1" />
-        <div className="absolute top-[10%] right-[-10%] w-[50%] h-[50%] bg-cyan-400/20 rounded-full blur-[100px] mix-blend-multiply animate-blob-2" />
-        <div className="absolute bottom-[-10%] left-[20%] w-[50%] h-[50%] bg-purple-400/20 rounded-full blur-[100px] mix-blend-multiply animate-blob-3" />
+        <div className="absolute top-[-10%] left-[-10%] w-[80%] h-[80%] sm:w-[50%] sm:h-[50%] bg-blue-400/20 rounded-full blur-[80px] sm:blur-[100px] mix-blend-multiply animate-blob-1" />
+        <div className="absolute top-[10%] right-[-10%] w-[80%] h-[80%] sm:w-[50%] sm:h-[50%] bg-cyan-400/20 rounded-full blur-[80px] sm:blur-[100px] mix-blend-multiply animate-blob-2" />
+        <div className="absolute bottom-[-10%] left-[20%] w-[80%] h-[80%] sm:w-[50%] sm:h-[50%] bg-purple-400/20 rounded-full blur-[80px] sm:blur-[100px] mix-blend-multiply animate-blob-3" />
       </div>
 
       <Card className="w-full max-w-md border border-white/40 shadow-2xl bg-white/60 backdrop-blur-xl rounded-3xl relative z-10 overflow-hidden animate-fade-in-up">
         {/* Top Accent Line */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-600" />
 
-        <CardHeader className="space-y-4 text-center pt-8 pb-8">
+        <CardHeader className="space-y-3 sm:space-y-4 text-center pt-6 pb-6 sm:pt-8 sm:pb-8">
           <div className="mx-auto bg-white p-4 rounded-2xl shadow-lg shadow-blue-500/10 mb-1 border border-blue-50">
             <ShieldCheck className="w-8 h-8 text-blue-600" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-800">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-800">
               Laxmi
             </h1>
             <p className="text-slate-500 text-sm font-medium">
@@ -120,7 +120,7 @@ export default function LoginPage() {
           </div>
         </CardHeader>
 
-        <CardContent className="px-8 pb-10 space-y-6">
+        <CardContent className="px-5 sm:px-8 pb-8 sm:pb-10 space-y-5 sm:space-y-6">
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
               <Label
