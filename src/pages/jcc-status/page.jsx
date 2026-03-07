@@ -1250,7 +1250,7 @@ export default function JccStatusPage() {
                                             variant="outline"
                                             onClick={() => setIsDialogOpen(false)}
                                             disabled={isSubmitting}
-                                            className="px-6 h-10 bg-white hover:bg-rose-500 text-slate-700 border-slate-200 font-medium rounded-lg"
+                                            className="px-6 h-10 bg-white hover:bg-slate-50 text-slate-700 border-slate-200 font-medium rounded-lg"
                                         >
                                             Cancel
                                         </Button>

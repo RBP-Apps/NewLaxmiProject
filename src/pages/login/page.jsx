@@ -153,7 +153,7 @@ export default function LoginPage() {
           </div>
           <div className="space-y-2">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-800">
-              Laxmi Project
+              Laxmi
             </h1>
             <p className="text-slate-500 text-sm font-medium">
               Enter your credentials to access the admin portal

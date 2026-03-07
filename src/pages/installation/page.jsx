@@ -1070,6 +1070,9 @@ export default function InstallationPage() {
                                   </a>
                                 ))}
                               </div>
+                              <a href={getPreviewUrl(item.photoUploadedOnUpadApp)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 hover:underline hover:bg-blue-50 px-2 py-1 rounded transition-colors text-sm font-medium">
+                                <FileCheck className="h-4 w-4" /> View
+                              </a>
                             ) : <span className="text-slate-400 italic text-sm">--</span>}
                           </TableCell>
                           <TableCell className="px-4 py-3 align-middle text-center">
@@ -1232,83 +1235,23 @@ export default function InstallationPage() {
                       </div>
 
                       <div className="space-y-2 md:col-span-2 mt-2">
-                        <Label className="text-sm font-medium text-slate-700">Installation Photos (Max 5)</Label>
-                        <div
-                          className={`border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center gap-3 transition-all group relative ${(!formData.photoFileObjs?.length && !formData.existingPhotos?.length) ? 'border-slate-300 bg-slate-50 hover:bg-slate-100/50 hover:border-blue-300 cursor-pointer' : 'border-slate-200 bg-white'}`}
-                          onClick={(e) => {
-                            if (e.target.closest('button') || e.target.closest('a')) return;
-                            if ((formData.existingPhotos?.length || 0) + (formData.photoFileObjs?.length || 0) < 5) {
-                              document.getElementById("photo-file")?.click();
-                            }
-                          }}
-                        >
-                          <input type="file" accept="image/*" multiple onChange={handleFileUpload} className="hidden" id="photo-file" />
-
-                          {(!formData.photoFileObjs || formData.photoFileObjs.length === 0) && (!formData.existingPhotos || formData.existingPhotos.length === 0) ? (
-                            <>
-                              <div className="h-12 w-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 group-hover:scale-110 transition-transform group-hover:border-blue-200 group-hover:shadow-blue-100">
-                                <Upload className="h-6 w-6 text-slate-500 group-hover:text-blue-500 transition-colors" />
-                              </div>
-                              <div className="text-center space-y-1">
-                                <span className="text-sm font-medium text-slate-700 group-hover:text-blue-600 transition-colors block">
-                                  Upload Installation Photos
-                                </span>
-                                <p className="text-xs text-slate-500 block">PNG, JPG or JPEG (max. 10MB each)</p>
-                              </div>
-                            </>
-                          ) : (
-                            <div className="w-full">
-                              <div className="flex flex-wrap gap-3 justify-center mb-3">
-                                {formData.existingPhotos?.map((url, index) => (
-                                  <div key={`existing-${index}`} className="relative group/badge">
-                                    <Badge variant="secondary" className="px-3 py-1.5 bg-blue-50 text-blue-700 border-blue-200 shadow-sm flex items-center gap-2 pr-8">
-                                      <FileCheck className="h-3.5 w-3.5" />
-                                      <a href={url} target="_blank" rel="noopener noreferrer" className="max-w-[120px] truncate hover:underline" onClick={(e) => e.stopPropagation()}>
-                                        Photo {index + 1}
-                                      </a>
-                                    </Badge>
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        removeExistingFile(index);
-                                      }}
-                                      className="absolute right-1 top-1/2 -translate-y-1/2 h-5 w-5 bg-blue-100 hover:bg-red-100 text-slate-500 hover:text-red-500 rounded-full flex items-center justify-center transition-colors"
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </button>
-                                  </div>
-                                ))}
-                                {formData.photoFileObjs?.map((file, index) => (
-                                  <div key={`new-${index}`} className="relative group/badge">
-                                    <Badge variant="secondary" className="px-3 py-1.5 bg-white text-slate-700 border-slate-200 shadow-sm flex items-center gap-2 pr-8">
-                                      <FileCheck className="h-3.5 w-3.5 text-blue-500" />
-                                      <span className="max-w-[120px] truncate">{file.name}</span>
-                                    </Badge>
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        removeNewFile(index);
-                                      }}
-                                      className="absolute right-1 top-1/2 -translate-y-1/2 h-5 w-5 bg-slate-100 hover:bg-red-100 text-slate-500 hover:text-red-500 rounded-full flex items-center justify-center transition-colors"
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                              {((formData.existingPhotos?.length || 0) + (formData.photoFileObjs?.length || 0)) < 5 && (
-                                <div className="text-center mt-4">
-                                  <Button type="button" variant="outline" size="sm" className="h-8 text-xs bg-white" onClick={() => document.getElementById("photo-file")?.click()}>
-                                    <Upload className="h-3 w-3 mr-2" />
-                                    Add More Photos ({((formData.existingPhotos?.length || 0) + (formData.photoFileObjs?.length || 0))}/5)
-                                  </Button>
-                                </div>
-                              )}
-                            </div>
+                        <Label className="text-sm font-medium text-slate-700">Installation Photo</Label>
+                        <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 bg-slate-50 flex flex-col items-center justify-center gap-3 hover:bg-slate-100/50 transition-all cursor-pointer group hover:border-blue-300" onClick={() => document.getElementById("photo-file")?.click()}>
+                          <Input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" id="photo-file" />
+                          <div className="h-12 w-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 group-hover:scale-110 transition-transform group-hover:border-blue-200 group-hover:shadow-blue-100">
+                            <Upload className="h-6 w-6 text-slate-500 group-hover:text-blue-500 transition-colors" />
+                          </div>
+                          <div className="text-center space-y-1">
+                            <span className="text-sm font-medium text-slate-700 group-hover:text-blue-600 transition-colors block">
+                              {formData.photoUploadedOnUpadApp ? "Change Photo" : "Upload Installation Photo"}
+                            </span>
+                            <p className="text-xs text-slate-500 block">PNG, JPG or JPEG (max. 10MB)</p>
+                          </div>
+                          {formData.photoUploadedOnUpadApp && (
+                            <Badge variant="secondary" className="mt-2 bg-slate-100 text-slate-700 border-slate-200">
+                              <FileCheck className="h-3 w-3 mr-1" />
+                              {formData.photoUploadedOnUpadApp}
+                            </Badge>
                           )}
                         </div>
                       </div>
