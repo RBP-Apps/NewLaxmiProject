@@ -15,13 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -33,7 +26,6 @@ import {
   Upload,
   FileCheck,
   Pencil,
-  Loader2,
   CheckCircle2,
   Search,
   X,
@@ -76,23 +68,10 @@ export default function InstallationPage() {
     return [...new Set(values)].sort();
   };
 
-  // const filteredPendingItems = pendingItems.filter((item) =>
-  //   Object.values(item).some((value) =>
-  //     String(value).toLowerCase().includes(searchTerm.toLowerCase())
-  //   )
-  // );
-
-  // const filteredHistoryItems = historyItems.filter((item) =>
-  //   Object.values(item).some((value) =>
-  //     String(value).toLowerCase().includes(searchTerm.toLowerCase())
-  //   )
-  // );
-
   const filteredPendingItems = pendingItems.filter((item) => {
     const matchesSearch = Object.values(item).some((value) =>
       String(value).toLowerCase().includes(searchTerm.toLowerCase())
     );
-
     const matchesFilters =
       (!filters.regId || item.regId === filters.regId) &&
       (!filters.village || item.village === filters.village) &&
@@ -101,7 +80,6 @@ export default function InstallationPage() {
       (!filters.pumpSource || item.pumpSource === filters.pumpSource) &&
       (!filters.pumpType || item.pumpType === filters.pumpType) &&
       (!filters.company || item.company === filters.company);
-
     return matchesSearch && matchesFilters;
   });
 
@@ -109,7 +87,6 @@ export default function InstallationPage() {
     const matchesSearch = Object.values(item).some((value) =>
       String(value).toLowerCase().includes(searchTerm.toLowerCase())
     );
-
     const matchesFilters =
       (!filters.regId || item.regId === filters.regId) &&
       (!filters.village || item.village === filters.village) &&
@@ -118,7 +95,6 @@ export default function InstallationPage() {
       (!filters.pumpSource || item.pumpSource === filters.pumpSource) &&
       (!filters.pumpType || item.pumpType === filters.pumpType) &&
       (!filters.company || item.company === filters.company);
-
     return matchesSearch && matchesFilters;
   });
 
@@ -130,21 +106,19 @@ export default function InstallationPage() {
     delay4: "",
   });
 
-  const getPreviewUrl = (url) => {
-    if (!url) return url;
-    return url;
-  };
+  const getPreviewUrl = (url) => url; // simple passthrough, can be extended
+
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // Get logged in user details
       const loggedInUserStr = localStorage.getItem("loggedInUser");
       const loggedInUser = loggedInUserStr ? JSON.parse(loggedInUserStr) : null;
       const isIpRole = loggedInUser?.role === "IP";
       const userIpName = loggedInUser?.ipName || "";
 
-      // 1. Fetch dispatch_material to identify pending reg_ids and history records
-      const { data: insData, error: insError } = await supabase.from("installation").select("*");
+      const { data: insData, error: insError } = await supabase
+        .from("installation")
+        .select("*");
       if (insError) throw insError;
 
       const pendingRegIds = [];
@@ -156,7 +130,6 @@ export default function InstallationPage() {
         const isActual4 = row.actual_4 != null && String(row.actual_4).trim() !== "";
 
         if (isPlanned4 && isActual4) {
-          // History: both set
           historyItemsParsed.push({
             id: row.id,
             regId: row.reg_id || "-",
@@ -169,7 +142,6 @@ export default function InstallationPage() {
             planned4: row.planned_4 || "",
           });
         } else if (isPlanned4 && !isActual4) {
-          // Pending: planned_4 set but actual_4 not set
           const regId = row.reg_id;
           if (regId) {
             pendingRegIds.push(regId);
@@ -178,24 +150,24 @@ export default function InstallationPage() {
         }
       });
 
-      // 2. Fetch portal records matching pending reg_ids
       let parsedPending = [];
       if (pendingRegIds.length > 0) {
-        let portalQuery = supabase.from("portal").select("*").in("reg_id", pendingRegIds);
+        let portalQuery = supabase
+          .from("portal")
+          .select("*")
+          .in("reg_id", pendingRegIds);
 
-        // Apply IP role filter if necessary
         if (isIpRole && userIpName) {
           portalQuery = portalQuery.eq("ip_name", userIpName);
         }
 
         const { data: portalData, error: portalError } = await portalQuery;
-
         if (portalError) throw portalError;
 
         parsedPending = portalData.map((row) => {
           const insRow = imMap[row.reg_id] || {};
           return {
-            id: insRow.id, // installation id for update
+            id: insRow.id,
             regId: row.reg_id || "-",
             serialNo: row.serial_no || "-",
             beneficiaryName: row.beneficiary_name || "-",
@@ -216,17 +188,13 @@ export default function InstallationPage() {
         });
       }
 
-      // 3. For History records, we need some portal info too
       if (historyItemsParsed.length > 0) {
         const historyRegIds = historyItemsParsed.map((i) => i.regId);
-
-        // Base query for history portal data
         let portalHistQuery = supabase
           .from("portal")
           .select("reg_id, beneficiary_name, mobile_number, village, pump_capacity, pump_head, ip_name")
           .in("reg_id", historyRegIds);
 
-        // Apply IP role filter if necessary
         if (isIpRole && userIpName) {
           portalHistQuery = portalHistQuery.eq("ip_name", userIpName);
         }
@@ -237,28 +205,20 @@ export default function InstallationPage() {
           const portalHistMap = {};
           portalHistData.forEach((p) => (portalHistMap[p.reg_id] = p));
 
-          // Filter out history items that do not belong to the IP user (if IP role)
           const validHistoryItems = [];
-
           historyItemsParsed.forEach((item) => {
             const pData = portalHistMap[item.regId];
-
-            // If IP role and the record isn't in filtered portal data, skip it
             if (isIpRole && !pData) return;
-
             item.beneficiaryName = pData?.beneficiary_name || "-";
             item.mobileNumber = pData?.mobile_number || "-";
             item.village = pData?.village || "-";
             item.pumpCapacity = pData?.pump_capacity || "-";
             item.pumpHead = pData?.pump_head || "-";
             item.ipName = pData?.ip_name || "-";
-
             validHistoryItems.push(item);
           });
-
           setHistoryItems(validHistoryItems);
         } else {
-          // If there's an error or no data, and it's an IP role, show nothing (filtered out)
           setHistoryItems(isIpRole ? [] : historyItemsParsed);
         }
       } else {
@@ -287,19 +247,17 @@ export default function InstallationPage() {
     }
   }, [isSuccess]);
 
-  // Local storage logic removed as per request
-
   const handleActionClick = (item) => {
     setSelectedItem(item);
     setIsSuccess(false);
     setIsBulk(false);
     let photos = [];
-    if (item.photoUploadedOnUpadApp && typeof item.photoUploadedOnUpadApp === 'string') {
-      photos = item.photoUploadedOnUpadApp.split(',').filter(Boolean).map(s => s.trim());
+    if (item.photoUploadedOnUpadApp && typeof item.photoUploadedOnUpadApp === "string") {
+      photos = item.photoUploadedOnUpadApp.split(",").filter(Boolean).map((s) => s.trim());
     }
 
     setFormData({
-      installationStatus: item.installationStatus === "Completed" ? "Done" : (item.installationStatus || "Done"),
+      installationStatus: item.installationStatus === "Completed" ? "Done" : item.installationStatus || "Done",
       installationDate: item.installationDate || "",
       existingPhotos: photos,
       photoFileObjs: [],
@@ -311,28 +269,6 @@ export default function InstallationPage() {
   const handleSelectAll = (checked) => {
     if (checked) {
       const items = activeTab === "history" ? filteredHistoryItems : filteredPendingItems;
-      setSelectedRows(items.map((item) => item.serialNo || item.id)); // Use ID for history if serialNo not available? Let's check historyItems structure
-      // historyItemsParsed has: id, regId, serialNo.
-      // pendingItems has: id, regId, serialNo.
-      // So use item.serialNo if it's the key, or id.
-      // previous implementation used serialNo for Pending.
-      // Let's stick to serialNo as key if unique, but history items might not have it or might be duplicate?
-      // Wait, history items are fetched from installation table. They have unique IDs.
-      // Pending items are from portal table (mapped). Portal table has unique reg_id or serial_no?
-      // In pending map: `id: insRow.id`. If pending, insRow might be empty?
-      // Ah, pending items are those with `planned_4` but NO `actual_4`. So they exist in installation table.
-      // So they have `id` from installation table.
-      // Let's use `id` (installation table ID) as the key for selection, to be safe.
-      // But `handleSelectRow` uses `serialNo`. Let's check `filteredPendingItems` map.
-      // `id: insRow.id`. `serialNo: row.serial_no`.
-      // The pending table uses `item.serialNo` as key for checkbox.
-      // If we change to ID, we must update table row checkbox too.
-      // Let's check if serialNo is reliable.
-      // In `foundation` page we used `id`.
-      // In `survey` page we used `serialNo`.
-      // In `work-order` we used `regId`.
-      // Let's stick to `serialNo` if that's what `installation` page is already using for Pending.
-      // Yes, `selectedRows` stores `serialNo`.
       setSelectedRows(items.map((item) => item.serialNo));
     } else {
       setSelectedRows([]);
@@ -416,13 +352,15 @@ export default function InstallationPage() {
     setIsSubmitting(true);
 
     try {
-      // 1. UPLOAD FILE ONCE (if any)
       let uploadedUrls = [...(formData.existingPhotos || [])];
 
       if (formData.photoFileObjs && formData.photoFileObjs.length > 0) {
         for (const file of formData.photoFileObjs) {
-          const filePath = `installation-photos/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
-          const { data: uploadData, error: uploadError } = await supabase.storage
+          const filePath = `installation-photos/${Date.now()}_${file.name.replace(
+            /[^a-zA-Z0-9.\-_]/g,
+            ""
+          )}`;
+          const { error: uploadError } = await supabase.storage
             .from("Image_bucket")
             .upload(filePath, file);
 
@@ -440,18 +378,14 @@ export default function InstallationPage() {
 
       const finalFileUrl = uploadedUrls.length > 0 ? uploadedUrls.join(",") : "";
 
-      // 2. IDENTIFY ITEMS
       let itemsToProcess = [];
       const currentItems = activeTab === "history" ? historyItems : pendingItems;
       if (isBulk) {
-        itemsToProcess = currentItems.filter((item) =>
-          selectedRows.includes(item.serialNo)
-        );
+        itemsToProcess = currentItems.filter((item) => selectedRows.includes(item.serialNo));
       } else {
         itemsToProcess = [selectedItem];
       }
 
-      // 3. UPDATE via Supabase
       const updatePromises = itemsToProcess.map(async (item) => {
         const rowUpdate = {
           installation_status: formData.installationStatus,
@@ -467,10 +401,18 @@ export default function InstallationPage() {
           rowUpdate.photo_uploaded_on_upad_app = finalFileUrl || null;
         }
 
-        // Set actual_4 if missing (first installation)
         if (!item.actual4) {
           const now = new Date();
-          const timestampStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+          const timestampStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+            2,
+            "0"
+          )}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(
+            2,
+            "0"
+          )}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(
+            2,
+            "0"
+          )}`;
           rowUpdate.actual_4 = timestampStr;
         }
 
@@ -489,7 +431,6 @@ export default function InstallationPage() {
 
       await Promise.all(updatePromises);
 
-      // 4. SUCCESS
       setSelectedRows([]);
       setIsBulk(false);
       setIsSuccess(true);
@@ -504,7 +445,7 @@ export default function InstallationPage() {
 
   return (
     <div className="space-y-6 md:p-8 max-w-[1600px] mx-auto min-h-screen bg-slate-50/50">
-      {/* Header Section */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
         <div className="space-y-1.5">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
@@ -537,11 +478,8 @@ export default function InstallationPage() {
           </TabsTrigger>
         </TabsList>
 
-        {/* PENDING TAB */}
-        <TabsContent
-          value="pending"
-          className="focus-visible:outline-none focus-visible:ring-0"
-        >
+        {/* Pending Tab */}
+        <TabsContent value="pending" className="focus-visible:outline-none focus-visible:ring-0">
           <Card className="border-slate-200 shadow-sm bg-white overflow-hidden rounded-xl">
             <CardHeader className="border-b border-slate-100 bg-slate-50/50 px-6 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-center gap-2">
@@ -552,9 +490,7 @@ export default function InstallationPage() {
                   <CardTitle className="text-lg font-semibold text-slate-800">
                     Pending Installations
                   </CardTitle>
-                  <p className="text-sm text-slate-500">
-                    Manage and update installation status
-                  </p>
+                  <p className="text-sm text-slate-500">Manage and update installation status</p>
                 </div>
               </div>
 
@@ -589,7 +525,7 @@ export default function InstallationPage() {
               </div>
             </CardHeader>
 
-            {/* Filter Dropdowns */}
+            {/* Filters */}
             <div className="px-6 py-4 bg-white border-b border-slate-100">
               <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
                 {[
@@ -602,14 +538,19 @@ export default function InstallationPage() {
                   { key: "company", label: "Company" },
                 ].map(({ key, label }) => (
                   <div key={key} className="space-y-1.5 flex flex-col">
-                    <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{label}</Label>
+                    <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                      {label}
+                    </Label>
                     <select
                       value={filters[key]}
-                      onChange={(e) =>
-                        setFilters({ ...filters, [key]: e.target.value })
-                      }
+                      onChange={(e) => setFilters({ ...filters, [key]: e.target.value })}
                       className="h-9 w-full rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-slate-300 transition-colors appearance-none cursor-pointer"
-                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '1rem' }}
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "right 0.5rem center",
+                        backgroundSize: "1rem",
+                      }}
                     >
                       <option value="">All {label}</option>
                       {getUniquePendingValues(key).map((val) => (
@@ -621,8 +562,7 @@ export default function InstallationPage() {
                   </div>
                 ))}
               </div>
-
-              {Object.values(filters).some(v => v !== "") && (
+              {Object.values(filters).some((v) => v !== "") && (
                 <div className="mt-4 flex justify-end">
                   <Button
                     variant="ghost"
@@ -662,28 +602,51 @@ export default function InstallationPage() {
                           className="border-slate-300 rounded data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                         />
                       </TableHead>
-                      <TableHead className="w-[120px] font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center">Action</TableHead>
-                      <TableHead className="w-14 font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center">S.No</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[120px]">Reg ID</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[150px]">Beneficiary Name</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[130px]">Father's Name</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[120px]">Mobile Number</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[100px]">Village</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[100px]">Block</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[100px]">District</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[100px]">Pincode</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[130px]">Pump Capacity</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[130px]">Pump Head</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[150px]">IP Name</TableHead>
+                      <TableHead className="w-[120px] font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center">
+                        Action
+                      </TableHead>
+                      <TableHead className="w-14 font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center">
+                        S.No
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[120px]">
+                        Reg ID
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[150px]">
+                        Beneficiary Name
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[130px]">
+                        Father's Name
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[120px]">
+                        Mobile Number
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[100px]">
+                        Village
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[100px]">
+                        Block
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[100px]">
+                        District
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[100px]">
+                        Pincode
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[130px]">
+                        Pump Capacity
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[130px]">
+                        Pump Head
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[150px]">
+                        IP Name
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {isLoading ? (
                       Array.from({ length: 6 }).map((_, index) => (
-                        <TableRow
-                          key={`install-skel-${index}`}
-                          className="animate-pulse border-b border-slate-100"
-                        >
+                        <TableRow key={`install-skel-${index}`} className="animate-pulse border-b border-slate-100">
                           {Array.from({ length: 14 }).map((__, i) => (
                             <TableCell key={i} className="px-4 py-3">
                               <div className="h-4 w-full bg-slate-200 rounded"></div>
@@ -693,17 +656,12 @@ export default function InstallationPage() {
                       ))
                     ) : filteredPendingItems.length === 0 ? (
                       <TableRow>
-                        <TableCell
-                          colSpan={14}
-                          className="h-48 text-center text-slate-500 bg-slate-50/50"
-                        >
+                        <TableCell colSpan={14} className="h-48 text-center text-slate-500 bg-slate-50/50">
                           <div className="flex flex-col items-center justify-center gap-3">
                             <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center shadow-inner">
                               <Wrench className="h-6 w-6 text-slate-400" />
                             </div>
-                            <p className="text-sm">
-                              No pending installation requests found matching your search.
-                            </p>
+                            <p className="text-sm">No pending installation requests found matching your search.</p>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -732,7 +690,8 @@ export default function InstallationPage() {
                                 setFormData({
                                   installationStatus: "Done",
                                   installationDate: "",
-                                  photoUploadedOnUpadApp: null,
+                                  existingPhotos: [],
+                                  photoFileObjs: [],
                                   delay4: "",
                                 });
                                 setIsDialogOpen(true);
@@ -743,19 +702,35 @@ export default function InstallationPage() {
                               Install
                             </Button>
                           </TableCell>
-                          <TableCell className="px-4 py-3 align-middle text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-center font-medium text-slate-500 text-xs">
+                            {index + 1}
+                          </TableCell>
                           <TableCell className="px-4 py-3 align-middle">
                             <span className="font-mono text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-1 rounded border border-slate-200">
                               {item.regId}
                             </span>
                           </TableCell>
-                          <TableCell className="px-4 py-3 align-middle font-medium text-slate-800">{item.beneficiaryName}</TableCell>
-                          <TableCell className="px-4 py-3 align-middle text-slate-600">{item.fatherName}</TableCell>
-                          <TableCell className="px-4 py-3 align-middle text-slate-700">{item.mobileNumber}</TableCell>
-                          <TableCell className="px-4 py-3 align-middle text-slate-600">{item.village}</TableCell>
-                          <TableCell className="px-4 py-3 align-middle text-slate-600">{item.block}</TableCell>
-                          <TableCell className="px-4 py-3 align-middle text-slate-600">{item.district}</TableCell>
-                          <TableCell className="px-4 py-3 align-middle text-slate-600 text-center">{item.pincode}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle font-medium text-slate-800">
+                            {item.beneficiaryName}
+                          </TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-600">
+                            {item.fatherName}
+                          </TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-700">
+                            {item.mobileNumber}
+                          </TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-600">
+                            {item.village}
+                          </TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-600">
+                            {item.block}
+                          </TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-600">
+                            {item.district}
+                          </TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-600 text-center">
+                            {item.pincode}
+                          </TableCell>
                           <TableCell className="px-4 py-3 align-middle text-center">
                             <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 font-medium">
                               {item.pumpCapacity}
@@ -766,7 +741,9 @@ export default function InstallationPage() {
                               {item.pumpHead}
                             </Badge>
                           </TableCell>
-                          <TableCell className="px-4 py-3 align-middle text-slate-600 font-medium">{item.ipName}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-600 font-medium">
+                            {item.ipName}
+                          </TableCell>
                         </TableRow>
                       ))
                     )}
@@ -777,66 +754,39 @@ export default function InstallationPage() {
               {/* Mobile View */}
               <div className="md:hidden space-y-4 p-4 bg-slate-50">
                 {filteredPendingItems.map((item) => (
-                  <Card
-                    key={item.serialNo}
-                    className="bg-white border text-sm shadow-sm"
-                  >
+                  <Card key={item.serialNo} className="bg-white border text-sm shadow-sm">
                     <CardContent className="p-4 space-y-3">
                       <div className="flex justify-between items-start">
                         <div className="space-y-1">
-                          <Badge
-                            variant="secondary"
-                            className="bg-slate-100 text-slate-600"
-                          >
+                          <Badge variant="secondary" className="bg-slate-100 text-slate-600">
                             {item.serialNo}
                           </Badge>
                           <h4 className="font-semibold text-base text-slate-800">
                             {item.beneficiaryName}
                           </h4>
-                          <p className="text-muted-foreground text-xs font-mono">
-                            {item.regId}
-                          </p>
+                          <p className="text-muted-foreground text-xs font-mono">{item.regId}</p>
                         </div>
-                        <Badge
-                          variant="outline"
-                          className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs"
-                        >
+                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">
                           Pending
                         </Badge>
                       </div>
 
                       <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs border-t border-b py-3 my-2 border-slate-100">
                         <div className="flex flex-col gap-1">
-                          <span className="text-slate-400 text-[10px] uppercase font-semibold">
-                            Father's Name
-                          </span>
-                          <span className="font-medium text-slate-700">
-                            {item.fatherName}
-                          </span>
+                          <span className="text-slate-400 text-[10px] uppercase font-semibold">Father's Name</span>
+                          <span className="font-medium text-slate-700">{item.fatherName}</span>
                         </div>
                         <div className="flex flex-col gap-1">
-                          <span className="text-slate-400 text-[10px] uppercase font-semibold">
-                            Village
-                          </span>
-                          <span className="font-medium text-slate-700">
-                            {item.village}
-                          </span>
+                          <span className="text-slate-400 text-[10px] uppercase font-semibold">Village</span>
+                          <span className="font-medium text-slate-700">{item.village}</span>
                         </div>
                         <div className="flex flex-col gap-1">
-                          <span className="text-slate-400 text-[10px] uppercase font-semibold">
-                            District
-                          </span>
-                          <span className="font-medium text-slate-700">
-                            {item.district}
-                          </span>
+                          <span className="text-slate-400 text-[10px] uppercase font-semibold">District</span>
+                          <span className="font-medium text-slate-700">{item.district}</span>
                         </div>
                         <div className="flex flex-col gap-1">
-                          <span className="text-slate-400 text-[10px] uppercase font-semibold">
-                            survey No
-                          </span>
-                          <span className="font-medium text-orange-600 font-mono">
-                            {item.surveyNo || "-"}
-                          </span>
+                          <span className="text-slate-400 text-[10px] uppercase font-semibold">Survey No</span>
+                          <span className="font-medium text-orange-600 font-mono">{item.surveyNo || "-"}</span>
                         </div>
                       </div>
 
@@ -857,11 +807,8 @@ export default function InstallationPage() {
           </Card>
         </TabsContent>
 
-        {/* HISTORY TAB */}
-        <TabsContent
-          value="history"
-          className="focus-visible:outline-none focus-visible:ring-0"
-        >
+        {/* History Tab */}
+        <TabsContent value="history" className="focus-visible:outline-none focus-visible:ring-0">
           <Card className="border-slate-200 shadow-sm bg-white overflow-hidden rounded-xl">
             <CardHeader className="border-b border-slate-100 bg-slate-50/50 px-6 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-center gap-2">
@@ -909,7 +856,7 @@ export default function InstallationPage() {
               </div>
             </CardHeader>
 
-            {/* Filter Dropdowns */}
+            {/* Filters */}
             <div className="px-6 py-4 bg-white border-b border-slate-100">
               <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
                 {[
@@ -922,14 +869,19 @@ export default function InstallationPage() {
                   { key: "company", label: "Company" },
                 ].map(({ key, label }) => (
                   <div key={key} className="space-y-1.5 flex flex-col">
-                    <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{label}</Label>
+                    <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                      {label}
+                    </Label>
                     <select
                       value={filters[key]}
-                      onChange={(e) =>
-                        setFilters({ ...filters, [key]: e.target.value })
-                      }
+                      onChange={(e) => setFilters({ ...filters, [key]: e.target.value })}
                       className="h-9 w-full rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-slate-300 transition-colors appearance-none cursor-pointer"
-                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '1rem' }}
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "right 0.5rem center",
+                        backgroundSize: "1rem",
+                      }}
                     >
                       <option value="">All {label}</option>
                       {getUniqueHistoryValues(key).map((val) => (
@@ -941,8 +893,7 @@ export default function InstallationPage() {
                   </div>
                 ))}
               </div>
-
-              {Object.values(filters).some(v => v !== "") && (
+              {Object.values(filters).some((v) => v !== "") && (
                 <div className="mt-4 flex justify-end">
                   <Button
                     variant="ghost"
@@ -972,29 +923,57 @@ export default function InstallationPage() {
                   <TableHeader className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm border-b border-slate-200">
                     <TableRow className="hover:bg-transparent">
                       <TableHead className="w-12 px-4 py-3 text-center">
-                        <Checkbox checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length} onCheckedChange={handleSelectAll} className="border-slate-300 rounded data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600" />
+                        <Checkbox
+                          checked={
+                            filteredHistoryItems.length > 0 &&
+                            selectedRows.length === filteredHistoryItems.length
+                          }
+                          onCheckedChange={handleSelectAll}
+                          className="border-slate-300 rounded data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                        />
                       </TableHead>
-                      <TableHead className="w-[120px] font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center">Action</TableHead>
-                      <TableHead className="w-14 font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center">S.No</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[120px]">Reg ID</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[150px]">Beneficiary Name</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[120px]">Mobile Number</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[100px]">Village</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[130px]">Pump Capacity</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[130px]">Pump Head</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[150px]">IP Name</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[140px]">Installation Date</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[100px]">Photo</TableHead>
-                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[120px]">Status</TableHead>
+                      <TableHead className="w-[120px] font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center">
+                        Action
+                      </TableHead>
+                      <TableHead className="w-14 font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center">
+                        S.No
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[120px]">
+                        Reg ID
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[150px]">
+                        Beneficiary Name
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[120px]">
+                        Mobile Number
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[100px]">
+                        Village
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[130px]">
+                        Pump Capacity
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[130px]">
+                        Pump Head
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[150px]">
+                        IP Name
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-left min-w-[140px]">
+                        Installation Date
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[100px]">
+                        Photo
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-11 text-xs uppercase tracking-wider text-center min-w-[120px]">
+                        Status
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {isLoading ? (
                       Array.from({ length: 6 }).map((_, index) => (
-                        <TableRow
-                          key={`history-skel-${index}`}
-                          className="animate-pulse border-b border-slate-100"
-                        >
+                        <TableRow key={`history-skel-${index}`} className="animate-pulse border-b border-slate-100">
                           {Array.from({ length: 13 }).map((__, i) => (
                             <TableCell key={i} className="px-4 py-3">
                               <div className="h-4 w-full bg-slate-200 rounded"></div>
@@ -1004,10 +983,7 @@ export default function InstallationPage() {
                       ))
                     ) : filteredHistoryItems.length === 0 ? (
                       <TableRow>
-                        <TableCell
-                          colSpan={13}
-                          className="h-48 text-center text-slate-500 bg-slate-50/50"
-                        >
+                        <TableCell colSpan={13} className="h-48 text-center text-slate-500 bg-slate-50/50">
                           <div className="flex flex-col items-center justify-center gap-3">
                             <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center shadow-inner">
                               <FileCheck className="h-6 w-6 text-slate-400" />
@@ -1027,7 +1003,13 @@ export default function InstallationPage() {
                           className="hover:bg-slate-50/80 transition-colors border-b border-slate-100 group"
                         >
                           <TableCell className="px-4 py-3 align-middle text-center">
-                            <Checkbox checked={selectedRows.includes(item.serialNo || item.id)} onCheckedChange={(checked) => handleSelectRow(item.serialNo || item.id, checked)} className="border-slate-300 rounded data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 transition-all opacity-0 group-hover:opacity-100 data-[state=checked]:opacity-100" />
+                            <Checkbox
+                              checked={selectedRows.includes(item.serialNo || item.id)}
+                              onCheckedChange={(checked) =>
+                                handleSelectRow(item.serialNo || item.id, checked)
+                              }
+                              className="border-slate-300 rounded data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 transition-all opacity-0 group-hover:opacity-100 data-[state=checked]:opacity-100"
+                            />
                           </TableCell>
                           <TableCell className="px-4 py-3 align-middle text-center">
                             <Button
@@ -1040,15 +1022,23 @@ export default function InstallationPage() {
                               Edit
                             </Button>
                           </TableCell>
-                          <TableCell className="px-4 py-3 align-middle text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-center font-medium text-slate-500 text-xs">
+                            {index + 1}
+                          </TableCell>
                           <TableCell className="px-4 py-3 align-middle">
                             <span className="font-mono text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-1 rounded border border-slate-200">
                               {item.regId}
                             </span>
                           </TableCell>
-                          <TableCell className="px-4 py-3 align-middle font-medium text-slate-800">{item.beneficiaryName}</TableCell>
-                          <TableCell className="px-4 py-3 align-middle text-slate-700">{item.mobileNumber}</TableCell>
-                          <TableCell className="px-4 py-3 align-middle text-slate-600">{item.village}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle font-medium text-slate-800">
+                            {item.beneficiaryName}
+                          </TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-700">
+                            {item.mobileNumber}
+                          </TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-600">
+                            {item.village}
+                          </TableCell>
                           <TableCell className="px-4 py-3 align-middle text-center">
                             <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 font-medium">
                               {item.pumpCapacity}
@@ -1059,27 +1049,45 @@ export default function InstallationPage() {
                               {item.pumpHead}
                             </Badge>
                           </TableCell>
-                          <TableCell className="px-4 py-3 align-middle text-slate-600 font-medium">{item.ipName}</TableCell>
-                          <TableCell className="px-4 py-3 align-middle text-slate-600">{item.installationDate}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-600 font-medium">
+                            {item.ipName}
+                          </TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-slate-600">
+                            {item.installationDate}
+                          </TableCell>
                           <TableCell className="px-4 py-3 align-middle text-center">
                             {item.photoUploadedOnUpadApp ? (
                               <div className="flex flex-wrap items-center justify-center gap-2">
-                                {item.photoUploadedOnUpadApp.split(',').filter(Boolean).map((url, i) => (
-                                  <a key={i} href={getPreviewUrl(url.trim())} title={url.trim()} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline hover:bg-blue-50 px-2 py-1 rounded transition-colors text-xs font-medium border border-blue-100 bg-white shadow-sm">
+                                {item.photoUploadedOnUpadApp.split(",").filter(Boolean).map((url, i) => (
+                                  <a
+                                    key={i}
+                                    href={getPreviewUrl(url.trim())}
+                                    title={url.trim()}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline hover:bg-blue-50 px-2 py-1 rounded transition-colors text-xs font-medium border border-blue-100 bg-white shadow-sm"
+                                  >
                                     <FileCheck className="h-3.5 w-3.5" /> Photo {i + 1}
                                   </a>
                                 ))}
                               </div>
-                              <a href={getPreviewUrl(item.photoUploadedOnUpadApp)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 hover:underline hover:bg-blue-50 px-2 py-1 rounded transition-colors text-sm font-medium">
-                                <FileCheck className="h-4 w-4" /> View
-                              </a>
-                            ) : <span className="text-slate-400 italic text-sm">--</span>}
+                            ) : (
+                              <span className="text-slate-400 italic text-sm">--</span>
+                            )}
                           </TableCell>
                           <TableCell className="px-4 py-3 align-middle text-center">
                             <Badge
                               className={`
-                                ${item.installationStatus === "Done" || item.installationStatus === "Completed" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : ""}
-                                ${item.installationStatus === "Pending" ? "bg-amber-50 text-amber-700 border-amber-200" : ""}
+                                ${
+                                  item.installationStatus === "Done" || item.installationStatus === "Completed"
+                                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                    : ""
+                                }
+                                ${
+                                  item.installationStatus === "Pending"
+                                    ? "bg-amber-50 text-amber-700 border-amber-200"
+                                    : ""
+                                }
                               `}
                               variant="outline"
                             >
@@ -1097,12 +1105,15 @@ export default function InstallationPage() {
         </TabsContent>
       </Tabs>
 
-      {/* INSTALLATION DIALOG */}
+      {/* Installation Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent
           showCloseButton={!isSuccess}
-          className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isSuccess ? "bg-transparent shadow-none! border-none!" : "bg-white rounded-xl shadow-2xl border-slate-200"
-            }`}
+          className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${
+            isSuccess
+              ? "bg-transparent shadow-none! border-none!"
+              : "bg-white rounded-xl shadow-2xl border-slate-200"
+          }`}
         >
           {isSuccess ? (
             <div className="flex flex-col items-center justify-center w-full p-8 text-center space-y-6 animate-in fade-in duration-300">
@@ -1149,67 +1160,67 @@ export default function InstallationPage() {
               <div className="p-6 space-y-8 bg-slate-50/30">
                 {(selectedItem || isBulk) && (
                   <>
-                    {/* PREFILLED BENEFICIARY DETAILS CARD - Show in Bulk Mode too with props */}
-                    {(isBulk || selectedItem) && (
-                      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
-                          <FileCheck className="h-4 w-4 text-slate-400" />
-                          Beneficiary Details
-                        </h3>
-                        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-y-5 gap-x-6 text-sm">
-                          <div className="space-y-1">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
-                              Serial No
-                            </span>
-                            <p className="font-medium text-slate-700">
-                              {isBulk ? "Multiple" : selectedItem.serialNo}
-                            </p>
-                          </div>
-                          <div className="space-y-1">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
-                              Reg ID
-                            </span>
-                            <p className="font-medium text-slate-700 font-mono text-[13px] bg-slate-50 px-2 py-1 rounded border border-slate-100 break-all w-max max-w-full">
-                              {isBulk ? "Multiple" : selectedItem.regId}
-                            </p>
-                          </div>
-                          <div className="space-y-1">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
-                              Beneficiary Name
-                            </span>
-                            <p className="font-medium text-slate-700">
-                              {isBulk ? "Multiple" : selectedItem.beneficiaryName}
-                            </p>
-                          </div>
-                          <div className="space-y-1">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
-                              Father's Name
-                            </span>
-                            <p className="font-medium text-slate-700">
-                              {isBulk ? "Multiple" : selectedItem.fatherName}
-                            </p>
-                          </div>
-                          <div className="space-y-1 col-span-2 md:col-span-1 xl:col-span-2">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
-                              Village/Block
-                            </span>
-                            <p className="font-medium text-slate-700">
-                              {isBulk ? "Multiple" : `${selectedItem.village}, ${selectedItem.block}`}
-                            </p>
-                          </div>
-                          <div className="space-y-1">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
-                              Pump Type
-                            </span>
-                            <p className="font-medium text-slate-600 bg-slate-100 inline-block px-2 py-0.5 rounded text-xs border border-slate-200">
-                              {isBulk ? "Multiple" : selectedItem.pumpCapacity}
-                            </p>
-                          </div>
+                    {/* Beneficiary Details Card */}
+                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
+                        <FileCheck className="h-4 w-4 text-slate-400" />
+                        Beneficiary Details
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-y-5 gap-x-6 text-sm">
+                        <div className="space-y-1">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
+                            Serial No
+                          </span>
+                          <p className="font-medium text-slate-700">
+                            {isBulk ? "Multiple" : selectedItem?.serialNo}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
+                            Reg ID
+                          </span>
+                          <p className="font-medium text-slate-700 font-mono text-[13px] bg-slate-50 px-2 py-1 rounded border border-slate-100 break-all w-max max-w-full">
+                            {isBulk ? "Multiple" : selectedItem?.regId}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
+                            Beneficiary Name
+                          </span>
+                          <p className="font-medium text-slate-700">
+                            {isBulk ? "Multiple" : selectedItem?.beneficiaryName}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
+                            Father's Name
+                          </span>
+                          <p className="font-medium text-slate-700">
+                            {isBulk ? "Multiple" : selectedItem?.fatherName}
+                          </p>
+                        </div>
+                        <div className="space-y-1 col-span-2 md:col-span-1 xl:col-span-2">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
+                            Village/Block
+                          </span>
+                          <p className="font-medium text-slate-700">
+                            {isBulk
+                              ? "Multiple"
+                              : `${selectedItem?.village}, ${selectedItem?.block}`}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
+                            Pump Type
+                          </span>
+                          <p className="font-medium text-slate-600 bg-slate-100 inline-block px-2 py-0.5 rounded text-xs border border-slate-200">
+                            {isBulk ? "Multiple" : selectedItem?.pumpCapacity}
+                          </p>
                         </div>
                       </div>
-                    )}
+                    </div>
 
-                    {/* INSTALLATION INPUT FORM */}
+                    {/* Installation Input Form */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                       <div className="space-y-2">
                         <Label className="text-sm font-medium text-slate-700 flex justify-between items-center">
@@ -1219,10 +1230,12 @@ export default function InstallationPage() {
                         <select
                           className="h-10 w-full border border-slate-300 rounded-md px-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all font-medium text-slate-700 shadow-sm"
                           value={formData.installationStatus}
-                          onChange={(e) => setFormData({ ...formData, installationStatus: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, installationStatus: e.target.value })
+                          }
                         >
-                          <option value="Done" className="text-slate-700">Done</option>
-                          <option value="Pending" className="text-slate-700">Pending</option>
+                          <option value="Done">Done</option>
+                          <option value="Pending">Pending</option>
                         </select>
                       </div>
 
@@ -1231,27 +1244,136 @@ export default function InstallationPage() {
                           Installation Date
                           <span className="text-[10px] text-slate-400 font-normal">Optional</span>
                         </Label>
-                        <Input type="date" value={formData.installationDate} onChange={(e) => setFormData({ ...formData, installationDate: e.target.value })} className="h-10 border-slate-300 focus:border-blue-400 focus-visible:ring-blue-100 transition-all shadow-sm" />
+                        <Input
+                          type="date"
+                          value={formData.installationDate}
+                          onChange={(e) =>
+                            setFormData({ ...formData, installationDate: e.target.value })
+                          }
+                          className="h-10 border-slate-300 focus:border-blue-400 focus-visible:ring-blue-100 transition-all shadow-sm"
+                        />
                       </div>
 
                       <div className="space-y-2 md:col-span-2 mt-2">
-                        <Label className="text-sm font-medium text-slate-700">Installation Photo</Label>
-                        <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 bg-slate-50 flex flex-col items-center justify-center gap-3 hover:bg-slate-100/50 transition-all cursor-pointer group hover:border-blue-300" onClick={() => document.getElementById("photo-file")?.click()}>
-                          <Input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" id="photo-file" />
-                          <div className="h-12 w-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 group-hover:scale-110 transition-transform group-hover:border-blue-200 group-hover:shadow-blue-100">
-                            <Upload className="h-6 w-6 text-slate-500 group-hover:text-blue-500 transition-colors" />
-                          </div>
-                          <div className="text-center space-y-1">
-                            <span className="text-sm font-medium text-slate-700 group-hover:text-blue-600 transition-colors block">
-                              {formData.photoUploadedOnUpadApp ? "Change Photo" : "Upload Installation Photo"}
-                            </span>
-                            <p className="text-xs text-slate-500 block">PNG, JPG or JPEG (max. 10MB)</p>
-                          </div>
-                          {formData.photoUploadedOnUpadApp && (
-                            <Badge variant="secondary" className="mt-2 bg-slate-100 text-slate-700 border-slate-200">
-                              <FileCheck className="h-3 w-3 mr-1" />
-                              {formData.photoUploadedOnUpadApp}
-                            </Badge>
+                        <Label className="text-sm font-medium text-slate-700">
+                          Installation Photos (Max 5)
+                        </Label>
+                        <div
+                          className={`border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center gap-3 transition-all group relative ${
+                            !formData.photoFileObjs?.length && !formData.existingPhotos?.length
+                              ? "border-slate-300 bg-slate-50 hover:bg-slate-100/50 hover:border-blue-300 cursor-pointer"
+                              : "border-slate-200 bg-white"
+                          }`}
+                          onClick={(e) => {
+                            if (e.target.closest("button") || e.target.closest("a")) return;
+                            if (
+                              (formData.existingPhotos?.length || 0) +
+                                (formData.photoFileObjs?.length || 0) <
+                              5
+                            ) {
+                              document.getElementById("photo-file")?.click();
+                            }
+                          }}
+                        >
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={handleFileUpload}
+                            className="hidden"
+                            id="photo-file"
+                          />
+
+                          {!formData.photoFileObjs?.length && !formData.existingPhotos?.length ? (
+                            <>
+                              <div className="h-12 w-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 group-hover:scale-110 transition-transform group-hover:border-blue-200 group-hover:shadow-blue-100">
+                                <Upload className="h-6 w-6 text-slate-500 group-hover:text-blue-500 transition-colors" />
+                              </div>
+                              <div className="text-center space-y-1">
+                                <span className="text-sm font-medium text-slate-700 group-hover:text-blue-600 transition-colors block">
+                                  Upload Installation Photos
+                                </span>
+                                <p className="text-xs text-slate-500 block">
+                                  PNG, JPG or JPEG (max. 10MB each)
+                                </p>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="w-full">
+                              <div className="flex flex-wrap gap-3 justify-center mb-3">
+                                {formData.existingPhotos?.map((url, index) => (
+                                  <div key={`existing-${index}`} className="relative group/badge">
+                                    <Badge
+                                      variant="secondary"
+                                      className="px-3 py-1.5 bg-blue-50 text-blue-700 border-blue-200 shadow-sm flex items-center gap-2 pr-8"
+                                    >
+                                      <FileCheck className="h-3.5 w-3.5" />
+                                      <a
+                                        href={url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="max-w-[120px] truncate hover:underline"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        Photo {index + 1}
+                                      </a>
+                                    </Badge>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        removeExistingFile(index);
+                                      }}
+                                      className="absolute right-1 top-1/2 -translate-y-1/2 h-5 w-5 bg-blue-100 hover:bg-red-100 text-slate-500 hover:text-red-500 rounded-full flex items-center justify-center transition-colors"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                                {formData.photoFileObjs?.map((file, index) => (
+                                  <div key={`new-${index}`} className="relative group/badge">
+                                    <Badge
+                                      variant="secondary"
+                                      className="px-3 py-1.5 bg-white text-slate-700 border-slate-200 shadow-sm flex items-center gap-2 pr-8"
+                                    >
+                                      <FileCheck className="h-3.5 w-3.5 text-blue-500" />
+                                      <span className="max-w-[120px] truncate">{file.name}</span>
+                                    </Badge>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        removeNewFile(index);
+                                      }}
+                                      className="absolute right-1 top-1/2 -translate-y-1/2 h-5 w-5 bg-slate-100 hover:bg-red-100 text-slate-500 hover:text-red-500 rounded-full flex items-center justify-center transition-colors"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                              {(formData.existingPhotos?.length || 0) +
+                                (formData.photoFileObjs?.length || 0) <
+                                5 && (
+                                <div className="text-center mt-4">
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 text-xs bg-white"
+                                    onClick={() => document.getElementById("photo-file")?.click()}
+                                  >
+                                    <Upload className="h-3 w-3 mr-2" />
+                                    Add More Photos (
+                                    {(formData.existingPhotos?.length || 0) +
+                                      (formData.photoFileObjs?.length || 0)}
+                                    /5)
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
                           )}
                         </div>
                       </div>
