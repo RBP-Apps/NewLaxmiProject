@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import React, { forwardRef } from "react";
 import { format } from "date-fns";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,11 +75,6 @@ export default function PortalUpdatePage() {
         days_7_verification: "",
         rms_data_mail_to_rotommag: "",
         reg_id: "",
-
-        pump_no: "",
-        motor_no: "",
-        controller_no: "",
-        rid: ""
     });
 
     const getUniquePendingValues = (field) => {
@@ -96,8 +92,8 @@ export default function PortalUpdatePage() {
     };
 
     const filteredPendingItems = pendingItems.filter((item) => {
-        const matchesSearch = Object.values(item).some((value) =>
-            String(value).toLowerCase().includes(searchTerm.toLowerCase())
+        const matchesSearch = Object.entries(item).some(([key, value]) => 
+            value !== null && value !== undefined && String(value).toLowerCase().includes(searchTerm.toLowerCase())
         );
 
         const matchesFilters =
@@ -112,8 +108,8 @@ export default function PortalUpdatePage() {
     });
 
     const filteredHistoryItems = historyItems.filter((item) => {
-        const matchesSearch = Object.values(item).some((value) =>
-            String(value).toLowerCase().includes(searchTerm.toLowerCase())
+        const matchesSearch = Object.entries(item).some(([key, value]) => 
+            value !== null && value !== undefined && String(value).toLowerCase().includes(searchTerm.toLowerCase())
         );
 
         const matchesFilters =
@@ -147,16 +143,30 @@ export default function PortalUpdatePage() {
             let portalData = [];
 
             if (regIds.length > 0) {
-                const { data: pData, error: pError } = await supabase
-                    .from("portal")
-                    .select("*")
-                    .in("reg_id", regIds);
+                // Chunk the IDs to avoid URL length limits (Supabase 400 error)
+                const chunkSize = 100;
+                const chunks = [];
+                for (let i = 0; i < regIds.length; i += chunkSize) {
+                    chunks.push(regIds.slice(i, i + chunkSize));
+                }
+
+                const fetchChunks = async (columnName) => {
+                    const results = await Promise.all(
+                        chunks.map(chunk =>
+                            supabase.from("portal").select("*").in(columnName, chunk)
+                        )
+                    );
+
+                    const errors = results.filter(r => r.error).map(r => r.error);
+                    if (errors.length > 0) return { data: null, error: errors[0] };
+
+                    return { data: results.flatMap(r => r.data), error: null };
+                };
+
+                const { data: pData, error: pError } = await fetchChunks("Reg ID");
 
                 if (pError) {
-                    const { data: pRetry, error: pRetryError } = await supabase
-                        .from("portal")
-                        .select("*")
-                        .in("reg_id", regIds);
+                    const { data: pRetry, error: pRetryError } = await fetchChunks("reg_id");
                     if (pRetryError) throw pRetryError;
                     portalData = pRetry;
                 } else {
@@ -165,7 +175,7 @@ export default function PortalUpdatePage() {
             }
 
             const portalMap = new Map();
-            portalData.forEach(p => portalMap.set(String(p["reg_id"] || p.reg_id), p));
+            portalData.forEach(p => portalMap.set(String(p["Reg ID"] || p.reg_id), p));
 
             const combined = updateData.map(upd => {
                 const portal = portalMap.get(String(upd.reg_id));
@@ -218,7 +228,7 @@ export default function PortalUpdatePage() {
         setSelectedItem(item);
         setIsSuccess(false);
         setFormData({
-            photo_links: item.photo_links?.length ? item.photo_links : [null],
+            photo_links: item.photo_links || [],
             photo_rms_data_pending: item.photo_rms_data_pending || "",
             photo_rms_data_pending_file: null,
             longitude: item.longitude || "",
@@ -231,11 +241,6 @@ export default function PortalUpdatePage() {
             days_7_verification: item.days_7_verification || "Done",
             rms_data_mail_to_rotommag: item.rms_data_mail_to_rotommag || "Done",
             reg_id: item.reg_id || item.regId || "",
-
-            pump_no: item.pump_no || "",
-            motor_no: item.motor_no || "",
-            controller_no: item.controller_no || "",
-            rid: item.rid || ""
         });
         setIsDialogOpen(true);
     };
@@ -243,7 +248,7 @@ export default function PortalUpdatePage() {
     const handleSelectAll = (checked) => {
         if (checked) {
             const items = activeTab === "history" ? filteredHistoryItems : filteredPendingItems;
-            setSelectedRows(items.map((item) => item.regId));
+            setSelectedRows(items.map((item) => item.id));
         } else {
             setSelectedRows([]);
         }
@@ -254,11 +259,11 @@ export default function PortalUpdatePage() {
         setSelectedItem(null);
     }, [activeTab]);
 
-    const handleSelectRow = (regId, checked) => {
+    const handleSelectRow = (id, checked) => {
         if (checked) {
-            setSelectedRows((prev) => [...prev, regId]);
+            setSelectedRows((prev) => [...prev, id]);
         } else {
-            setSelectedRows((prev) => prev.filter((id) => id !== regId));
+            setSelectedRows((prev) => prev.filter((rowId) => rowId !== id));
         }
     };
 
@@ -267,8 +272,7 @@ export default function PortalUpdatePage() {
         setSelectedItem(null);
         setIsSuccess(false);
         setFormData({
-            photo_link: "",
-            photo_link_file: null,
+            photo_links: [null],
             photo_rms_data_pending: "",
             photo_rms_data_pending_file: null,
             longitude: "",
@@ -356,7 +360,7 @@ export default function PortalUpdatePage() {
             const currentItems = activeTab === "history" ? historyItems : pendingItems;
             if (isBulk) {
                 itemsToProcess = currentItems.filter((item) =>
-                    selectedRows.includes(item.regId)
+                    selectedRows.includes(item.id)
                 );
             } else {
                 itemsToProcess = [selectedItem];
@@ -381,12 +385,6 @@ export default function PortalUpdatePage() {
                     asset_mapping_by_ea: formData.asset_mapping_by_ea,
                     days_7_verification: formData.days_7_verification,
                     rms_data_mail_to_rotommag: formData.rms_data_mail_to_rotommag,
-
-                    pump_no: formData.pump_no,
-                    motor_no: formData.motor_no,
-                    controller_no: formData.controller_no,
-                    rid: formData.rid,
-
                     actual_5: localTimestamp,
                     updated_at: localTimestamp,
                 };
@@ -407,7 +405,7 @@ export default function PortalUpdatePage() {
                 const { error } = await supabase
                     .from("portal_update")
                     .update(rowUpdate)
-                    .eq("reg_id", item.regId);
+                    .eq("id", item.id);
 
                 if (error) {
                     console.error(`Update failed for reg_id ${item.regId}:`, error);
@@ -436,24 +434,23 @@ export default function PortalUpdatePage() {
         }
     };
 
-    const Dropdown = ({ label, value, onChange }) => (
-        <div className="space-y-1.5">
-            <Label className="text-xs text-slate-700 font-medium">{label}</Label>
-            <div className="relative">
-                <select
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    className="flex h-9 w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-                >
-                    <option value="Done">Done</option>
-                    <option value="Pending">Pending</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
-                    <svg width="12" height="12" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.13523 6.15803C3.3241 5.95657 3.64052 5.94637 3.84197 6.13523L7.5 9.56464L11.158 6.13523C11.3595 5.94637 11.6759 5.95657 11.8648 6.15803C12.0536 6.35949 12.0434 6.67591 11.842 6.86477L7.84197 10.6148C7.64964 10.7951 7.35036 10.7951 7.15803 10.6148L3.15803 6.86477C2.95657 6.67591 2.94637 6.35949 3.13523 6.15803Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path></svg>
-                </div>
-            </div>
-        </div>
-    );
+    
+
+const Dropdown = forwardRef(({ label, value, onChange }, ref) => (
+    <div className="space-y-1.5">
+        <Label className="text-xs text-slate-700 font-medium">{label}</Label>
+
+        <select
+            ref={ref}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="flex h-9 w-full items-center rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
+        >
+            <option value="Done">Done</option>
+            <option value="Pending">Pending</option>
+        </select>
+    </div>
+));
 
     return (
         <div className="space-y-6 sm:space-y-8 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
@@ -535,7 +532,7 @@ export default function PortalUpdatePage() {
                         <div className="px-4 sm:px-6 py-4 bg-slate-50 border-b border-slate-100">
                             <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
                                 {[
-                                    { key: "regId", label: "reg_id" },
+                                    { key: "regId", label: "Reg ID" },
                                     { key: "village", label: "Village" },
                                     { key: "block", label: "Block" },
                                     { key: "district", label: "District" },
@@ -593,8 +590,8 @@ export default function PortalUpdatePage() {
                                         {isLoading ? Array.from({ length: 5 }).map((_, i) => <TableRow key={i} className="animate-pulse">{Array.from({ length: 14 }).map((__, j) => <TableCell key={j}><div className="h-4 w-full bg-slate-200 rounded mx-auto"></div></TableCell>)}</TableRow>) :
                                             filteredPendingItems.length === 0 ? <TableRow><TableCell colSpan={14} className="h-48 text-center text-slate-500">No pending records.</TableCell></TableRow> :
                                                 filteredPendingItems.map((item, index) => (
-                                                    <TableRow key={item.regId} className="hover:bg-slate-50/80 transition-colors data-[state=selected]:bg-slate-50 border-b border-slate-100 group">
-                                                        <TableCell className="px-4 py-2 text-center align-middle"><div className="flex justify-center"><Checkbox checked={selectedRows.includes(item.regId)} onCheckedChange={(c) => handleSelectRow(item.regId, c === true)} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110" /></div></TableCell>
+                                                    <TableRow key={item.id} className="hover:bg-slate-50/80 transition-colors data-[state=selected]:bg-slate-50 border-b border-slate-100 group">
+                                                        <TableCell className="px-4 py-2 text-center align-middle"><div className="flex justify-center"><Checkbox checked={selectedRows.includes(item.id)} onCheckedChange={(c) => handleSelectRow(item.id, c === true)} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110" /></div></TableCell>
                                                         <TableCell className="px-4 py-2 text-center align-middle"><Button variant="ghost" size="sm" onClick={() => handleActionClick(item)} disabled={selectedRows.length >= 2} className="bg-slate-50 text-blue-600 hover:bg-blue-50 border border-slate-200 shadow-sm text-[11px] font-semibold h-7 px-3 rounded-md flex items-center gap-1.5 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed group-hover:border-blue-200 group-hover:bg-white"><FileText className="h-3 w-3" />Process</Button></TableCell>
                                                         <TableCell className="px-4 py-2 text-center align-middle font-medium text-slate-500 text-[13px]">{index + 1}</TableCell>
                                                         <TableCell className="whitespace-nowrap font-mono text-[13px] text-slate-600 bg-slate-50 rounded px-2 py-0.5 border border-slate-100 w-fit mx-auto">{item.regId}</TableCell>
@@ -678,16 +675,6 @@ export default function PortalUpdatePage() {
                                             <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Pump Capacity</TableHead>
                                             <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Pump Head</TableHead>
                                             <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">IP Name</TableHead>
-
-                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Longitude</TableHead>
-                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Latitude</TableHead>
-
-                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Pump No</TableHead>
-                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Motor No</TableHead>
-                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Controller No</TableHead>
-                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">RID</TableHead>
-                                            <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Photos</TableHead>
-
                                             <TableHead className="h-11 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center align-middle">Supply Date</TableHead>
                                         </TableRow>
                                     </TableHeader>
@@ -695,8 +682,8 @@ export default function PortalUpdatePage() {
                                         {isLoading ? Array.from({ length: 5 }).map((_, i) => <TableRow key={i} className="animate-pulse">{Array.from({ length: 13 }).map((__, j) => <TableCell key={j}><div className="h-4 w-full bg-slate-200 rounded mx-auto"></div></TableCell>)}</TableRow>) :
                                             filteredHistoryItems.length === 0 ? <TableRow><TableCell colSpan={13} className="h-48 text-center text-slate-500">No history records.</TableCell></TableRow> :
                                                 filteredHistoryItems.map((item, index) => (
-                                                    <TableRow key={item.regId} className="hover:bg-slate-50/80 transition-colors data-[state=selected]:bg-slate-50 border-b border-slate-100 group">
-                                                        <TableCell className="px-4 py-2 text-center align-middle"><div className="flex justify-center"><Checkbox checked={selectedRows.includes(item.regId)} onCheckedChange={(c) => handleSelectRow(item.regId, c === true)} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110" /></div></TableCell>
+                                                    <TableRow key={item.id} className="hover:bg-slate-50/80 transition-colors data-[state=selected]:bg-slate-50 border-b border-slate-100 group">
+                                                        <TableCell className="px-4 py-2 text-center align-middle"><div className="flex justify-center"><Checkbox checked={selectedRows.includes(item.id)} onCheckedChange={(c) => handleSelectRow(item.id, c === true)} className="checkbox-3d border-slate-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110" /></div></TableCell>
                                                         <TableCell className="px-4 py-2 text-center align-middle">
                                                             <Button variant="ghost" size="sm" onClick={() => handleActionClick(item)} disabled={selectedRows.length >= 2} className="bg-slate-50 text-blue-600 hover:bg-blue-50 border border-slate-200 shadow-sm text-[11px] font-semibold h-7 px-3 rounded-md flex items-center gap-1.5 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed group-hover:border-blue-200 group-hover:bg-white">
                                                                 <Pencil className="h-3 w-3" />
@@ -713,51 +700,6 @@ export default function PortalUpdatePage() {
                                                         <TableCell className="whitespace-nowrap text-slate-700 font-medium text-[13px] px-4 py-2 text-center align-middle uppercase">{item.pumpCapacity}</TableCell>
                                                         <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">{item.pumpHead}</TableCell>
                                                         <TableCell className="whitespace-nowrap text-slate-600 font-medium text-[13px] px-4 py-2 text-center align-middle">{item.ipName}</TableCell>
-
-
-                                                        <TableCell className="whitespace-nowrap text-[13px]">
-                                                            {item.longitude || "-"}
-                                                        </TableCell>
-
-                                                        <TableCell className="whitespace-nowrap text-[13px]">
-                                                            {item.latitude || "-"}
-                                                        </TableCell>
-
-                                                        <TableCell className="whitespace-nowrap text-[13px]">
-                                                            {item.pump_no || "-"}
-                                                        </TableCell>
-
-                                                        <TableCell className="whitespace-nowrap text-[13px]">
-                                                            {item.motor_no || "-"}
-                                                        </TableCell>
-
-                                                        <TableCell className="whitespace-nowrap text-[13px]">
-                                                            {item.controller_no || "-"}
-                                                        </TableCell>
-
-                                                        <TableCell className="whitespace-nowrap text-[13px]">
-                                                            {item.rid || "-"}
-                                                        </TableCell>
-
-                                                        <TableCell className="min-w-[120px]">
-                                                            <div className="flex gap-2 justify-start">
-                                                                {item.photo_links?.map((photo, i) => (
-                                                                    <a
-                                                                        key={i}
-                                                                        href={photo}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
-                                                                    >
-                                                                        <img
-                                                                            src={photo}
-                                                                            alt="photo"
-                                                                            className="w-10 h-10 object-cover rounded border flex-shrink-0"
-                                                                        />
-                                                                    </a>
-                                                                ))}
-                                                            </div>
-                                                        </TableCell>
-
                                                         <TableCell className="whitespace-nowrap text-slate-600 text-[13px] px-4 py-2 text-center align-middle">{item.supply_aapurti_date}</TableCell>
                                                     </TableRow>
                                                 ))}
@@ -851,56 +793,25 @@ export default function PortalUpdatePage() {
                                                 </div>
                                             ))}
 
-                                            {/* Show add button only after first photo uploaded */}
-                                            {formData.photo_links[0] && formData.photo_links.length < 6 && (
+                                            {formData.photo_links.length < 6 && (
                                                 <Button
                                                     type="button"
                                                     variant="outline"
                                                     onClick={addPhotoField}
                                                 >
-                                                    + Add More Photo
+                                                    + Add Photo
                                                 </Button>
                                             )}
                                         </div>
 
-                                        <div className="space-y-2">
-                                            <Label className="text-xs font-medium">Pump No.</Label>
-                                            <Input
-                                                value={formData.pump_no}
-                                                onChange={(e) =>
-                                                    setFormData({ ...formData, pump_no: e.target.value })
-                                                }
-                                            />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label className="text-xs font-medium">Motor No.</Label>
-                                            <Input
-                                                value={formData.motor_no}
-                                                onChange={(e) =>
-                                                    setFormData({ ...formData, motor_no: e.target.value })
-                                                }
-                                            />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label className="text-xs font-medium">Controller No.</Label>
-                                            <Input
-                                                value={formData.controller_no}
-                                                onChange={(e) =>
-                                                    setFormData({ ...formData, controller_no: e.target.value })
-                                                }
-                                            />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label className="text-xs font-medium">RID</Label>
-                                            <Input
-                                                value={formData.rid}
-                                                onChange={(e) =>
-                                                    setFormData({ ...formData, rid: e.target.value })
-                                                }
-                                            />
+                                        <div className="space-y-1.5">
+                                            <Label className="text-xs text-slate-700 font-medium">RMS Data Pending (Upload)</Label>
+                                            <div className="flex gap-2 items-center">
+                                                <Input type="file" onChange={(e) => handleFileUpload(e, 'photo_rms_data_pending')} className="file:mr-4 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 h-9" />
+                                                {formData.photo_rms_data_pending && typeof formData.photo_rms_data_pending === 'string' && (
+                                                    <a href={formData.photo_rms_data_pending} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline"><ExternalLink className="h-4 w-4" /></a>
+                                                )}
+                                            </div>
                                         </div>
 
                                         <div className="space-y-1.5">
