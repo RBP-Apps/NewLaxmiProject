@@ -371,7 +371,7 @@ export default function FoundationPage() {
           <Pencil className="h-3.5 w-3.5" /> Edit
         </Button>
       </TableCell>
-      <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+      <TableCell className="text-center font-medium text-slate-500 text-xs">{item.serialNo}</TableCell>
       <TableCell><div className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit max-w-[120px] truncate" title={item.regId}>{item.regId}</div></TableCell>
       <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
       <TableCell className="whitespace-nowrap text-slate-600 font-mono text-xs">{item.mobileNumber}</TableCell>
@@ -527,7 +527,7 @@ export default function FoundationPage() {
                               <Hammer className="h-3 w-3" /> Process
                             </Button>
                           </TableCell>
-                          <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                          <TableCell className="text-center font-medium text-slate-500 text-xs">{item.serialNo}</TableCell>
                           {renderPendingRow(item, index)}
                         </TableRow>
                       ))

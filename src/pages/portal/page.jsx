@@ -571,7 +571,7 @@ export default function PortalPage() {
                       className="hover:bg-slate-50/80 transition-colors data-[state=selected]:bg-slate-50 border-b border-slate-100 group"
                     >
                       <TableCell className="px-4 py-2 text-center align-middle font-medium text-slate-500 text-[13px]">
-                        {index + 1}
+                        {item.serialNo}
                       </TableCell>
                       <TableCell className="whitespace-nowrap font-mono text-[13px] text-slate-600 bg-slate-50 rounded px-2 py-0.5 border border-slate-100 w-fit mx-auto mt-1.5 block">
                         {item.regId}

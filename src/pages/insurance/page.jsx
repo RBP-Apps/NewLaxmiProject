@@ -589,7 +589,7 @@ export default function InvoicingPage() {
                               Process
                             </Button>
                           </TableCell>
-                          <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                          <TableCell className="text-center font-medium text-slate-500 text-xs">{item.serialNo}</TableCell>
 
                           <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">
                             {item.regId}
@@ -916,7 +916,7 @@ export default function InvoicingPage() {
                               Edit
                             </Button>
                           </TableCell>
-                          <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                          <TableCell className="text-center font-medium text-slate-500 text-xs">{item.serialNo}</TableCell>
                           <TableCell>
                             <span className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md">
                               {item.regId}

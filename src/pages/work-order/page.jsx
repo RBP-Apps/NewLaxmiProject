@@ -667,7 +667,7 @@ export default function LoiMrPage() {
                               Process
                             </Button>
                           </TableCell>
-                          <TableCell className="px-4 py-2 text-center align-middle font-medium text-slate-500 text-[13px]">{index + 1}</TableCell>
+                          <TableCell className="px-4 py-2 text-center align-middle font-medium text-slate-500 text-[13px]">{item.serialNo}</TableCell>
 
                           <TableCell className="whitespace-nowrap font-mono text-[13px] text-slate-600 bg-slate-50 rounded px-2 py-0.5 border border-slate-100 w-fit mx-auto mt-1.5 block">
                             {item.regId}
@@ -947,7 +947,7 @@ export default function LoiMrPage() {
                               Edit
                             </Button>
                           </TableCell>
-                          <TableCell className="px-4 py-2 text-center align-middle font-medium text-slate-500 text-[13px]">{index + 1}</TableCell>
+                          <TableCell className="px-4 py-2 text-center align-middle font-medium text-slate-500 text-[13px]">{item.serialNo}</TableCell>
                           <TableCell className="whitespace-nowrap font-mono text-[13px] text-slate-600 bg-slate-50 rounded px-2 py-0.5 border border-slate-100 w-fit mx-auto mt-1.5 block">
                             {item.regId}
                           </TableCell>

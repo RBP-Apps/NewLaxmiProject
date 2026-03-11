@@ -63,17 +63,17 @@ export default function SurveyPage() {
   const handleSelectAll = (checked) => {
     if (checked) {
       const items = activeTab === "history" ? filteredHistoryItems : filteredPendingItems;
-      setSelectedRows(items.map((item) => item.serialNo));
+      setSelectedRows(items.map((item) => item.regId));
     } else {
       setSelectedRows([]);
     }
   };
 
-  const handleSelectRow = (serialNo, checked) => {
+  const handleSelectRow = (regId, checked) => {
     if (checked) {
-      setSelectedRows((prev) => [...prev, serialNo]);
+      setSelectedRows((prev) => [...prev, regId]);
     } else {
-      setSelectedRows((prev) => prev.filter((id) => id !== serialNo));
+      setSelectedRows((prev) => prev.filter((id) => id !== regId));
     }
   };
 
@@ -722,11 +722,11 @@ export default function SurveyPage() {
                         >
                           <TableCell className="px-4 py-3 align-middle text-center">
                             <Checkbox
-                              checked={selectedRows.includes(item.serialNo)}
+                              checked={selectedRows.includes(item.regId)}
                               onCheckedChange={(checked) =>
-                                handleSelectRow(item.serialNo, checked)
+                                handleSelectRow(item.regId, checked)
                               }
-                              aria-label={`Select row ${item.serialNo}`}
+                              aria-label={`Select row ${item.regId}`}
                               className="border-slate-300 rounded data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 transition-all opacity-0 group-hover:opacity-100 data-[state=checked]:opacity-100"
                             />
                           </TableCell>
@@ -741,7 +741,7 @@ export default function SurveyPage() {
                               Process
                             </Button>
                           </TableCell>
-                          <TableCell className="px-4 py-3 align-middle text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                          <TableCell className="px-4 py-3 align-middle text-center font-medium text-slate-500 text-xs">{item.serialNo}</TableCell>
                           <TableCell className="px-4 py-3 align-middle">
                             <span className="font-mono text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-1 rounded border border-slate-200">
                               {item.regId}
@@ -1003,11 +1003,11 @@ export default function SurveyPage() {
                         >
                           <TableCell className="px-4 py-3 align-middle text-center">
                             <Checkbox
-                              checked={selectedRows.includes(item.serialNo)}
+                              checked={selectedRows.includes(item.regId)}
                               onCheckedChange={(checked) =>
-                                handleSelectRow(item.serialNo, checked)
+                                handleSelectRow(item.regId, checked)
                               }
-                              aria-label={`Select row ${item.serialNo}`}
+                              aria-label={`Select row ${item.regId}`}
                               className="border-slate-300 rounded data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 transition-all opacity-0 group-hover:opacity-100 data-[state=checked]:opacity-100"
                             />
                           </TableCell>

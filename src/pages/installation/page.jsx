@@ -703,7 +703,7 @@ export default function InstallationPage() {
                             </Button>
                           </TableCell>
                           <TableCell className="px-4 py-3 align-middle text-center font-medium text-slate-500 text-xs">
-                            {index + 1}
+                            {item.serialNo}
                           </TableCell>
                           <TableCell className="px-4 py-3 align-middle">
                             <span className="font-mono text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-1 rounded border border-slate-200">
@@ -1023,7 +1023,7 @@ export default function InstallationPage() {
                             </Button>
                           </TableCell>
                           <TableCell className="px-4 py-3 align-middle text-center font-medium text-slate-500 text-xs">
-                            {index + 1}
+                            {item.serialNo}
                           </TableCell>
                           <TableCell className="px-4 py-3 align-middle">
                             <span className="font-mono text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-1 rounded border border-slate-200">

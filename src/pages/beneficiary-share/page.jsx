@@ -609,7 +609,7 @@ export default function BeneficiarySharePage() {
                                                             Process Update
                                                         </Button>
                                                     </TableCell>
-                                                    <TableCell className="px-3 sm:px-4 py-2.5 border-r border-slate-100/50 text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                                                    <TableCell className="px-3 sm:px-4 py-2.5 border-r border-slate-100/50 text-center font-medium text-slate-500 text-xs">{item.serialNo}</TableCell>
                                                     <TableCell className="px-3 sm:px-4 py-2.5 border-r border-slate-100/50 whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 rounded-md mx-auto w-fit text-center">
                                                         {item.regId}
                                                     </TableCell>
@@ -933,7 +933,7 @@ export default function BeneficiarySharePage() {
                                                             Edit
                                                         </Button>
                                                     </TableCell>
-                                                    <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                                                    <TableCell className="text-center font-medium text-slate-500 text-xs">{item.serialNo}</TableCell>
                                                     <TableCell>
                                                         <span className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md">
                                                             {item.regId}

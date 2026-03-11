@@ -536,7 +536,7 @@ export default function SystemInfoPage() {
                                                             Update
                                                         </Button>
                                                     </TableCell>
-                                                    <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                                                    <TableCell className="text-center font-medium text-slate-500 text-xs">{item.serialNo}</TableCell>
                                                     <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500">{item.regId}</TableCell>
                                                     <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
                                                     <TableCell className="whitespace-nowrap text-slate-600">{item.fatherName}</TableCell>
@@ -630,7 +630,7 @@ export default function SystemInfoPage() {
                                                             Edit
                                                         </Button>
                                                     </TableCell>
-                                                    <TableCell className="text-center font-medium text-slate-500 text-xs">{index + 1}</TableCell>
+                                                    <TableCell className="text-center font-medium text-slate-500 text-xs">{item.serialNo}</TableCell>
                                                     <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500">{item.regId}</TableCell>
                                                     <TableCell className="whitespace-nowrap font-medium text-slate-800">{item.beneficiaryName}</TableCell>
                                                     <TableCell className="whitespace-nowrap text-slate-600">{item.village}</TableCell>
