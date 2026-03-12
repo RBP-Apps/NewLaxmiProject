@@ -267,8 +267,7 @@ export default function PortalUpdatePage() {
         setSelectedItem(null);
         setIsSuccess(false);
         setFormData({
-            photo_link: "",
-            photo_link_file: null,
+            photo_links: [null],
             photo_rms_data_pending: "",
             photo_rms_data_pending_file: null,
             longitude: "",
@@ -281,6 +280,11 @@ export default function PortalUpdatePage() {
             days_7_verification: "Done",
             rms_data_mail_to_rotommag: "Done",
             reg_id: "",
+
+            pump_no: "",
+            motor_no: "",
+            controller_no: "",
+            rid: ""
         });
         setIsDialogOpen(true);
     };
