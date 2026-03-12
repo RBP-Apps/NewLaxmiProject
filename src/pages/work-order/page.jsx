@@ -1039,7 +1039,7 @@ export default function LoiMrPage() {
                         {/* Top Row: S.No, Reg ID, Checkbox */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{index + 1}</span>
+                            <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{item.serialNo}</span>
                             <span className="font-mono text-xs text-slate-600 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">{item.regId}</span>
                           </div>
                           <Checkbox
