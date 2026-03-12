@@ -49,7 +49,7 @@ export default function PortalPage() {
     setError(null);
     try {
       const { data, error } = await supabase.from("portal").select("*");
-      console.log("data", data);
+      
       if (error) {
         throw error;
       }
@@ -75,6 +75,8 @@ export default function PortalPage() {
           ipName: item.ip_name || "-",
           amount: item.amount || "-",
         }));
+
+       
 
         setHistory(mappedData);
         setIsLoaded(true);
