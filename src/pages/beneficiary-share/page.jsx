@@ -211,13 +211,11 @@ export default function BeneficiarySharePage() {
                     // Let's check: if (farmer_share_amt && state_share_amt) -> history?
                     // Or effectively, if we have a record in beneficiary_share, is it done?
                     // Let's use `share?.farmer_share_amt` as a proxy for "done" if actual_5 is not being used/updated.
-                    // isCompleted: !!share?.farmer_share_amt && !!share?.state_share_amt
-                    isCompleted:
+                  isCompleted:
     !!share?.farmer_share_amt ||
     !!share?.state_share_amt ||
     !!share?.farmer_share_dt ||
     !!share?.state_share_dt
-
                 };
             }).filter(Boolean);
 
@@ -305,24 +303,132 @@ export default function BeneficiarySharePage() {
         setIsDialogOpen(true);
     };
 
-    const handleSubmit = async () => {
-        if (!selectedItem && (!isBulk || selectedRows.length === 0)) return;
-        setIsSubmitting(true);
+    // const handleSubmit = async () => {
+    //     if (!selectedItem && (!isBulk || selectedRows.length === 0)) return;
+    //     setIsSubmitting(true);
 
-        try {
-            let itemsToProcess = [];
-            const currentItems = activeTab === "history" ? historyItems : pendingItems;
-            if (isBulk) {
-                itemsToProcess = currentItems.filter((item) =>
-                    selectedRows.includes(item.regId)
-                );
-            } else {
-                itemsToProcess = [selectedItem];
+    //     try {
+    //         let itemsToProcess = [];
+    //         const currentItems = activeTab === "history" ? historyItems : pendingItems;
+    //         if (isBulk) {
+    //             itemsToProcess = currentItems.filter((item) =>
+    //                 selectedRows.includes(item.regId)
+    //             );
+    //         } else {
+    //             itemsToProcess = [selectedItem];
+    //         }
+
+    //         const updatePromises = itemsToProcess.map(async (item) => {
+    //             const timestamp = format(new Date(), "yyyy-MM-dd HH:mm:ss");
+    //             const shareData = {
+    //                 state_share_amt: formData.state_share_amt || null,
+    //                 state_share_dt: formData.state_share_dt || null,
+    //                 farmer_share_amt: formData.farmer_share_amt || null,
+    //                 farmer_share_dt: formData.farmer_share_dt || null,
+    //                 actual_9: timestamp,
+    //                 updated_at: timestamp,
+    //             };
+
+    //             // Check if row exists in beneficiary_share
+    //             const { data: existingRows } = await supabase
+    //                 .from("beneficiary_share")
+    //                 .select("id")
+    //                 .eq("reg_id", item.regId)
+    //                 .maybeSingle();
+
+    //             if (existingRows) {
+    //                 const { error } = await supabase
+    //                     .from("beneficiary_share")
+    //                     .update(shareData)
+    //                     .eq("id", existingRows.id);
+    //                 if (error) throw error;
+    //             } else {
+    //                 const newRow = {
+    //                     reg_id: item.regId,
+    //                     serial_no: item.serialNo, // Assuming serialNo is available in item
+    //                     ...shareData
+    //                 };
+    //                 const { error } = await supabase
+    //                     .from("beneficiary_share")
+    //                     .insert([newRow]);
+    //                 if (error) throw error;
+    //             }
+    //         });
+
+    //         await Promise.all(updatePromises);
+
+    //         await fetchData();
+    //         setSelectedItem(null);
+    //         setIsBulk(false);
+    //         setSelectedRows([]);
+    //         setIsSuccess(true);
+    //     } catch (error) {
+    //         console.error("Submission Error:", error);
+    //         alert("Error submitting form: " + error.message);
+    //     } finally {
+    //         setIsSubmitting(false);
+    //     }
+    // };
+
+
+
+
+    const handleSubmit = async () => {
+    if (!selectedItem && (!isBulk || selectedRows.length === 0)) return;
+    setIsSubmitting(true);
+
+    try {
+        let itemsToProcess = [];
+        const currentItems = activeTab === "history" ? historyItems : pendingItems;
+        if (isBulk) {
+            itemsToProcess = currentItems.filter((item) =>
+                selectedRows.includes(item.regId)
+            );
+        } else {
+            itemsToProcess = [selectedItem];
+        }
+
+        const updatePromises = itemsToProcess.map(async (item) => {
+            const timestamp = format(new Date(), "yyyy-MM-dd HH:mm:ss");
+            
+            // Only include fields that have values
+            const shareData = {
+                actual_9: timestamp,
+                updated_at: timestamp,
+            };
+            
+            // Add fields only if they have values
+            if (formData.state_share_amt && formData.state_share_amt.trim() !== "") {
+                shareData.state_share_amt = formData.state_share_amt;
+            }
+            if (formData.state_share_dt && formData.state_share_dt.trim() !== "") {
+                shareData.state_share_dt = formData.state_share_dt;
+            }
+            if (formData.farmer_share_amt && formData.farmer_share_amt.trim() !== "") {
+                shareData.farmer_share_amt = formData.farmer_share_amt;
+            }
+            if (formData.farmer_share_dt && formData.farmer_share_dt.trim() !== "") {
+                shareData.farmer_share_dt = formData.farmer_share_dt;
             }
 
-            const updatePromises = itemsToProcess.map(async (item) => {
-                const timestamp = format(new Date(), "yyyy-MM-dd HH:mm:ss");
-                const shareData = {
+            // Check if row exists in beneficiary_share
+            const { data: existingRows } = await supabase
+                .from("beneficiary_share")
+                .select("id")
+                .eq("reg_id", item.regId)
+                .maybeSingle();
+
+            if (existingRows) {
+                const { error } = await supabase
+                    .from("beneficiary_share")
+                    .update(shareData)
+                    .eq("id", existingRows.id);
+                if (error) throw error;
+            } else {
+                // For new records, include all fields even if empty
+                const newRow = {
+                    reg_id: item.regId,
+                    serial_no: item.serialNo,
                     state_share_amt: formData.state_share_amt || null,
                     state_share_dt: formData.state_share_dt || null,
                     farmer_share_amt: formData.farmer_share_amt || null,
@@ -330,47 +436,27 @@ export default function BeneficiarySharePage() {
                     actual_9: timestamp,
                     updated_at: timestamp,
                 };
-
-                // Check if row exists in beneficiary_share
-                const { data: existingRows } = await supabase
+                const { error } = await supabase
                     .from("beneficiary_share")
-                    .select("id")
-                    .eq("reg_id", item.regId)
-                    .maybeSingle();
+                    .insert([newRow]);
+                if (error) throw error;
+            }
+        });
 
-                if (existingRows) {
-                    const { error } = await supabase
-                        .from("beneficiary_share")
-                        .update(shareData)
-                        .eq("id", existingRows.id);
-                    if (error) throw error;
-                } else {
-                    const newRow = {
-                        reg_id: item.regId,
-                        serial_no: item.serialNo, // Assuming serialNo is available in item
-                        ...shareData
-                    };
-                    const { error } = await supabase
-                        .from("beneficiary_share")
-                        .insert([newRow]);
-                    if (error) throw error;
-                }
-            });
+        await Promise.all(updatePromises);
+        await fetchData();
+        setSelectedItem(null);
+        setIsBulk(false);
+        setSelectedRows([]);
+        setIsSuccess(true);
+    } catch (error) {
+        console.error("Submission Error:", error);
+        alert("Error submitting form: " + error.message);
+    } finally {
+        setIsSubmitting(false);
+    }
+};
 
-            await Promise.all(updatePromises);
-
-            await fetchData();
-            setSelectedItem(null);
-            setIsBulk(false);
-            setSelectedRows([]);
-            setIsSuccess(true);
-        } catch (error) {
-            console.error("Submission Error:", error);
-            alert("Error submitting form: " + error.message);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
 
     return (
         <div className="space-y-6 sm:space-y-8 sm:p-6 lg:p-8 lg:max-w-screen-2xl mx-auto bg-slate-50/30 min-h-screen animate-fade-in-up text-slate-800">
