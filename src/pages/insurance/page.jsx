@@ -1,0 +1,1253 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Pencil, FileText, Inbox, FileCheck, Search, Loader2, CheckCircle2, Upload } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+
+export default function InvoicingPage() {
+  const [activeTab, setActiveTab] = useState("pending");
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [pendingItems, setPendingItems] = useState([]);
+  const [historyItems, setHistoryItems] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [formData, setFormData] = useState({
+    raisoni_invoice_no: "",
+    invoice_date: "",
+    raisoni_invoice_link: "",
+    laxmi_invoice_no: "",
+    laxmi_invoice_date: "",
+    laxmi_invoice_link: "",
+    file_raisoni_invoice_link: null, // For file object
+    file_laxmi_invoice_link: null, // For file object
+    serial_no: "",
+    reg_id: "",
+  });
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [isBulk, setIsBulk] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [filters, setFilters] = useState({
+    regId: "",
+    village: "",
+    block: "",
+    district: "",
+    pumpType: "",
+    company: "",
+  });
+
+  const getUniquePendingValues = (field) => {
+    const values = pendingItems
+      .map((item) => item[field])
+      .filter((v) => v && v !== "-");
+    return [...new Set(values)].sort();
+  };
+
+  const getUniqueHistoryValues = (field) => {
+    const values = historyItems
+      .map((item) => item[field])
+      .filter((v) => v && v !== "-");
+    return [...new Set(values)].sort();
+  };
+
+  // const filteredPendingItems = pendingItems.filter((item) =>
+  //   Object.values(item).some((value) =>
+  //     String(value).toLowerCase().includes(searchTerm.toLowerCase())
+  //   )
+  // );
+
+  // const filteredHistoryItems = historyItems.filter((item) =>
+  //   Object.values(item).some((value) =>
+  //     String(value).toLowerCase().includes(searchTerm.toLowerCase())
+  //   )
+  // );
+
+  // Helper to construct preview URLs
+
+  const filteredPendingItems = pendingItems.filter((item) => {
+    const matchesSearch = Object.values(item).some((value) =>
+      String(value).toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const matchesFilters =
+      (!filters.regId || item.regId === filters.regId) &&
+      (!filters.village || item.village === filters.village) &&
+      (!filters.block || item.block === filters.block) &&
+      (!filters.district || item.district === filters.district) &&
+      (!filters.pumpType || item.pumpType === filters.pumpType) &&
+      (!filters.company || item.company === filters.company);
+
+    return matchesSearch && matchesFilters;
+  });
+
+  const filteredHistoryItems = historyItems.filter((item) => {
+    const matchesSearch = Object.values(item).some((value) =>
+      String(value).toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const matchesFilters =
+      (!filters.regId || item.regId === filters.regId) &&
+      (!filters.village || item.village === filters.village) &&
+      (!filters.block || item.block === filters.block) &&
+      (!filters.district || item.district === filters.district) &&
+      (!filters.pumpType || item.pumpType === filters.pumpType) &&
+      (!filters.company || item.company === filters.company);
+
+    return matchesSearch && matchesFilters;
+  });
+
+  const getPreviewUrl = (idOrLink) => {
+    if (!idOrLink) return "";
+    const idMatch = idOrLink.match(/[-\w]{25,}/);
+    const fileId = idMatch ? idMatch[0] : idOrLink;
+    return `https://drive.google.com/file/d/${fileId}/preview`;
+  };
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      // 1. Fetch invoicing records where planned_6 is set
+      const { data: invData, error: invError } = await supabase
+        .from("invoicing")
+        .select("*")
+        .not("planned_6", "is", null);
+
+      if (invError) throw invError;
+
+      if (!invData || invData.length === 0) {
+        setPendingItems([]);
+        setHistoryItems([]);
+        return;
+      }
+
+      // 2. Fetch portal details
+      const regIds = [...new Set(invData.map(d => d.reg_id))];
+      let portalData = [];
+      if (regIds.length > 0) {
+        const { data: pData, error: pError } = await supabase
+          .from("portal")
+          .select("*")
+          .in("Reg ID", regIds);
+
+        if (pError) {
+          const { data: pRetry, error: pRetryError } = await supabase
+            .from("portal")
+            .select("*")
+            .in("reg_id", regIds);
+          if (pRetryError) throw pRetryError;
+          portalData = pRetry;
+        } else {
+          portalData = pData;
+        }
+      }
+
+      const portalMap = new Map();
+      portalData.forEach(p => portalMap.set(String(p["Reg ID"] || p.reg_id), p));
+
+      // 3. Map and Join
+      const combined = invData.map(inv => {
+        const portal = portalMap.get(String(inv.reg_id));
+        if (!portal) return null;
+
+        return {
+          ...inv,
+          id: inv.id,
+          regId: inv.reg_id,
+          serialNo: inv.serial_no || "-",
+          beneficiaryName: portal["Beneficiary Name"] || portal.beneficiary_name || "-",
+          fatherName: portal["Father's Name"] || portal.fathers_name || portal.father_name || "-",
+          village: portal["Village"] || portal.village || "-",
+          block: portal["Block"] || portal.block || "-",
+          district: portal["District"] || portal.district || "-",
+          pumpType: portal["Pump Capacity"] || portal.pump_capacity || portal.pump_type || "-",
+          company: portal["Company"] || portal.ip_name || portal.company || "-",
+          installer: portal["Installer Name"] || portal.installer_name || portal.ip_name || "-",
+          installationCompletionDate: portal["Commissioning Date"] || portal.commissioning_date || portal.installation_date || "-",
+        };
+      }).filter(Boolean);
+
+      setPendingItems(combined.filter(item => !item.actual_6));
+      setHistoryItems(combined.filter(item => item.actual_6));
+    } catch (e) {
+      console.error("Fetch Data Error:", e);
+    } finally {
+      setIsLoading(false);
+      setIsLoaded(true);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+    const timer = setTimeout(() => setIsLoading(false), 15000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (isSuccess) {
+      const timer = setTimeout(() => {
+        setIsDialogOpen(false);
+        setTimeout(() => setIsSuccess(false), 300);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess]);
+
+  const handleActionClick = (item) => {
+    console.log("Process Invoicing clicked for:", item);
+    setIsSuccess(false);
+    setIsBulk(false);
+    setSelectedItem(item);
+    setFormData({
+      planned_6: item.planned_6 || "",
+      actual_6: item.actual_6 || new Date().toISOString().split('T')[0],
+      delay_6: item.delay_6 || "",
+      raisoni_invoice_no: item.raisoni_invoice_no || "",
+      invoice_date: item.invoice_date || "",
+      raisoni_invoice_link: item.raisoni_invoice_link || "",
+      laxmi_invoice_no: item.laxmi_invoice_no || "",
+      laxmi_invoice_date: item.laxmi_invoice_date || "",
+      laxmi_invoice_link: item.laxmi_invoice_link || "",
+      file_raisoni_invoice_link: null,
+      file_laxmi_invoice_link: null,
+      serial_no: item.serial_no || "",
+      reg_id: item.reg_id || item.regId || "",
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      const items = activeTab === "history" ? filteredHistoryItems : filteredPendingItems;
+      setSelectedRows(items.map((item) => item.regId));
+    } else {
+      setSelectedRows([]);
+    }
+  };
+
+  useEffect(() => {
+    setSelectedRows([]);
+    setSelectedItem(null);
+  }, [activeTab]);
+
+  const handleSelectRow = (regId, checked) => {
+    if (checked) {
+      setSelectedRows((prev) => [...prev, regId]);
+    } else {
+      setSelectedRows((prev) => prev.filter((id) => id !== regId));
+    }
+  };
+
+  const handleBulkClick = () => {
+    setIsBulk(true);
+    setSelectedItem(null);
+    setIsSuccess(false);
+    setFormData({
+      planned_6: "",
+      actual_6: new Date().toISOString().split('T')[0],
+      delay_6: "",
+      raisoni_invoice_no: "",
+      invoice_date: "",
+      raisoni_invoice_link: "",
+      laxmi_invoice_no: "",
+      laxmi_invoice_date: "",
+      laxmi_invoice_link: "",
+      file_raisoni_invoice_link: null,
+      file_laxmi_invoice_link: null,
+      serial_no: "",
+      reg_id: "",
+    });
+    setIsDialogOpen(true);
+  };
+
+
+
+  const handleFileUpload = (e, fieldName) => {
+    if (e.target.files && e.target.files[0]) {
+      setFormData({
+        ...formData,
+        [fieldName]: e.target.files[0],
+        [fieldName.replace('file_', '')]: e.target.files[0].name // Store filename as string representation for now
+      });
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedItem && (!isBulk || selectedRows.length === 0)) return;
+    setIsSubmitting(true);
+
+    try {
+      let itemsToProcess = [];
+      const currentItems = activeTab === "history" ? historyItems : pendingItems;
+      if (isBulk) {
+        itemsToProcess = currentItems.filter((item) =>
+          selectedRows.includes(item.regId)
+        );
+      } else {
+        itemsToProcess = [selectedItem];
+      }
+
+      const updatePromises = itemsToProcess.map(async (item) => {
+        const rowUpdate = {
+          actual_6: formData.actual_6 || new Date().toISOString().split('T')[0],
+          delay_6: formData.delay_6 || null,
+          raisoni_invoice_no: formData.raisoni_invoice_no || null,
+          invoice_date: formData.invoice_date || null,
+          raisoni_invoice_link: formData.raisoni_invoice_link || null,
+          laxmi_invoice_no: formData.laxmi_invoice_no || null,
+          laxmi_invoice_date: formData.laxmi_invoice_date || null,
+          laxmi_invoice_link: formData.laxmi_invoice_link || null,
+          updated_at: new Date().toISOString(),
+        };
+
+        const { error } = await supabase
+          .from("invoicing")
+          .update(rowUpdate)
+          .eq("reg_id", item.regId);
+
+        if (error) throw error;
+      });
+
+      await Promise.all(updatePromises);
+      await fetchData();
+      setSelectedItem(null);
+      setIsBulk(false);
+      setSelectedRows([]);
+      setIsSuccess(true);
+    } catch (error) {
+      console.error("Submission Error:", error);
+      alert("Error submitting form: " + error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-8 md:p-8 max-w-[1600px] mx-auto bg-slate-50/50 min-h-screen animate-fade-in-up">
+      <Tabs
+        defaultValue="pending"
+        className="w-full"
+        onValueChange={setActiveTab}
+      >
+        <TabsList className="grid w-full grid-cols-2 relative p-1 bg-slate-100/80 h-14 rounded-xl border border-slate-200">
+          <div
+            className={`absolute top-1 bottom-1 left-1 w-[calc(50%-0.5rem)] rounded-lg bg-white shadow-sm transition-all duration-300 ease-in-out ${activeTab === "history" ? "translate-x-full" : "translate-x-0"
+              }`}
+          />
+          <TabsTrigger
+            value="pending"
+            className="z-10 h-full data-[state=active]:bg-transparent data-[state=active]:text-blue-700 data-[state=active]:shadow-none transition-colors duration-200 text-base font-medium text-slate-500"
+          >
+            Pending Actions
+          </TabsTrigger>
+          <TabsTrigger
+            value="history"
+            className="z-10 h-full data-[state=active]:bg-transparent data-[state=active]:text-blue-700 data-[state=active]:shadow-none transition-colors duration-200 text-base font-medium text-slate-500"
+          >
+            History & Records
+          </TabsTrigger>
+        </TabsList>
+
+        {/* ====================== PENDING TAB ====================== */}
+        <TabsContent
+          value="pending"
+          className="mt-6 focus-visible:ring-0 focus-visible:outline-none"
+        >
+          <Card className="border border-slate-200 shadow-sm bg-white overflow-hidden rounded-xl">
+            <CardHeader className="border-b border-slate-100 bg-white px-6 py-5 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto">
+              <div className="flex items-center gap-3 w-full md:w-auto justify-between">
+                <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                  <div className="p-2.5 bg-blue-50 rounded-xl border border-blue-100/50">
+                    <FileText className="h-5 w-5 text-blue-600" />
+                  </div>
+                  Pending Invoicing
+                </CardTitle>
+              </div>
+
+              <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+                <div className="relative w-full md:w-64 group">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                  <Input
+                    placeholder="Search..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 h-10 transition-all rounded-lg"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                  {selectedRows.length >= 2 && (
+                    <Button
+                      onClick={handleBulkClick}
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-10 px-4 rounded-lg font-medium"
+                      size="sm"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Process Selected ({selectedRows.length})
+                    </Button>
+                  )}
+                  <Badge
+                    variant="outline"
+                    className="bg-amber-50 text-amber-700 border-amber-200 px-3 py-1.5 h-10 flex items-center rounded-lg font-medium shadow-sm"
+                  >
+                    {filteredPendingItems.length} Pending
+                  </Badge>
+                </div>
+              </div>
+            </CardHeader>
+
+            {/* Filter Dropdowns */}
+            <div className="px-6 py-5 bg-slate-50/30 border-b border-slate-100">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="h-4 w-1 bg-blue-600 rounded-full"></div>
+                <h3 className="text-sm font-semibold text-slate-700">Filter Records</h3>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                {[
+                  { key: "regId", label: "Reg ID" },
+                  { key: "village", label: "Village" },
+                  { key: "block", label: "Block" },
+                  { key: "district", label: "District" },
+                  { key: "pumpType", label: "Pump Type" },
+                  { key: "company", label: "Company" },
+                ].map(({ key, label }) => (
+                  <div key={key} className="space-y-1.5 flex flex-col">
+                    <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{label}</Label>
+                    <select
+                      value={filters[key]}
+                      onChange={(e) =>
+                        setFilters({ ...filters, [key]: e.target.value })
+                      }
+                      className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-slate-300 transition-colors shadow-sm appearance-none cursor-pointer"
+                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
+                    >
+                      <option value="">All</option>
+                      {getUniquePendingValues(key).map((val) => (
+                        <option key={val} value={val}>
+                          {val}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end mt-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    setFilters({
+                      regId: "",
+                      village: "",
+                      block: "",
+                      district: "",
+                      pumpType: "",
+                      company: "",
+                    })
+                  }
+                  className="text-sm font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 h-8 px-3 rounded-md transition-colors"
+                >
+                  Clear Filters
+                </Button>
+              </div>
+            </div>
+            <CardContent className="p-0">
+              {/* Desktop Table */}
+              <div className="max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
+                <Table className="[&_th]:text-center [&_td]:text-center">
+                  <TableHeader className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm">
+                    <TableRow className="border-b border-slate-200 hover:bg-transparent">
+                      <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-12">
+                        <div className="flex justify-center">
+                          <Checkbox
+                            checked={
+                              filteredPendingItems.length > 0 &&
+                              selectedRows.length ===
+                              filteredPendingItems.length
+                            }
+                            onCheckedChange={handleSelectAll}
+                            aria-label="Select all rows"
+                            className="checkbox-3d border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out rounded"
+                          />
+                        </div>
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
+                        Action
+                      </TableHead>
+                      <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
+
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Reg ID
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Beneficiary Name
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Father's Name
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Village
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Block
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        District
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Pump Type
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Company
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Installer
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {isLoading ? (
+                      Array.from({ length: 6 }).map((_, index) => (
+                        <TableRow
+                          key={`pending-skel-${index}`}
+                          className="animate-pulse"
+                        >
+                          {Array.from({ length: 12 }).map((__, i) => (
+                            <TableCell key={i}>
+                              <div className="h-4 w-full bg-slate-200 rounded mx-auto"></div>
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))
+                    ) : filteredPendingItems.length === 0 ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={12}
+                          className="h-48 text-center text-slate-500 bg-slate-50/30"
+                        >
+                          <div className="flex flex-col items-center justify-center gap-2">
+                            <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center">
+                              <Inbox className="h-6 w-6 text-slate-400" />
+                            </div>
+                            <p>
+                              No pending invoicing requests found matching your
+                              search
+                            </p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredPendingItems.map((item, index) => (
+                        <TableRow
+                          key={item.regId}
+                          className="hover:bg-blue-50/40 transition-colors group border-b border-slate-100"
+                        >
+                          <TableCell className="px-4">
+                            <div className="flex justify-center">
+                              <Checkbox
+                                checked={selectedRows.includes(item.regId)}
+                                onCheckedChange={(checked) =>
+                                  handleSelectRow(item.regId, checked)
+                                }
+                                aria-label={`Select row ${item.regId}`}
+                                className="checkbox-3d border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110 rounded"
+                              />
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleActionClick(item)}
+                              disabled={selectedRows.length >= 2}
+                              className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200/50 shadow-sm text-[11px] font-semibold h-7 px-3 rounded-md flex items-center gap-1.5 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <FileText className="h-3 w-3" />
+                              Process
+                            </Button>
+                          </TableCell>
+                          <TableCell className="text-center font-medium text-slate-500 text-xs">{item.serialNo}</TableCell>
+
+                          <TableCell className="whitespace-nowrap font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md mx-auto w-fit">
+                            {item.regId}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap font-medium text-slate-800 text-sm">
+                            {item.beneficiaryName}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-slate-600 text-sm">
+                            {item.fatherName}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-slate-600 text-sm">
+                            {item.village}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-slate-600 text-sm">
+                            {item.block}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-slate-600 text-sm">
+                            {item.district}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-slate-600 text-sm">
+                            {item.pumpType}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-slate-600 text-sm">
+                            {item.company}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-slate-600 text-sm">
+                            {item.installer}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+
+              <div className="block md:hidden space-y-4 p-4 bg-slate-50">
+                {filteredPendingItems.map((item) => (
+                  <Card
+                    key={item.regId}
+                    className="bg-white border text-sm shadow-sm"
+                  >
+                    <CardContent className="p-4 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-1">
+                          <Badge
+                            variant="secondary"
+                            className="bg-slate-100 text-slate-600"
+                          >
+                            {item.serialNo || "-"}
+                          </Badge>
+                          <h4 className="font-semibold text-base text-slate-800">
+                            {item.beneficiaryName}
+                          </h4>
+                          <p className="text-muted-foreground text-xs font-mono">
+                            {item.regId}
+                          </p>
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs"
+                        >
+                          Pending
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs border-t border-b py-3 my-2 border-slate-100">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-slate-400 text-[10px] uppercase font-semibold">
+                            Father's Name
+                          </span>
+                          <span className="font-medium text-slate-700">
+                            {item.fatherName}
+                          </span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-slate-400 text-[10px] uppercase font-semibold">
+                            Village
+                          </span>
+                          <span className="font-medium text-slate-700">
+                            {item.village}
+                          </span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-slate-400 text-[10px] uppercase font-semibold">
+                            District
+                          </span>
+                          <span className="font-medium text-slate-700">
+                            {item.district}
+                          </span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-slate-400 text-[10px] uppercase font-semibold">
+                            Pump Type
+                          </span>
+                          <span className="font-medium text-slate-700">
+                            {item.pumpType}
+                          </span>
+                        </div>
+                      </div>
+
+                      <Button
+                        size="sm"
+                        disabled={selectedRows.length >= 2}
+                        className="w-full bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => handleActionClick(item)}
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        Process Invoicing
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ====================== HISTORY TAB ====================== */}
+        <TabsContent
+          value="history"
+          className="mt-6 focus-visible:ring-0 focus-visible:outline-none animate-in fade-in-0 slide-in-from-right-4 duration-500 ease-out"
+        >
+          <Card className="border border-slate-200 shadow-sm bg-white overflow-hidden rounded-xl">
+            <CardHeader className="border-b border-slate-100 bg-white px-6 py-5 flex flex-col md:flex-row items-center gap-4 md:gap-0 justify-between h-auto">
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                  <div className="p-2.5 bg-blue-50 rounded-xl border border-blue-100/50">
+                    <FileCheck className="h-5 w-5 text-blue-600" />
+                  </div>
+                  Invoicing History
+                </CardTitle>
+              </div>
+
+              <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+                <div className="relative w-full md:w-64 group">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                  <Input
+                    placeholder="Search..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 h-10 transition-all rounded-lg"
+                  />
+                </div>
+                <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                  {selectedRows.length >= 2 && (
+                    <Button
+                      onClick={handleBulkClick}
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all duration-300 animate-in fade-in slide-in-from-right-4 h-10 px-4 rounded-lg font-medium"
+                      size="sm"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Invoice Selected ({selectedRows.length})
+                    </Button>
+                  )}
+                  <Badge
+                    variant="outline"
+                    className="bg-slate-100 text-slate-700 border-slate-200 px-3 py-1.5 h-10 flex items-center whitespace-nowrap rounded-lg font-medium shadow-sm"
+                  >
+                    {filteredHistoryItems.length} Records
+                  </Badge>
+                </div>
+              </div>
+            </CardHeader>
+
+            {/* Filter Dropdowns */}
+            <div className="px-6 py-5 bg-slate-50/30 border-b border-slate-100">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="h-4 w-1 bg-blue-600 rounded-full"></div>
+                <h3 className="text-sm font-semibold text-slate-700">Filter Records</h3>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                {[
+                  { key: "regId", label: "Reg ID" },
+                  { key: "village", label: "Village" },
+                  { key: "block", label: "Block" },
+                  { key: "district", label: "District" },
+                  { key: "pumpType", label: "Pump Type" },
+                  { key: "company", label: "Company" },
+                ].map(({ key, label }) => (
+                  <div key={key} className="space-y-1.5 flex flex-col">
+                    <Label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{label}</Label>
+                    <select
+                      value={filters[key]}
+                      onChange={(e) =>
+                        setFilters({ ...filters, [key]: e.target.value })
+                      }
+                      className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-slate-300 transition-colors shadow-sm appearance-none cursor-pointer"
+                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
+                    >
+                      <option value="">All</option>
+                      {getUniqueHistoryValues(key).map((val) => (
+                        <option key={val} value={val}>
+                          {val}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end mt-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    setFilters({
+                      regId: "",
+                      village: "",
+                      block: "",
+                      district: "",
+                      pumpType: "",
+                      company: "",
+                    })
+                  }
+                  className="text-sm font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 h-8 px-3 rounded-md transition-colors"
+                >
+                  Clear Filters
+                </Button>
+              </div>
+            </div>
+
+            <CardContent className="p-0">
+              {/* Desktop Table */}
+              <div className="hidden md:block max-h-[70vh] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead_th]:bg-slate-50">
+                <Table className="[&_th]:text-center [&_td]:text-center">
+                  <TableHeader className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm">
+                    <TableRow className="border-b border-slate-200 hover:bg-transparent">
+                      <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-12">
+                        <div className="flex justify-center">
+                          <Checkbox
+                            checked={filteredHistoryItems.length > 0 && selectedRows.length === filteredHistoryItems.length}
+                            onCheckedChange={handleSelectAll}
+                            className="checkbox-3d border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out rounded"
+                          />
+                        </div>
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Action
+                      </TableHead>
+                      <TableHead className="h-12 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap w-14">S.No</TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Reg ID
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Beneficiary
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        District
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Raisoni Invoice No
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Invoice Date
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Raisoni Link
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Laxmi Link
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Status
+                      </TableHead>
+
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {isLoading ? (
+                      Array.from({ length: 6 }).map((_, index) => (
+                        <TableRow
+                          key={`history-skel-${index}`}
+                          className="animate-pulse"
+                        >
+                          {Array.from({ length: 12 }).map((__, i) => (
+                            <TableCell key={i}>
+                              <div className="h-4 w-full bg-slate-200 rounded mx-auto"></div>
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))
+                    ) : filteredHistoryItems.length === 0 ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={12}
+                          className="h-48 text-center text-slate-500 bg-slate-50/30"
+                        >
+                          <div className="flex flex-col items-center justify-center gap-2">
+                            <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center">
+                              <FileCheck className="h-6 w-6 text-slate-400" />
+                            </div>
+                            <p>
+                              {historyItems.length === 0
+                                ? "No invoicing records yet."
+                                : "No history records found matching your search."}
+                            </p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredHistoryItems.map((item, index) => (
+                        <TableRow
+                          key={item.regId}
+                          className="hover:bg-blue-50/40 transition-colors group border-b border-slate-100"
+                        >
+                          <TableCell className="px-4">
+                            <div className="flex justify-center">
+                              <Checkbox
+                                checked={selectedRows.includes(item.regId)}
+                                onCheckedChange={(checked) => handleSelectRow(item.regId, checked)}
+                                className="checkbox-3d border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-4 w-4 shadow-sm transition-all duration-300 ease-out active:scale-75 hover:scale-110 data-[state=checked]:scale-110 rounded"
+                              />
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleActionClick(item)}
+                              disabled={selectedRows.length >= 2}
+                              className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200/50 shadow-sm text-[11px] font-semibold h-7 px-3 rounded-md flex items-center gap-1.5 transition-all duration-300 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <Pencil className="h-3 w-3" />
+                              Edit
+                            </Button>
+                          </TableCell>
+                          <TableCell className="text-center font-medium text-slate-500 text-xs">{item.serialNo}</TableCell>
+                          <TableCell>
+                            <span className="font-mono text-xs text-slate-500 bg-slate-50 py-1 px-2 rounded-md">
+                              {item.regId}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium text-slate-800 text-sm">
+                                {item.beneficiaryName}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {item.village}, {item.block}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-slate-600 text-sm">
+                            {item.district}
+                          </TableCell>
+                          <TableCell className="font-medium text-blue-700 bg-blue-50/50 text-sm">
+                            {item.raisoni_invoice_no || "-"}
+                          </TableCell>
+                          <TableCell className="text-slate-600 text-sm">
+                            {item.invoice_date || "-"}
+                          </TableCell>
+                          <TableCell>
+                            {item.raisoni_invoice_link ? (
+                              <a href={item.raisoni_invoice_link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-sm font-medium">View</a>
+                            ) : "-"}
+                          </TableCell>
+                          <TableCell>
+                            {item.laxmi_invoice_link ? (
+                              <a href={item.laxmi_invoice_link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-sm font-medium">View</a>
+                            ) : "-"}
+                          </TableCell>
+                          <TableCell>
+                            <Badge className="bg-teal-50 text-teal-700 border-teal-200 shadow-sm">
+                              Invoiced
+                            </Badge>
+                          </TableCell>
+
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="block md:hidden space-y-4 p-4 bg-slate-50">
+                {filteredHistoryItems.map((item) => (
+                  <Card
+                    key={item.regId}
+                    className="bg-white border text-sm shadow-sm"
+                  >
+                    <CardContent className="p-4 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-1">
+                          <p className="font-semibold text-blue-900">
+                            {item.regId}
+                          </p>
+                          <p className="text-base font-medium text-slate-800">
+                            {item.beneficiaryName}
+                          </p>
+                          <p className="text-muted-foreground text-xs">
+                            {item.district} • {item.village}
+                          </p>
+                        </div>
+                        <Badge className="bg-teal-50 text-teal-700 border-teal-200">
+                          Invoiced
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 text-xs border-t border-slate-100 pt-3 mt-2">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-slate-400 text-[10px] uppercase font-semibold">
+                            Inv No
+                          </span>
+                          <span className="font-medium text-slate-700">
+                            {item.raisoni_invoice_no || "-"}
+                          </span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-slate-400 text-[10px] uppercase font-semibold">
+                            Inv Date
+                          </span>
+                          <span className="font-medium text-slate-700">
+                            {item.invoice_date || "-"}
+                          </span>
+                        </div>
+                        <div className="col-span-2 flex flex-col gap-1 mt-2">
+                          <span className="text-slate-400 text-[10px] uppercase font-semibold">
+                            Laxmi Link
+                          </span>
+                          <span className="font-medium text-slate-700">
+                            {item.laxmi_invoice_link ? (
+                              <a href={item.laxmi_invoice_link} target="_blank" rel="noreferrer" className="text-blue-600 truncate inline-block max-w-[200px] hover:underline">View Document</a>
+                            ) : "-"}
+                          </span>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="w-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 mt-2 transition-colors"
+                        onClick={() => handleActionClick(item)}
+                      >
+                        <Pencil className="h-3.5 w-3.5 mr-2" />
+                        Edit Record
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* INSURANCE DIALOG */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent
+          showCloseButton={!isSuccess}
+          className={`max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isSuccess ? "bg-transparent shadow-none! border-none!" : "bg-white"
+            }`}
+        >
+          {isSuccess ? (
+            <div className="flex flex-col items-center justify-center w-full p-8 text-center space-y-6 animate-in fade-in duration-300">
+              <div className="rounded-full bg-white p-5 shadow-2xl shadow-white/20 ring-8 ring-white/10 animate-in zoom-in duration-500 ease-out">
+                <CheckCircle2 className="h-16 w-16 text-green-600 scale-110" />
+              </div>
+              <h2 className="text-3xl font-bold text-white drop-shadow-md animate-in slide-in-from-bottom-4 fade-in duration-500 delay-150 ease-out tracking-wide">
+                Submitted Successfully!
+              </h2>
+            </div>
+          ) : (
+            <>
+              <DialogHeader className="p-6 pb-4 border-b border-slate-100 bg-slate-50/80">
+                <DialogTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                  <span className="bg-blue-100 p-2 rounded-lg border border-blue-200/50 shadow-sm">
+                    <FileText className="h-5 w-5 text-blue-600" />
+                  </span>
+                  Enter Invoicing Information
+                </DialogTitle>
+                <DialogDescription className="text-slate-500 ml-12 text-sm mt-1 border-l-2 border-blue-200 pl-3 py-0.5">
+                  {isBulk ? (
+                    <span>
+                      Applying changes to{" "}
+                      <span className="font-bold text-blue-700">
+                        {selectedRows.length} selected items
+                      </span>
+                      . All fields below will be updated for these items.
+                    </span>
+                  ) : (
+                    <span>
+                      Enter invoicing details for{" "}
+                      <span className="font-semibold text-slate-700">
+                        {selectedItem?.beneficiaryName}
+                      </span>
+                    </span>
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+
+              {(selectedItem || isBulk) && (
+                <div className="grid gap-6 p-6">
+                  {/* Beneficiary Details Card - Hide in Bulk */}
+                  {!isBulk && selectedItem && (
+                    <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-5 shadow-sm">
+                      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-200/60">
+                        <span className="bg-white p-1.5 rounded-md shadow-sm border border-slate-200 text-blue-600">
+                          <FileText className="h-4 w-4" />
+                        </span>
+                        <h4 className="font-semibold text-slate-800">
+                          Beneficiary & Project Details
+                        </h4>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-6 text-sm">
+                        {[
+                          { label: "Serial No", value: selectedItem.serialNo },
+                          { label: "Reg ID", value: selectedItem.regId },
+                          {
+                            label: "Beneficiary Name",
+                            value: selectedItem.beneficiaryName,
+                          },
+                          {
+                            label: "Father's Name",
+                            value: selectedItem.fatherName,
+                          },
+                          { label: "Village", value: selectedItem.village },
+                          { label: "District", value: selectedItem.district },
+                          { label: "Pump Type", value: selectedItem.pumpType },
+                          { label: "Company", value: selectedItem.company },
+                        ].map((field, i) => (
+                          <div key={i} className="space-y-1">
+                            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+                              {field.label}
+                            </span>
+                            <p className="font-medium text-slate-700 bg-white px-2.5 py-1.5 rounded-md border border-slate-100 shadow-sm leading-tight">
+                              {field.value || "-"}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Form Fields */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 scale-95 origin-top">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                        Raisoni Invoice No
+                      </Label>
+                      <Input
+                        value={formData.raisoni_invoice_no}
+                        onChange={(e) =>
+                          setFormData({ ...formData, raisoni_invoice_no: e.target.value })
+                        }
+                        placeholder="Enter Raisoni invoice number"
+                        className="border-slate-200 focus:border-blue-500 focus-visible:ring-blue-500/20 bg-slate-50 hover:bg-white transition-colors h-11"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                        Invoice Date
+                      </Label>
+                      <Input
+                        type="date"
+                        value={formData.invoice_date}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            invoice_date: e.target.value,
+                          })
+                        }
+                        className="border-slate-200 focus:border-blue-500 focus-visible:ring-blue-500/20 bg-slate-50 hover:bg-white transition-colors h-11"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                        Raisoni Invoice Link
+                      </Label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                          <Upload className="h-4 w-4 text-slate-400" />
+                        </div>
+                        <Input
+                          type="file"
+                          onChange={(e) => handleFileUpload(e, 'file_raisoni_invoice_link')}
+                          className="border-slate-200 focus:border-blue-500 focus-visible:ring-blue-500/20 bg-slate-50 hover:bg-white transition-colors h-11 pl-10 pt-[0.6rem] cursor-pointer file:cursor-pointer file:bg-blue-50 file:text-blue-700 file:border-0 file:rounded-md file:px-2 file:py-1 file:text-xs file:font-semibold"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                        Laxmi Invoice No
+                      </Label>
+                      <Input
+                        value={formData.laxmi_invoice_no}
+                        onChange={(e) =>
+                          setFormData({ ...formData, laxmi_invoice_no: e.target.value })
+                        }
+                        placeholder="Enter Laxmi invoice number"
+                        className="border-slate-200 focus:border-purple-500 focus-visible:ring-purple-500/20 bg-slate-50 hover:bg-white transition-colors h-11"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                        Laxmi Invoice Date
+                      </Label>
+                      <Input
+                        type="date"
+                        value={formData.laxmi_invoice_date}
+                        onChange={(e) =>
+                          setFormData({ ...formData, laxmi_invoice_date: e.target.value })
+                        }
+                        className="border-slate-200 focus:border-purple-500 focus-visible:ring-purple-500/20 bg-slate-50 hover:bg-white transition-colors h-11"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                        Laxmi Invoice Link
+                      </Label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                          <Upload className="h-4 w-4 text-slate-400" />
+                        </div>
+                        <Input
+                          type="file"
+                          onChange={(e) => handleFileUpload(e, 'file_laxmi_invoice_link')}
+                          className="border-slate-200 focus:border-purple-500 focus-visible:ring-purple-500/20 bg-slate-50 hover:bg-white transition-colors h-11 pl-10 pt-[0.6rem] cursor-pointer file:cursor-pointer file:bg-purple-50 file:text-purple-700 file:border-0 file:rounded-md file:px-2 file:py-1 file:text-xs file:font-semibold"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex justify-end gap-3 mt-4 pt-5 border-t border-slate-100">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsDialogOpen(false)}
+                      disabled={isSubmitting}
+                      className="h-11 px-6 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200 rounded-lg"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={isSubmitting}
+                      className="h-11 px-8 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 rounded-lg font-medium transition-all active:scale-[0.98]"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        "Submit Invoicing"
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
