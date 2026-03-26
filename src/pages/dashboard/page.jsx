@@ -111,240 +111,6 @@ export default function DashboardPage() {
     XLSX.writeFile(wb, `IP_Wise_Payment_Summary_${ts}.xlsx`);
   };
 
-  // previous
-
-  // const fetchData = async () => {
-  //   setIsLoading(true);
-  //   setError(null);
-  //   try {
-  //     // 1. Fetch all required tables in parallel
-  //     const [
-  //       { data: portalData, error: portalError },
-  //       { data: surveyData, error: surveyError },
-  //       { data: dmData, error: dmError },
-  //       { data: insData, error: insError },
-  //       { data: updateData, error: updateError },
-  //       { data: invData, error: invError },
-  //       { data: shareData, error: shareError },
-  //       { data: insuranceData, error: insuranceError },
-  //       { data: paymentData, error: paymentError },
-  //     ] = await Promise.all([
-  //       supabase.from("portal").select("*"),
-  //       supabase.from("survey").select("reg_id, actual_2"),
-  //       supabase.from("dispatch_material").select("reg_id, dispatched_plan, plan_date, material_received, material_received_date"),
-  //       supabase.from("installation").select("reg_id, actual_4"),
-  //       supabase.from("portal_update").select("*"), // Need many fields
-  //       supabase.from("invoicing").select("*"),
-  //       supabase.from("beneficiary_share").select("reg_id, actual_9, farmer_share_amt, state_share_amt"),
-  //       supabase.from("insurance").select("reg_id, scada_insurance_upload"),
-  //       supabase.from("ip_payment").select("reg_id, bill_send_date, ip_jcr_csr_payment, ho_csr_60_percent, ho_csr_75_percent, transport_expense, ip_payment_per_installation, gst_18_percent, total_amount_payment_to_ip"),
-  //     ]);
-
-  //     if (portalError) throw portalError;
-  //     if (surveyError) throw surveyError;
-  //     if (dmError) throw dmError;
-  //     if (insError) throw insError;
-  //     if (updateError) throw updateError;
-  //     if (invError) throw invError;
-  //     if (shareError) throw shareError;
-  //     if (insuranceError) throw insuranceError;
-  //     if (paymentError) throw paymentError;
-
-  //     // 2. Build Lookup Maps (Key: String(reg_id).trim())
-  //     const createMap = (dataset, keyField = "reg_id") => {
-  //       const map = new Map();
-  //       (dataset || []).forEach(item => {
-  //         const key = String(item[keyField] || "").trim();
-  //         if (key) map.set(key, item);
-  //       });
-  //       return map;
-  //     };
-
-  //     const surveyMap = createMap(surveyData);
-  //     const dmMap = createMap(dmData);
-  //     const insMap = createMap(insData);
-  //     const updateMap = createMap(updateData);
-  //     const invMap = createMap(invData);
-  //     const shareMap = createMap(shareData);
-  //     const insuranceMap = createMap(insuranceData);
-  //     const paymentMap = createMap(paymentData);
-
-  //     // 3. Aggregate Data
-  //     const aggMap = new Map(); // Key: "IP|District"
-
-  //     portalData.forEach(portal => {
-  //       // Normalize Key Fields
-  //       const ip = (portal["IP Name"] || portal.ip_name || portal.installer_name || "Unknown").trim();
-  //       const district = (portal["District"] || portal.district || "Unknown").trim();
-  //       const regId = String(portal["Reg ID"] || portal.reg_id || "").trim();
-
-  //       if (!regId) return; // Skip invalid rows
-
-  //       const key = `${ip}|${district}`;
-
-  //       if (!aggMap.has(key)) {
-  //         aggMap.set(key, {
-  //           id: key,
-  //           ipName: ip,
-  //           district: district,
-  //           target: 0,
-  //           surveyDone: 0,
-  //           dispatchPlanDone: 0,
-  //           dispatchPlanDateCount: 0,
-  //           materialDispatchDone: 0,
-  //           materialDispatchDateCount: 0,
-  //           installationDone: 0,
-  //           photoUploadedMaster: 0,
-  //           upadSupplyDateCount: 0,
-  //           upPortalPhotoUploaded: 0,
-  //           invoiceDone: 0,
-  //           laxmiInvoiceDone: 0,
-  //           jcrCompleted: 0,
-  //           totalJcrSubmitted: 0,
-  //           farmerShare: 0,
-  //           stateShare: 0,
-  //           insuranceUploaded: 0,
-  //           scadaLotDone: 0,
-  //           rmsMappingDone: 0,
-  //           sevenDaysVerification: 0,
-  //         });
-  //       }
-
-  //       const entry = aggMap.get(key);
-  //       entry.target++; // Count of Reg IDs
-
-  //       // -- Survey Done --
-  //       // survey.actual_2
-  //       const sRow = surveyMap.get(regId);
-  //       if (sRow && sRow.actual_2) entry.surveyDone++;
-
-  //       // -- Dispatch Fields --
-  //       const dmRow = dmMap.get(regId);
-  //       if (dmRow) {
-  //         if (dmRow.dispatched_plan === "Done") entry.dispatchPlanDone++;
-  //         if (dmRow.plan_date) entry.dispatchPlanDateCount++;
-  //         if (dmRow.material_received === "Done") entry.materialDispatchDone++;
-  //         if (dmRow.material_received_date) entry.materialDispatchDateCount++;
-  //       }
-
-  //       // -- Installation Done --
-  //       // installation.actual_4
-  //       const insRow = insMap.get(regId);
-  //       if (insRow && insRow.actual_4) entry.installationDone++;
-
-  //       // -- Portal Update Fields --
-  //       const upRow = updateMap.get(regId);
-  //       if (upRow) {
-  //         if (upRow.photo_link) entry.photoUploadedMaster++;
-  //         if (upRow.supply_aapurti_date) entry.upadSupplyDateCount++;
-  //         // "UP PORTAL PHOTO UPLODED" -> check photo_rms_data_pending column?
-  //         // Based on user request "count of Photo Uploded on UPAD APP", let's assume photo_rms_data_pending or similar
-  //         // Actually, "UP PORTAL PHOTO UPLODED" likely refers to 'photo_rms_data_pending' field being filled/done
-  //         // Or is it 'photo_link'? No, user asked specific columns.
-  //         // Re-reading map: "count of 'Photo Uploded on UPAD APP'" -> usually implies a specific column.
-  //         // In portal_update we have 'photo_rms_data_pending'. Let's use that if distinct from 'photo_link'.
-  //         if (upRow.photo_rms_data_pending) entry.upPortalPhotoUploaded++;
-
-  //         if (upRow.scadalot_creation === "Done") entry.scadaLotDone++;
-  //         if (upRow.rms_data_mail_to_rotommag === "Done") entry.rmsMappingDone++;
-  //         if (upRow.days_7_verification === "Done") entry.sevenDaysVerification++;
-  //       }
-
-  //       // -- Invoicing --
-  //       const invRow = invMap.get(regId);
-  //       if (invRow) {
-  //         if (invRow.raisoni_invoice_no) entry.invoiceDone++;
-  //         if (invRow.laxmi_invoice_no) entry.laxmiInvoiceDone++;
-  //       }
-
-  //       // -- Shares & JCR --
-  //       const shareRow = shareMap.get(regId);
-  //       if (shareRow) {
-  //         if (shareRow.actual_9) entry.jcrCompleted++;
-  //         // Sum financial shares
-  //         const farmer = parseFloat(shareRow.farmer_share_amt) || 0;
-  //         const state = parseFloat(shareRow.state_share_amt) || 0;
-  //         entry.farmerShare += farmer;
-  //         entry.stateShare += state;
-  //       }
-
-  //       // -- IP Payment (JCR Submit Date) --
-  //       const payRow = paymentMap.get(regId);
-  //       // "TOTAL JCR SUBMITTED" -> count of "JCR Submit Date" or "bill_send_date"
-  //       if (payRow && payRow.bill_send_date) entry.totalJcrSubmitted++;
-
-  //       // -- Insurance --
-  //       const insuRow = insuranceMap.get(regId);
-  //       if (insuRow && insuRow.scada_insurance_upload === "Done") entry.insuranceUploaded++;
-
-  //     });
-
-  //     // 4. Calculate Derived Columns & Sort
-  //     const processedData = Array.from(aggMap.values())
-  //       .sort((a, b) => a.ipName.localeCompare(b.ipName) || a.district.localeCompare(b.district))
-  //       .map((item, index) => ({
-  //         ...item,
-  //         sNo: index + 1,
-  //         surveyPending: item.target - item.surveyDone,
-  //         balanceDispatchPlan: item.target - item.dispatchPlanDone,
-  //         installationPending: item.target - item.installationDone,
-  //         photoRmsPending: item.installationDone - item.photoUploadedMaster,
-  //         upPortalPhotoPending: item.installationDone - item.upPortalPhotoUploaded,
-  //         invoicePending: item.installationDone - item.invoiceDone,
-  //         jcrPending: item.installationDone - item.jcrCompleted,
-  //       }));
-
-  //     // 5. Build IP-wise Expense Summary from ip_payment data
-  //     const expenseMap = new Map();
-  //     (paymentData || []).forEach((row) => {
-  //       const regId = String(row.reg_id || "").trim();
-  //       if (!regId) return;
-  //       const portalItem = portalData?.find(
-  //         (p) => String(p.reg_id || p["Reg ID"] || "").trim() === regId
-  //       );
-  //       const ipName = (portalItem?.ip_name || portalItem?.["IP Name"] || portalItem?.installer_name || "Unknown").trim();
-
-  //       if (!expenseMap.has(ipName)) {
-  //         expenseMap.set(ipName, {
-  //           ipName,
-  //           ipCsr: 0,
-  //           hoCsr60: 0,
-  //           hoCsr75: 0,
-  //           transportExpense: 0,
-  //           ipPaymentTotal: 0,
-  //           netTotal: 0,
-  //         });
-  //       }
-  //       const entry = expenseMap.get(ipName);
-  //       const ipCsr = parseFloat(row.ip_jcr_csr_payment) || 0;
-  //       const ho60 = parseFloat(row.ho_csr_60_percent) || 0;
-  //       const ho75 = parseFloat(row.ho_csr_75_percent) || 0;
-  //       const transport = parseFloat(row.transport_expense) || 0;
-  //       const ipTotal = parseFloat(row.total_amount_payment_to_ip) || 0;
-
-  //       entry.ipCsr += ipCsr;
-  //       entry.hoCsr60 += ho60;
-  //       entry.hoCsr75 += ho75;
-  //       entry.transportExpense += transport;
-  //       entry.ipPaymentTotal += ipTotal;
-  //       entry.netTotal += ipCsr + ho60 + ho75 + transport + ipTotal;
-  //     });
-
-  //     const expenseData = Array.from(expenseMap.values())
-  //       .sort((a, b) => a.ipName.localeCompare(b.ipName))
-  //       .map((item, index) => ({ ...item, sNo: index + 1 }));
-
-  //     setExpenseSummary(expenseData);
-  //     setData(processedData);
-  //     setLastUpdated(new Date());
-
-  //   } catch (err) {
-  //     console.error("Dashboard Aggregation Error:", err);
-  //     setError(err.message);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
 
   // Deepseek
   const fetchData = async () => {
@@ -386,7 +152,16 @@ export default function DashboardPage() {
             "reg_id, actual_9, farmer_share_amt, state_share_amt , central_share",
           ),
         supabase.from("insurance").select("reg_id, scada_insurance_upload"),
-        supabase.from("ip_payment").select("reg_id, bill_send_date"),
+        supabase
+  .from("ip_payment")
+  .select(`
+    reg_id,
+    ip_jcr_csr_payment,
+    ho_csr_60_percent,
+    ho_csr_75_percent,
+    transport_expense,
+    total_amount_payment_to_ip
+  `),
         // supabase.from("jcr_status").select("reg_id, jcr_submit_date")
         supabase
           .from("jcr_status")
@@ -712,6 +487,80 @@ export default function DashboardPage() {
 
       setData(processedData);
       setLastUpdated(new Date());
+
+
+
+
+
+
+
+// ================= IP PAYMENT SUMMARY (ONLY IP CSR) =================
+const paymentAgg = new Map();
+
+paymentData.forEach((payRow) => {
+  const regId = String(payRow.reg_id || "").trim();
+  if (!regId) return;
+
+  const portalRow = portalData.find(
+    (p) => String(p.reg_id).trim() === regId
+  );
+
+  const ip = (portalRow?.ip_name || "Unknown").trim();
+
+  if (!paymentAgg.has(ip)) {
+    paymentAgg.set(ip, {
+      ipName: ip,
+      ipCsr: 0,
+      hoCsr60: 0,
+      hoCsr75: 0,
+      transportExpense: 0,
+      ipPaymentTotal: 0,
+      netTotal: 0,
+    });
+  }
+
+  const entry = paymentAgg.get(ip);
+
+  // ✅ already working (do not touch)
+  const ipCsr = parseFloat(payRow.ip_jcr_csr_payment) || 0;
+  entry.ipCsr += ipCsr;
+
+  // ✅ ADD THESE (NEW)
+  const ho60 = parseFloat(payRow.ho_csr_60_percent) || 0;
+  const ho75 = parseFloat(payRow.ho_csr_75_percent) || 0;
+  const transport = parseFloat(payRow.transport_expense) || 0;
+  const total = parseFloat(payRow.total_amount_payment_to_ip) || 0;
+
+  entry.hoCsr60 += ho60;
+  entry.hoCsr75 += ho75;
+  entry.transportExpense += transport;
+  entry.ipPaymentTotal += total;
+
+  // ✅ Net Total
+  entry.netTotal =
+    entry.ipCsr +
+    entry.hoCsr60 +
+    entry.hoCsr75 +
+    entry.transportExpense +
+    entry.ipPaymentTotal;
+});
+
+const expenseData = Array.from(paymentAgg.values()).map((item, index) => ({
+  ...item,
+  sNo: index + 1,
+}));
+
+setExpenseSummary(expenseData);
+
+
+
+
+
+
+
+
+
+      
     } catch (err) {
       console.error("Dashboard Aggregation Error:", err);
       setError(err.message);
