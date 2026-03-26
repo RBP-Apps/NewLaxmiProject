@@ -127,77 +127,210 @@ export default function PortalUpdatePage() {
         return matchesSearch && matchesFilters;
     });
 
+    // const fetchData = async () => {
+    //     setIsLoading(true);
+    //     try {
+    //         const { data: updateData, error: updateError } = await supabase
+    //             .from("portal_update")
+    //             .select("*")
+    //             .not("planned_5", "is", null);
+
+    //         if (updateError) throw updateError;
+
+    //         if (!updateData || updateData.length === 0) {
+    //             setPendingItems([]);
+    //             setHistoryItems([]);
+    //             return;
+    //         }
+
+    //         const regIds = [...new Set(updateData.map(d => d.reg_id))];
+    //         let portalData = [];
+
+    //         if (regIds.length > 0) {
+    //             const { data: pData, error: pError } = await supabase
+    //                 .from("portal")
+    //                 .select("*")
+    //                 .in("reg_id", regIds);
+
+    //             if (pError) {
+    //                 const { data: pRetry, error: pRetryError } = await supabase
+    //                     .from("portal")
+    //                     .select("*")
+    //                     .in("reg_id", regIds);
+    //                 if (pRetryError) throw pRetryError;
+    //                 portalData = pRetry;
+    //             } else {
+    //                 portalData = pData;
+    //             }
+    //         }
+
+    //         const portalMap = new Map();
+    //         portalData.forEach(p => portalMap.set(String(p["reg_id"] || p.reg_id), p));
+
+    //         const combined = updateData.map(upd => {
+    //             const portal = portalMap.get(String(upd.reg_id));
+    //             if (!portal) return null;
+
+    //             return {
+    //                 ...upd,
+    //                 id: upd.id,
+    //                 regId: upd.reg_id,
+    //                 serialNo: upd.serial_no || "-",
+    //                 beneficiaryName: portal["Beneficiary Name"] || portal.beneficiary_name || "-",
+    //                 fatherName: portal["Father's Name"] || portal.fathers_name || portal.father_husband_name || portal.father_name || "-",
+    //                 mobileNumber: portal["Mobile Number"] || portal.mobile_number || "-",
+    //                 village: portal["Village"] || portal.village || "-",
+    //                 block: portal["Block"] || portal.block || "-",
+    //                 district: portal["District"] || portal.district || "-",
+    //                 pincode: portal["Pincode"] || portal.pincode || "-",
+    //                 pumpCapacity: portal["Pump Capacity"] || portal.pump_type || portal.pump_capacity || "-",
+    //                 pumpHead: portal["Pump Head"] || portal.pump_head || "-",
+    //                 ipName: portal["IP Name"] || portal.ip_name || portal.installer_name || "-",
+    //                 amount: portal["Amount"] || portal.amount || "-",
+    //             };
+    //         }).filter(Boolean);
+
+    //         setPendingItems(combined.filter(item => !item.supply_aapurti_date));
+    //         setHistoryItems(combined.filter(item => item.supply_aapurti_date));
+    //     } catch (e) {
+    //         console.error("Fetch Data Error:", e);
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // };
+
+
+
+
     const fetchData = async () => {
-        setIsLoading(true);
-        try {
-            const { data: updateData, error: updateError } = await supabase
-                .from("portal_update")
+    setIsLoading(true);
+    try {
+        const { data: updateData, error: updateError } = await supabase
+            .from("portal_update")
+            .select("*")
+            .not("planned_5", "is", null);
+
+        if (updateError) throw updateError;
+
+        if (!updateData || updateData.length === 0) {
+            setPendingItems([]);
+            setHistoryItems([]);
+            return;
+        }
+
+        const regIds = [...new Set(updateData.map(d => d.reg_id))];
+
+        // ================= portal =================
+        let portalData = [];
+
+        const { data: pData, error: pError } = await supabase
+            .from("portal")
+            .select("*")
+            .in("reg_id", regIds);
+
+        if (pError) {
+            const { data: pRetry, error: pRetryError } = await supabase
+                .from("portal")
                 .select("*")
-                .not("planned_5", "is", null);
+                .in("reg_id", regIds);
+            if (pRetryError) throw pRetryError;
+            portalData = pRetry;
+        } else {
+            portalData = pData;
+        }
 
-            if (updateError) throw updateError;
+        // ================= beneficiary_share (NEW) =================
+        const { data: shareData, error: shareError } = await supabase
+            .from("beneficiary_share")
+            .select("*")
+            .in("reg_id", regIds);
 
-            if (!updateData || updateData.length === 0) {
-                setPendingItems([]);
-                setHistoryItems([]);
-                return;
-            }
+        if (shareError) throw shareError;
 
-            const regIds = [...new Set(updateData.map(d => d.reg_id))];
-            let portalData = [];
+        // ================= MAPS =================
+        const portalMap = new Map();
+        portalData.forEach(p =>
+            portalMap.set(String(p["reg_id"] || p.reg_id).trim(), p)
+        );
 
-            if (regIds.length > 0) {
-                const { data: pData, error: pError } = await supabase
-                    .from("portal")
-                    .select("*")
-                    .in("reg_id", regIds);
+        const shareMap = new Map();
+        shareData.forEach(s =>
+            shareMap.set(String(s.reg_id).trim(), s)
+        );
 
-                if (pError) {
-                    const { data: pRetry, error: pRetryError } = await supabase
-                        .from("portal")
-                        .select("*")
-                        .in("reg_id", regIds);
-                    if (pRetryError) throw pRetryError;
-                    portalData = pRetry;
-                } else {
-                    portalData = pData;
-                }
-            }
+        // ================= COMBINED =================
+        const combined = updateData.map(upd => {
+            const portal = portalMap.get(String(upd.reg_id).trim());
+            const share = shareMap.get(String(upd.reg_id).trim());
 
-            const portalMap = new Map();
-            portalData.forEach(p => portalMap.set(String(p["reg_id"] || p.reg_id), p));
-
-            const combined = updateData.map(upd => {
-                const portal = portalMap.get(String(upd.reg_id));
-                if (!portal) return null;
-
+            // 🔥 agar portal missing ho tab bhi data dikhe
+            if (!portal) {
                 return {
                     ...upd,
                     id: upd.id,
                     regId: upd.reg_id,
                     serialNo: upd.serial_no || "-",
-                    beneficiaryName: portal["Beneficiary Name"] || portal.beneficiary_name || "-",
-                    fatherName: portal["Father's Name"] || portal.fathers_name || portal.father_husband_name || portal.father_name || "-",
-                    mobileNumber: portal["Mobile Number"] || portal.mobile_number || "-",
-                    village: portal["Village"] || portal.village || "-",
-                    block: portal["Block"] || portal.block || "-",
-                    district: portal["District"] || portal.district || "-",
-                    pincode: portal["Pincode"] || portal.pincode || "-",
-                    pumpCapacity: portal["Pump Capacity"] || portal.pump_type || portal.pump_capacity || "-",
-                    pumpHead: portal["Pump Head"] || portal.pump_head || "-",
-                    ipName: portal["IP Name"] || portal.ip_name || portal.installer_name || "-",
-                    amount: portal["Amount"] || portal.amount || "-",
-                };
-            }).filter(Boolean);
 
-            setPendingItems(combined.filter(item => !item.supply_aapurti_date));
-            setHistoryItems(combined.filter(item => item.supply_aapurti_date));
-        } catch (e) {
-            console.error("Fetch Data Error:", e);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+                    beneficiaryName: "-",
+                    fatherName: "-",
+                    mobileNumber: "-",
+                    village: "-",
+                    block: "-",
+                    district: "-",
+                    pincode: "-",
+                    pumpCapacity: "-",
+                    pumpHead: "-",
+                    ipName: "-",
+
+                    // 🔥 NEW share data
+                    stateShare: share?.state_share_amt || 0,
+                    farmerShare: share?.farmer_share_amt || 0,
+                    centralShare: share?.central_share || 0,
+                    totalShare: share?.state_farmer_share_total_amount || 0,
+                };
+            }
+
+            return {
+                ...upd,
+                id: upd.id,
+                regId: upd.reg_id,
+                serialNo: upd.serial_no || "-",
+
+                // ✅ portal data (correct mapping)
+                beneficiaryName: portal.beneficiary_name || "-",
+                fatherName: portal.fathers_name || portal.father_name || "-",
+                mobileNumber: portal.mobile_number || "-",
+                village: portal.village || "-",
+                block: portal.block || "-",
+                district: portal.district || "-",
+                pincode: portal.pincode || "-",
+                pumpCapacity: portal.pump_capacity || "-",
+                pumpHead: portal.pump_head || "-",
+                ipName: portal.ip_name || "-",
+                amount: portal.amount || "-",
+
+                // 🔥 NEW share data
+                stateShare: share?.state_share_amt || 0,
+                farmerShare: share?.farmer_share_amt || 0,
+                centralShare: share?.central_share || 0,
+                totalShare: share?.state_farmer_share_total_amount || 0,
+            };
+        }).filter(Boolean);
+
+        console.log("Update Data:", updateData);
+        console.log("Portal Data:", portalData);
+        console.log("Share Data:", shareData);
+
+        setPendingItems(combined.filter(item => !item.supply_aapurti_date));
+        setHistoryItems(combined.filter(item => item.supply_aapurti_date));
+
+    } catch (e) {
+        console.error("Fetch Data Error:", e);
+    } finally {
+        setIsLoading(false);
+    }
+};
+
 
     useEffect(() => {
         fetchData();
@@ -224,12 +357,12 @@ export default function PortalUpdatePage() {
             longitude: item.longitude || "",
             latitude: item.latitude || "",
             supply_aapurti_date: item.supply_aapurti_date || new Date().toISOString().split('T')[0],
-            scadalot_creation: item.scadalot_creation || "Done",
+            scadalot_creation: item.scadalot_creation || "",
             lot_ref_no: item.lot_ref_no || "",
             lot_name: item.lot_name || "",
-            asset_mapping_by_ea: item.asset_mapping_by_ea || "Done",
-            days_7_verification: item.days_7_verification || "Done",
-            rms_data_mail_to_rotommag: item.rms_data_mail_to_rotommag || "Done",
+            asset_mapping_by_ea: item.asset_mapping_by_ea || "",
+            days_7_verification: item.days_7_verification || "",
+            rms_data_mail_to_rotommag: item.rms_data_mail_to_rotommag || "",
             reg_id: item.reg_id || item.regId || "",
 
             pump_no: item.pump_no || "",
@@ -445,7 +578,7 @@ export default function PortalUpdatePage() {
             <Label className="text-xs text-slate-700 font-medium">{label}</Label>
             <div className="relative">
                 <select
-                    value={value}
+                    value={value ?? ""}
                     onChange={(e) => onChange(e.target.value)}
                     className="flex h-9 w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
                 >

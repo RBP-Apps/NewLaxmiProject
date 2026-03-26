@@ -1,10 +1,25 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Activity, RefreshCw, AlertCircle, Clock, PlayCircle, Download, IndianRupee } from "lucide-react";
+import {
+  Activity,
+  RefreshCw,
+  AlertCircle,
+  Clock,
+  PlayCircle,
+  Download,
+  IndianRupee,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import * as XLSX from "xlsx";
 import { dashboardColumns } from "./columns";
@@ -37,7 +52,7 @@ export default function DashboardPage() {
       ];
 
       const results = await Promise.all(
-        tables.map((t) => supabase.from(t.name).select("*"))
+        tables.map((t) => supabase.from(t.name).select("*")),
       );
 
       const wb = XLSX.utils.book_new();
@@ -96,6 +111,242 @@ export default function DashboardPage() {
     XLSX.writeFile(wb, `IP_Wise_Payment_Summary_${ts}.xlsx`);
   };
 
+  // previous
+
+  // const fetchData = async () => {
+  //   setIsLoading(true);
+  //   setError(null);
+  //   try {
+  //     // 1. Fetch all required tables in parallel
+  //     const [
+  //       { data: portalData, error: portalError },
+  //       { data: surveyData, error: surveyError },
+  //       { data: dmData, error: dmError },
+  //       { data: insData, error: insError },
+  //       { data: updateData, error: updateError },
+  //       { data: invData, error: invError },
+  //       { data: shareData, error: shareError },
+  //       { data: insuranceData, error: insuranceError },
+  //       { data: paymentData, error: paymentError },
+  //     ] = await Promise.all([
+  //       supabase.from("portal").select("*"),
+  //       supabase.from("survey").select("reg_id, actual_2"),
+  //       supabase.from("dispatch_material").select("reg_id, dispatched_plan, plan_date, material_received, material_received_date"),
+  //       supabase.from("installation").select("reg_id, actual_4"),
+  //       supabase.from("portal_update").select("*"), // Need many fields
+  //       supabase.from("invoicing").select("*"),
+  //       supabase.from("beneficiary_share").select("reg_id, actual_9, farmer_share_amt, state_share_amt"),
+  //       supabase.from("insurance").select("reg_id, scada_insurance_upload"),
+  //       supabase.from("ip_payment").select("reg_id, bill_send_date, ip_jcr_csr_payment, ho_csr_60_percent, ho_csr_75_percent, transport_expense, ip_payment_per_installation, gst_18_percent, total_amount_payment_to_ip"),
+  //     ]);
+
+  //     if (portalError) throw portalError;
+  //     if (surveyError) throw surveyError;
+  //     if (dmError) throw dmError;
+  //     if (insError) throw insError;
+  //     if (updateError) throw updateError;
+  //     if (invError) throw invError;
+  //     if (shareError) throw shareError;
+  //     if (insuranceError) throw insuranceError;
+  //     if (paymentError) throw paymentError;
+
+  //     // 2. Build Lookup Maps (Key: String(reg_id).trim())
+  //     const createMap = (dataset, keyField = "reg_id") => {
+  //       const map = new Map();
+  //       (dataset || []).forEach(item => {
+  //         const key = String(item[keyField] || "").trim();
+  //         if (key) map.set(key, item);
+  //       });
+  //       return map;
+  //     };
+
+  //     const surveyMap = createMap(surveyData);
+  //     const dmMap = createMap(dmData);
+  //     const insMap = createMap(insData);
+  //     const updateMap = createMap(updateData);
+  //     const invMap = createMap(invData);
+  //     const shareMap = createMap(shareData);
+  //     const insuranceMap = createMap(insuranceData);
+  //     const paymentMap = createMap(paymentData);
+
+  //     // 3. Aggregate Data
+  //     const aggMap = new Map(); // Key: "IP|District"
+
+  //     portalData.forEach(portal => {
+  //       // Normalize Key Fields
+  //       const ip = (portal["IP Name"] || portal.ip_name || portal.installer_name || "Unknown").trim();
+  //       const district = (portal["District"] || portal.district || "Unknown").trim();
+  //       const regId = String(portal["Reg ID"] || portal.reg_id || "").trim();
+
+  //       if (!regId) return; // Skip invalid rows
+
+  //       const key = `${ip}|${district}`;
+
+  //       if (!aggMap.has(key)) {
+  //         aggMap.set(key, {
+  //           id: key,
+  //           ipName: ip,
+  //           district: district,
+  //           target: 0,
+  //           surveyDone: 0,
+  //           dispatchPlanDone: 0,
+  //           dispatchPlanDateCount: 0,
+  //           materialDispatchDone: 0,
+  //           materialDispatchDateCount: 0,
+  //           installationDone: 0,
+  //           photoUploadedMaster: 0,
+  //           upadSupplyDateCount: 0,
+  //           upPortalPhotoUploaded: 0,
+  //           invoiceDone: 0,
+  //           laxmiInvoiceDone: 0,
+  //           jcrCompleted: 0,
+  //           totalJcrSubmitted: 0,
+  //           farmerShare: 0,
+  //           stateShare: 0,
+  //           insuranceUploaded: 0,
+  //           scadaLotDone: 0,
+  //           rmsMappingDone: 0,
+  //           sevenDaysVerification: 0,
+  //         });
+  //       }
+
+  //       const entry = aggMap.get(key);
+  //       entry.target++; // Count of Reg IDs
+
+  //       // -- Survey Done --
+  //       // survey.actual_2
+  //       const sRow = surveyMap.get(regId);
+  //       if (sRow && sRow.actual_2) entry.surveyDone++;
+
+  //       // -- Dispatch Fields --
+  //       const dmRow = dmMap.get(regId);
+  //       if (dmRow) {
+  //         if (dmRow.dispatched_plan === "Done") entry.dispatchPlanDone++;
+  //         if (dmRow.plan_date) entry.dispatchPlanDateCount++;
+  //         if (dmRow.material_received === "Done") entry.materialDispatchDone++;
+  //         if (dmRow.material_received_date) entry.materialDispatchDateCount++;
+  //       }
+
+  //       // -- Installation Done --
+  //       // installation.actual_4
+  //       const insRow = insMap.get(regId);
+  //       if (insRow && insRow.actual_4) entry.installationDone++;
+
+  //       // -- Portal Update Fields --
+  //       const upRow = updateMap.get(regId);
+  //       if (upRow) {
+  //         if (upRow.photo_link) entry.photoUploadedMaster++;
+  //         if (upRow.supply_aapurti_date) entry.upadSupplyDateCount++;
+  //         // "UP PORTAL PHOTO UPLODED" -> check photo_rms_data_pending column?
+  //         // Based on user request "count of Photo Uploded on UPAD APP", let's assume photo_rms_data_pending or similar
+  //         // Actually, "UP PORTAL PHOTO UPLODED" likely refers to 'photo_rms_data_pending' field being filled/done
+  //         // Or is it 'photo_link'? No, user asked specific columns.
+  //         // Re-reading map: "count of 'Photo Uploded on UPAD APP'" -> usually implies a specific column.
+  //         // In portal_update we have 'photo_rms_data_pending'. Let's use that if distinct from 'photo_link'.
+  //         if (upRow.photo_rms_data_pending) entry.upPortalPhotoUploaded++;
+
+  //         if (upRow.scadalot_creation === "Done") entry.scadaLotDone++;
+  //         if (upRow.rms_data_mail_to_rotommag === "Done") entry.rmsMappingDone++;
+  //         if (upRow.days_7_verification === "Done") entry.sevenDaysVerification++;
+  //       }
+
+  //       // -- Invoicing --
+  //       const invRow = invMap.get(regId);
+  //       if (invRow) {
+  //         if (invRow.raisoni_invoice_no) entry.invoiceDone++;
+  //         if (invRow.laxmi_invoice_no) entry.laxmiInvoiceDone++;
+  //       }
+
+  //       // -- Shares & JCR --
+  //       const shareRow = shareMap.get(regId);
+  //       if (shareRow) {
+  //         if (shareRow.actual_9) entry.jcrCompleted++;
+  //         // Sum financial shares
+  //         const farmer = parseFloat(shareRow.farmer_share_amt) || 0;
+  //         const state = parseFloat(shareRow.state_share_amt) || 0;
+  //         entry.farmerShare += farmer;
+  //         entry.stateShare += state;
+  //       }
+
+  //       // -- IP Payment (JCR Submit Date) --
+  //       const payRow = paymentMap.get(regId);
+  //       // "TOTAL JCR SUBMITTED" -> count of "JCR Submit Date" or "bill_send_date"
+  //       if (payRow && payRow.bill_send_date) entry.totalJcrSubmitted++;
+
+  //       // -- Insurance --
+  //       const insuRow = insuranceMap.get(regId);
+  //       if (insuRow && insuRow.scada_insurance_upload === "Done") entry.insuranceUploaded++;
+
+  //     });
+
+  //     // 4. Calculate Derived Columns & Sort
+  //     const processedData = Array.from(aggMap.values())
+  //       .sort((a, b) => a.ipName.localeCompare(b.ipName) || a.district.localeCompare(b.district))
+  //       .map((item, index) => ({
+  //         ...item,
+  //         sNo: index + 1,
+  //         surveyPending: item.target - item.surveyDone,
+  //         balanceDispatchPlan: item.target - item.dispatchPlanDone,
+  //         installationPending: item.target - item.installationDone,
+  //         photoRmsPending: item.installationDone - item.photoUploadedMaster,
+  //         upPortalPhotoPending: item.installationDone - item.upPortalPhotoUploaded,
+  //         invoicePending: item.installationDone - item.invoiceDone,
+  //         jcrPending: item.installationDone - item.jcrCompleted,
+  //       }));
+
+  //     // 5. Build IP-wise Expense Summary from ip_payment data
+  //     const expenseMap = new Map();
+  //     (paymentData || []).forEach((row) => {
+  //       const regId = String(row.reg_id || "").trim();
+  //       if (!regId) return;
+  //       const portalItem = portalData?.find(
+  //         (p) => String(p.reg_id || p["Reg ID"] || "").trim() === regId
+  //       );
+  //       const ipName = (portalItem?.ip_name || portalItem?.["IP Name"] || portalItem?.installer_name || "Unknown").trim();
+
+  //       if (!expenseMap.has(ipName)) {
+  //         expenseMap.set(ipName, {
+  //           ipName,
+  //           ipCsr: 0,
+  //           hoCsr60: 0,
+  //           hoCsr75: 0,
+  //           transportExpense: 0,
+  //           ipPaymentTotal: 0,
+  //           netTotal: 0,
+  //         });
+  //       }
+  //       const entry = expenseMap.get(ipName);
+  //       const ipCsr = parseFloat(row.ip_jcr_csr_payment) || 0;
+  //       const ho60 = parseFloat(row.ho_csr_60_percent) || 0;
+  //       const ho75 = parseFloat(row.ho_csr_75_percent) || 0;
+  //       const transport = parseFloat(row.transport_expense) || 0;
+  //       const ipTotal = parseFloat(row.total_amount_payment_to_ip) || 0;
+
+  //       entry.ipCsr += ipCsr;
+  //       entry.hoCsr60 += ho60;
+  //       entry.hoCsr75 += ho75;
+  //       entry.transportExpense += transport;
+  //       entry.ipPaymentTotal += ipTotal;
+  //       entry.netTotal += ipCsr + ho60 + ho75 + transport + ipTotal;
+  //     });
+
+  //     const expenseData = Array.from(expenseMap.values())
+  //       .sort((a, b) => a.ipName.localeCompare(b.ipName))
+  //       .map((item, index) => ({ ...item, sNo: index + 1 }));
+
+  //     setExpenseSummary(expenseData);
+  //     setData(processedData);
+  //     setLastUpdated(new Date());
+
+  //   } catch (err) {
+  //     console.error("Dashboard Aggregation Error:", err);
+  //     setError(err.message);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  // Deepseek
   const fetchData = async () => {
     setIsLoading(true);
     setError(null);
@@ -111,16 +362,35 @@ export default function DashboardPage() {
         { data: shareData, error: shareError },
         { data: insuranceData, error: insuranceError },
         { data: paymentData, error: paymentError },
+        { data: jcrData, error: jcrError },
       ] = await Promise.all([
         supabase.from("portal").select("*"),
         supabase.from("survey").select("reg_id, actual_2"),
-        supabase.from("dispatch_material").select("reg_id, dispatched_plan, plan_date, material_received, material_received_date"),
+        supabase
+          .from("dispatch_material")
+          .select(
+            "reg_id, dispatched_plan, plan_date, material_received, material_received_date",
+          ),
         supabase.from("installation").select("reg_id, actual_4"),
-        supabase.from("portal_update").select("*"), // Need many fields
-        supabase.from("invoicing").select("*"),
-        supabase.from("beneficiary_share").select("reg_id, actual_9, farmer_share_amt, state_share_amt"),
+        supabase
+          .from("portal_update")
+          .select(
+            "reg_id, photo_link, supply_aapurti_date, photo_rms_data_pending, scadalot_creation, rms_data_mail_to_rotommag, days_7_verification",
+          ),
+        supabase
+          .from("invoicing")
+          .select("reg_id, raisoni_invoice_no, laxmi_invoice_no"),
+        supabase
+          .from("beneficiary_share")
+          .select(
+            "reg_id, actual_9, farmer_share_amt, state_share_amt , central_share",
+          ),
         supabase.from("insurance").select("reg_id, scada_insurance_upload"),
-        supabase.from("ip_payment").select("reg_id, bill_send_date, ip_jcr_csr_payment, ho_csr_60_percent, ho_csr_75_percent, transport_expense, ip_payment_per_installation, gst_18_percent, total_amount_payment_to_ip"),
+        supabase.from("ip_payment").select("reg_id, bill_send_date"),
+        // supabase.from("jcr_status").select("reg_id, jcr_submit_date")
+        supabase
+          .from("jcr_status")
+          .select("reg_id, jcr_submit_date, jcr_status"),
       ]);
 
       if (portalError) throw portalError;
@@ -132,11 +402,12 @@ export default function DashboardPage() {
       if (shareError) throw shareError;
       if (insuranceError) throw insuranceError;
       if (paymentError) throw paymentError;
+      if (jcrError) throw jcrError;
 
-      // 2. Build Lookup Maps (Key: String(reg_id).trim())
+      // 2. Build Lookup Maps
       const createMap = (dataset, keyField = "reg_id") => {
         const map = new Map();
-        (dataset || []).forEach(item => {
+        (dataset || []).forEach((item) => {
           const key = String(item[keyField] || "").trim();
           if (key) map.set(key, item);
         });
@@ -151,17 +422,18 @@ export default function DashboardPage() {
       const shareMap = createMap(shareData);
       const insuranceMap = createMap(insuranceData);
       const paymentMap = createMap(paymentData);
+      const jcrMap = createMap(jcrData);
 
       // 3. Aggregate Data
-      const aggMap = new Map(); // Key: "IP|District"
+      const aggMap = new Map();
 
-      portalData.forEach(portal => {
+      portalData.forEach((portal) => {
         // Normalize Key Fields
-        const ip = (portal["IP Name"] || portal.ip_name || portal.installer_name || "Unknown").trim();
-        const district = (portal["District"] || portal.district || "Unknown").trim();
-        const regId = String(portal["Reg ID"] || portal.reg_id || "").trim();
+        const ip = (portal["ip_name"] || "Unknown").trim();
+        const district = (portal["district"] || "Unknown").trim();
+        const regId = String(portal["reg_id"] || "").trim();
 
-        if (!regId) return; // Skip invalid rows
+        if (!regId) return;
 
         const key = `${ip}|${district}`;
 
@@ -172,155 +444,274 @@ export default function DashboardPage() {
             district: district,
             target: 0,
             surveyDone: 0,
-            dispatchPlanDone: 0,
-            dispatchPlanDateCount: 0,
-            materialDispatchDone: 0,
-            materialDispatchDateCount: 0,
+            surveyPending: 0,
+            nosOfCompleteSetDispatchPlan: 0,
+            balanceDispatchPlan: 0,
+            materialDispatchOnSite: 0,
             installationDone: 0,
-            photoUploadedMaster: 0,
-            upadSupplyDateCount: 0,
+            installationPending: 0,
+            photoUploadedMasterSheet: 0,
+            upadOnlinePortalSupply: 0,
             upPortalPhotoUploaded: 0,
-            invoiceDone: 0,
-            laxmiInvoiceDone: 0,
-            jcrCompleted: 0,
-            totalJcrSubmitted: 0,
+            upPortalPhotoUploadPending: 0,
+            scadaPortalLotCreationDone: 0,
+            photoRmsDataPending: 0,
+            rmsIntegrationMappingDone: 0,
+            sevenDaysRmsIntegrationVerification: 0,
+            raisoniInvoice: 0,
+            laxmiInvoice: 0,
+            jcrAtIp: 0,
+            jcrAtRbp: 0,
+            totalJcrSubmittedToDo: 0,
+            totalJcrAtHo: 0,
+            jcrUploadedInMasterSheet: 0,
+            insuranceUploadedMasterSheet: 0,
             farmerShare: 0,
             stateShare: 0,
-            insuranceUploaded: 0,
-            scadaLotDone: 0,
-            rmsMappingDone: 0,
-            sevenDaysVerification: 0,
+            centralShare: 0,
+            ninetyDaysRmsIntegrationVerification: 0,
+            tenPercentHkrpShare: 0,
           });
         }
 
         const entry = aggMap.get(key);
-        entry.target++; // Count of Reg IDs
+        entry.target++;
 
-        // -- Survey Done --
-        // survey.actual_2
+        // Survey Done - Only count if actual_2 has a valid date string (not null)
         const sRow = surveyMap.get(regId);
-        if (sRow && sRow.actual_2) entry.surveyDone++;
+        if (
+          sRow &&
+          sRow.actual_2 &&
+          sRow.actual_2 !== null &&
+          sRow.actual_2 !== ""
+        ) {
+          entry.surveyDone++;
+        }
+        entry.surveyPending = entry.target - entry.surveyDone;
 
-        // -- Dispatch Fields --
+        // Dispatch Material
         const dmRow = dmMap.get(regId);
         if (dmRow) {
-          if (dmRow.dispatched_plan === "Done") entry.dispatchPlanDone++;
-          if (dmRow.plan_date) entry.dispatchPlanDateCount++;
-          if (dmRow.material_received === "Done") entry.materialDispatchDone++;
-          if (dmRow.material_received_date) entry.materialDispatchDateCount++;
+          // Nos Of Complete Set Dispatch Plan - count if dispatched_plan is "Done"
+          if (dmRow.dispatched_plan === "Done") {
+            entry.nosOfCompleteSetDispatchPlan++;
+          }
+          // Balance Dispatch Plan
+          entry.balanceDispatchPlan =
+            entry.target - entry.nosOfCompleteSetDispatchPlan;
+          // Material Dispatch On Site - count if material_received is "Done"
+          if (dmRow.material_received === "Done") {
+            entry.materialDispatchOnSite++;
+          }
         }
 
-        // -- Installation Done --
-        // installation.actual_4
+        // Installation - Only count if actual_4 has a valid date
         const insRow = insMap.get(regId);
-        if (insRow && insRow.actual_4) entry.installationDone++;
+        if (
+          insRow &&
+          insRow.actual_4 &&
+          insRow.actual_4 !== null &&
+          insRow.actual_4 !== ""
+        ) {
+          entry.installationDone++;
+        }
+        entry.installationPending = entry.target - entry.installationDone;
 
-        // -- Portal Update Fields --
+        // Portal Update
         const upRow = updateMap.get(regId);
         if (upRow) {
-          if (upRow.photo_link) entry.photoUploadedMaster++;
-          if (upRow.supply_aapurti_date) entry.upadSupplyDateCount++;
-          // "UP PORTAL PHOTO UPLODED" -> check photo_rms_data_pending column?
-          // Based on user request "count of Photo Uploded on UPAD APP", let's assume photo_rms_data_pending or similar
-          // Actually, "UP PORTAL PHOTO UPLODED" likely refers to 'photo_rms_data_pending' field being filled/done
-          // Or is it 'photo_link'? No, user asked specific columns. 
-          // Re-reading map: "count of 'Photo Uploded on UPAD APP'" -> usually implies a specific column.
-          // In portal_update we have 'photo_rms_data_pending'. Let's use that if distinct from 'photo_link'.
-          if (upRow.photo_rms_data_pending) entry.upPortalPhotoUploaded++;
-
-          if (upRow.scadalot_creation === "Done") entry.scadaLotDone++;
-          if (upRow.rms_data_mail_to_rotommag === "Done") entry.rmsMappingDone++;
-          if (upRow.days_7_verification === "Done") entry.sevenDaysVerification++;
+          // Photo Uploaded Master Sheet - count if photo_link has value
+          if (
+            upRow.photo_link &&
+            upRow.photo_link !== null &&
+            upRow.photo_link !== ""
+          ) {
+            entry.photoUploadedMasterSheet++;
+          }
+          // UPAD Online Portal Supply - count if supply_aapurti_date has value
+          if (
+            upRow.supply_aapurti_date &&
+            upRow.supply_aapurti_date !== null &&
+            upRow.supply_aapurti_date !== ""
+          ) {
+            entry.upadOnlinePortalSupply++;
+          }
+          // UP Portal Photo Uploaded - count if photo_rms_data_pending is "Done" or has value
+          if (upRow.photo_rms_data_pending === "Done") {
+            entry.upPortalPhotoUploaded++;
+          }
+          // UP Portal Photo Upload Pending
+          entry.upPortalPhotoUploadPending =
+            entry.installationDone - entry.upPortalPhotoUploaded;
+          // SCADA Portal Lot Creation Done - count if scadalot_creation is "Done"
+          if (upRow.scadalot_creation === "DONE") {
+            entry.scadaPortalLotCreationDone++;
+          }
+          // Photo + RMS Data Pending
+          entry.photoRmsDataPending =
+            entry.installationDone - entry.upPortalPhotoUploaded;
+          // RMS Integration Mapping Done Mail To Rotomag - count if rms_data_mail_to_rotommag is "Done"
+          if (upRow.rms_data_mail_to_rotommag?.toUpperCase() === "DONE") {
+            entry.rmsIntegrationMappingDone++;
+          }
+          // 7 Days RMS Integration Verification Valid - count if days_7_verification is "Done"
+          if (upRow.days_7_verification?.toUpperCase() === "DONE") {
+            entry.sevenDaysRmsIntegrationVerification++;
+          }
         }
 
-        // -- Invoicing --
+        // Invoicing
         const invRow = invMap.get(regId);
         if (invRow) {
-          if (invRow.raisoni_invoice_no) entry.invoiceDone++;
-          if (invRow.laxmi_invoice_no) entry.laxmiInvoiceDone++;
+          // Raisoni Invoice - count if raisoni_invoice_no has value
+          if (
+            invRow.raisoni_invoice_no &&
+            invRow.raisoni_invoice_no !== null &&
+            invRow.raisoni_invoice_no !== ""
+          ) {
+            entry.raisoniInvoice++;
+          }
+          // Laxmi Invoice - count if laxmi_invoice_no has value
+          if (
+            invRow.laxmi_invoice_no &&
+            invRow.laxmi_invoice_no !== null &&
+            invRow.laxmi_invoice_no !== ""
+          ) {
+            entry.laxmiInvoice++;
+          }
         }
 
-        // -- Shares & JCR --
+        // JCR Status - Total JCR Submitted To DO
+        // const jcrRow = jcrMap.get(regId);
+        // if (jcrRow && jcrRow.jcr_submit_date && jcrRow.jcr_submit_date !== null && jcrRow.jcr_submit_date !== "") {
+        //   entry.totalJcrSubmittedToDo++;
+        //   entry.totalJcrAtHo++; // Same as submitted to DO
+        //   entry.jcrUploadedInMasterSheet++; // JCR Uploaded In Master Sheet
+        // }
+
+        const jcrRow = jcrMap.get(regId);
+
+        if (jcrRow && jcrRow.jcr_status) {
+          const status = jcrRow.jcr_status.toUpperCase().trim();
+
+          if (status === "DO") {
+            entry.totalJcrSubmittedToDo++;
+          }
+
+          if (status === "HO") {
+            entry.totalJcrAtHo++;
+          }
+
+          if (status === "PAYMENT DONE") {
+            entry.jcrUploadedInMasterSheet++;
+          }
+        }
+
+        // JCR At IP (Pending) - count of installation done minus jcr submitted
+        entry.jcrAtIp = entry.installationDone - entry.totalJcrSubmittedToDo;
+        // JCR At RBP (Pending) - same as JCR At IP
+        entry.jcrAtRbp = entry.jcrAtIp;
+
+        // Beneficiary Share - Sum amounts, not count
         const shareRow = shareMap.get(regId);
         if (shareRow) {
-          if (shareRow.actual_9) entry.jcrCompleted++;
-          // Sum financial shares
+          // Farmer Share - sum the amounts
           const farmer = parseFloat(shareRow.farmer_share_amt) || 0;
+          // State Share - sum the amounts
           const state = parseFloat(shareRow.state_share_amt) || 0;
+          const central = parseFloat(shareRow.central_share) || 0; // ✅ ADD THIS
+
           entry.farmerShare += farmer;
           entry.stateShare += state;
+          // Central Share - keep as 0 (not in data)
+          // entry.centralShare += 0;
+          entry.centralShare += central;
         }
 
-        // -- IP Payment (JCR Submit Date) --
-        const payRow = paymentMap.get(regId);
-        // "TOTAL JCR SUBMITTED" -> count of "JCR Submit Date" or "bill_send_date"
-        if (payRow && payRow.bill_send_date) entry.totalJcrSubmitted++;
-
-        // -- Insurance --
+        // Insurance
         const insuRow = insuranceMap.get(regId);
-        if (insuRow && insuRow.scada_insurance_upload === "Done") entry.insuranceUploaded++;
+        if (insuRow && insuRow.scada_insurance_upload === "Done") {
+          entry.insuranceUploadedMasterSheet++;
+        }
 
+        // 90 Days RMS Integration Verification Valid - count where days_7_verification is Done
+        if (upRow && upRow.days_7_verification === "Done") {
+          entry.ninetyDaysRmsIntegrationVerification++;
+        }
+
+        // 10% HKRP Share - This should be 0 based on CSV, so don't count anything
+        // Keep it as 0 unless there's specific logic in CSV
+        entry.tenPercentHkrpShare = 0;
       });
 
-      // 4. Calculate Derived Columns & Sort
+      // 4. Convert to array and sort
       const processedData = Array.from(aggMap.values())
-        .sort((a, b) => a.ipName.localeCompare(b.ipName) || a.district.localeCompare(b.district))
+        .sort(
+          (a, b) =>
+            a.ipName.localeCompare(b.ipName) ||
+            a.district.localeCompare(b.district),
+        )
         .map((item, index) => ({
           ...item,
           sNo: index + 1,
-          surveyPending: item.target - item.surveyDone,
-          balanceDispatchPlan: item.target - item.dispatchPlanDone,
-          installationPending: item.target - item.installationDone,
-          photoRmsPending: item.installationDone - item.photoUploadedMaster,
-          upPortalPhotoPending: item.installationDone - item.upPortalPhotoUploaded,
-          invoicePending: item.installationDone - item.invoiceDone,
-          jcrPending: item.installationDone - item.jcrCompleted,
+          // Ensure all numeric fields are numbers
+          target: Number(item.target),
+          surveyDone: Number(item.surveyDone),
+          surveyPending: Number(item.surveyPending),
+          nosOfCompleteSetDispatchPlan: Number(
+            item.nosOfCompleteSetDispatchPlan,
+          ),
+          balanceDispatchPlan: Number(item.balanceDispatchPlan),
+          materialDispatchOnSite: Number(item.materialDispatchOnSite),
+          installationDone: Number(item.installationDone),
+          installationPending: Number(item.installationPending),
+          photoUploadedMasterSheet: Number(item.photoUploadedMasterSheet),
+          upadOnlinePortalSupply: Number(item.upadOnlinePortalSupply),
+          upPortalPhotoUploaded: Number(item.upPortalPhotoUploaded),
+          upPortalPhotoUploadPending: Number(item.upPortalPhotoUploadPending),
+          scadaPortalLotCreationDone: Number(item.scadaPortalLotCreationDone),
+          photoRmsDataPending: Number(item.photoRmsDataPending),
+          rmsIntegrationMappingDone: Number(item.rmsIntegrationMappingDone),
+          sevenDaysRmsIntegrationVerification: Number(
+            item.sevenDaysRmsIntegrationVerification,
+          ),
+          raisoniInvoice: Number(item.raisoniInvoice),
+          laxmiInvoice: Number(item.laxmiInvoice),
+          jcrAtIp: Number(item.jcrAtIp),
+          jcrAtRbp: Number(item.jcrAtRbp),
+          totalJcrSubmittedToDo: Number(item.totalJcrSubmittedToDo),
+          totalJcrAtHo: Number(item.totalJcrAtHo),
+          jcrUploadedInMasterSheet: Number(item.jcrUploadedInMasterSheet),
+          insuranceUploadedMasterSheet: Number(
+            item.insuranceUploadedMasterSheet,
+          ),
+          farmerShare: Number(item.farmerShare),
+          stateShare: Number(item.stateShare),
+          centralShare: Number(item.centralShare),
+          ninetyDaysRmsIntegrationVerification: Number(
+            item.ninetyDaysRmsIntegrationVerification,
+          ),
+          tenPercentHkrpShare: Number(item.tenPercentHkrpShare),
         }));
 
-      // 5. Build IP-wise Expense Summary from ip_payment data
-      const expenseMap = new Map();
-      (paymentData || []).forEach((row) => {
-        const regId = String(row.reg_id || "").trim();
-        if (!regId) return;
-        const portalItem = portalData?.find(
-          (p) => String(p.reg_id || p["Reg ID"] || "").trim() === regId
-        );
-        const ipName = (portalItem?.ip_name || portalItem?.["IP Name"] || portalItem?.installer_name || "Unknown").trim();
+      // Debug logs to verify counts
+      console.log("=== DEBUGGING AGGREGATION ===");
+      console.log("Total Records:", portalData.length);
+      console.log(
+        "Survey Done Count:",
+        processedData.reduce((sum, row) => sum + row.surveyDone, 0),
+      );
+      console.log(
+        "State Share Total:",
+        processedData.reduce((sum, row) => sum + row.stateShare, 0),
+      );
+      console.log(
+        "10% HKRP Share Total:",
+        processedData.reduce((sum, row) => sum + row.tenPercentHkrpShare, 0),
+      );
 
-        if (!expenseMap.has(ipName)) {
-          expenseMap.set(ipName, {
-            ipName,
-            ipCsr: 0,
-            hoCsr60: 0,
-            hoCsr75: 0,
-            transportExpense: 0,
-            ipPaymentTotal: 0,
-            netTotal: 0,
-          });
-        }
-        const entry = expenseMap.get(ipName);
-        const ipCsr = parseFloat(row.ip_jcr_csr_payment) || 0;
-        const ho60 = parseFloat(row.ho_csr_60_percent) || 0;
-        const ho75 = parseFloat(row.ho_csr_75_percent) || 0;
-        const transport = parseFloat(row.transport_expense) || 0;
-        const ipTotal = parseFloat(row.total_amount_payment_to_ip) || 0;
-
-        entry.ipCsr += ipCsr;
-        entry.hoCsr60 += ho60;
-        entry.hoCsr75 += ho75;
-        entry.transportExpense += transport;
-        entry.ipPaymentTotal += ipTotal;
-        entry.netTotal += ipCsr + ho60 + ho75 + transport + ipTotal;
-      });
-
-      const expenseData = Array.from(expenseMap.values())
-        .sort((a, b) => a.ipName.localeCompare(b.ipName))
-        .map((item, index) => ({ ...item, sNo: index + 1 }));
-
-      setExpenseSummary(expenseData);
       setData(processedData);
       setLastUpdated(new Date());
-
     } catch (err) {
       console.error("Dashboard Aggregation Error:", err);
       setError(err.message);
@@ -336,10 +727,14 @@ export default function DashboardPage() {
   // -- Render Helper --
   const formatValue = (val, format) => {
     if (format === "currency") {
-      return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
+      return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0,
+      }).format(val);
     }
     return val;
-  }
+  };
 
   return (
     <div className="space-y-6 sm:space-y-8 sm:p-6 lg:p-8 lg:max-w-screen-2xl mx-auto animate-fade-in-up min-h-screen bg-slate-50/30 text-slate-800">
@@ -348,14 +743,13 @@ export default function DashboardPage() {
           <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent tracking-tight">
             Master Dashboard
           </h1>
-          <p className="text-slate-500 text-sm mt-1">
-            Aggregated Live Data
-          </p>
+          <p className="text-slate-500 text-sm mt-1">Aggregated Live Data</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           {lastUpdated && (
             <span className="text-xs text-slate-400 mr-2 flex items-center gap-1 w-full md:w-auto mb-2 md:mb-0">
-              <Clock className="h-3 w-3" /> Updated: {lastUpdated.toLocaleTimeString()}
+              <Clock className="h-3 w-3" /> Updated:{" "}
+              {lastUpdated.toLocaleTimeString()}
             </span>
           )}
           <Button
@@ -363,9 +757,15 @@ export default function DashboardPage() {
             disabled={isExporting}
             className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md shadow-emerald-500/20 transition-all flex-1 sm:flex-none whitespace-nowrap"
           >
-            <Download className={cn("h-4 w-4 mr-2", isExporting && "animate-bounce")} />
-            <span className="hidden sm:inline">{isExporting ? "Exporting..." : "Export All Data"}</span>
-            <span className="sm:hidden">{isExporting ? "Exporting..." : "Export All"}</span>
+            <Download
+              className={cn("h-4 w-4 mr-2", isExporting && "animate-bounce")}
+            />
+            <span className="hidden sm:inline">
+              {isExporting ? "Exporting..." : "Export All Data"}
+            </span>
+            <span className="sm:hidden">
+              {isExporting ? "Exporting..." : "Export All"}
+            </span>
           </Button>
           <Button
             onClick={fetchData}
@@ -373,7 +773,9 @@ export default function DashboardPage() {
             variant="outline"
             className="border-slate-200 hover:bg-white hover:text-blue-600 hover:border-blue-300 transition-all flex-1 sm:flex-none whitespace-nowrap"
           >
-            <RefreshCw className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")} />
+            <RefreshCw
+              className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")}
+            />
             Refresh
           </Button>
         </div>
@@ -382,7 +784,9 @@ export default function DashboardPage() {
       <Card className="border border-slate-200 shadow-sm bg-white overflow-hidden rounded-xl">
         <CardHeader className="border-b border-slate-100 bg-slate-50/50 px-5 sm:px-6 py-4 sm:py-5">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <CardTitle className="text-lg font-semibold text-slate-800">Summary Report</CardTitle>
+            <CardTitle className="text-lg font-semibold text-slate-800">
+              Summary Report
+            </CardTitle>
             <div className="flex flex-wrap items-center justify-between w-full sm:w-auto gap-2">
               <Button
                 onClick={handleExportSummary}
@@ -393,8 +797,12 @@ export default function DashboardPage() {
                 <span className="hidden sm:inline">Download Summary</span>
                 <span className="sm:hidden">Download</span>
               </Button>
-              <Badge variant="secondary" className="bg-white border-slate-200 text-slate-600 shrink-0">
-                <PlayCircle className="h-3 w-3 mr-1 text-green-500" /> {data.length} Records
+              <Badge
+                variant="secondary"
+                className="bg-white border-slate-200 text-slate-600 shrink-0"
+              >
+                <PlayCircle className="h-3 w-3 mr-1 text-green-500" />{" "}
+                {data.length} Records
               </Badge>
             </div>
           </div>
@@ -409,7 +817,7 @@ export default function DashboardPage() {
                       key={idx}
                       className={cn(
                         "h-11 px-3 sm:px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap border-r border-slate-200/50 bg-slate-50/80 transition-colors",
-                        col.className
+                        col.className,
                       )}
                     >
                       {col.header}
@@ -420,7 +828,10 @@ export default function DashboardPage() {
               <TableBody>
                 {isLoading ? (
                   Array.from({ length: 10 }).map((_, i) => (
-                    <TableRow key={i} className="animate-pulse border-b border-slate-100">
+                    <TableRow
+                      key={i}
+                      className="animate-pulse border-b border-slate-100"
+                    >
                       {dashboardColumns.map((_, j) => (
                         <TableCell key={j} className="p-3">
                           <div className="h-4 bg-slate-100 rounded w-full"></div>
@@ -430,17 +841,30 @@ export default function DashboardPage() {
                   ))
                 ) : error ? (
                   <TableRow>
-                    <TableCell colSpan={dashboardColumns.length} className="h-64 text-center text-red-500">
+                    <TableCell
+                      colSpan={dashboardColumns.length}
+                      className="h-64 text-center text-red-500"
+                    >
                       <div className="flex flex-col items-center gap-2">
                         <AlertCircle className="h-8 w-8" />
                         <p>{error}</p>
-                        <Button variant="outline" size="sm" onClick={fetchData} className="mt-2">Try Again</Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={fetchData}
+                          className="mt-2"
+                        >
+                          Try Again
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
                 ) : data.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={dashboardColumns.length} className="h-64 text-center text-slate-400">
+                    <TableCell
+                      colSpan={dashboardColumns.length}
+                      className="h-64 text-center text-slate-400"
+                    >
                       No data found.
                     </TableCell>
                   </TableRow>
@@ -449,27 +873,50 @@ export default function DashboardPage() {
                     {/* Totals Row */}
                     <TableRow className="bg-slate-100/90 font-semibold border-y-2 border-slate-200 hover:bg-slate-200/50 sticky top-11 z-20">
                       <TableCell className="text-center sticky left-0 bg-slate-100/90 z-20"></TableCell>
-                      <TableCell className="sticky left-12 bg-slate-100/90 z-20 px-3 sm:px-4">Total</TableCell>
+                      <TableCell className="sticky left-12 bg-slate-100/90 z-20 px-3 sm:px-4">
+                        Total
+                      </TableCell>
                       <TableCell className="sticky left-[212px] bg-slate-100 z-20"></TableCell>
                       <TableCell className="text-center sticky left-[362px] bg-slate-100/90 z-20 font-bold text-slate-900 px-3 sm:px-4">
-                        {data.reduce((sum, row) => sum + (Number(row.target) || 0), 0)}
+                        {data.reduce(
+                          (sum, row) => sum + (Number(row.target) || 0),
+                          0,
+                        )}
                       </TableCell>
                       {dashboardColumns.slice(4).map((col, i) => (
-                        <TableCell key={i} className={cn("border-r border-slate-200/50 px-3 sm:px-4 py-3 font-medium text-slate-800", col.className?.includes("text-right") ? "text-right" : "text-center")}>
-                          {formatValue(data.reduce((sum, row) => sum + (Number(row[col.accessor]) || 0), 0), col.format)}
+                        <TableCell
+                          key={i}
+                          className={cn(
+                            "border-r border-slate-200/50 px-3 sm:px-4 py-3 font-medium text-slate-800",
+                            col.className?.includes("text-right")
+                              ? "text-right"
+                              : "text-center",
+                          )}
+                        >
+                          {formatValue(
+                            data.reduce(
+                              (sum, row) =>
+                                sum + (Number(row[col.accessor]) || 0),
+                              0,
+                            ),
+                            col.format,
+                          )}
                         </TableCell>
                       ))}
                     </TableRow>
 
                     {/* Data Rows */}
                     {data.map((row) => (
-                      <TableRow key={row.id} className="group hover:bg-slate-50/50 transition-colors border-b border-slate-100 last:border-0">
+                      <TableRow
+                        key={row.id}
+                        className="group hover:bg-slate-50/50 transition-colors border-b border-slate-100 last:border-0"
+                      >
                         {dashboardColumns.map((col, idx) => (
                           <TableCell
                             key={idx}
                             className={cn(
                               "border-r border-slate-100/50 px-3 sm:px-4 py-2.5 truncate max-w-[200px] text-slate-600 group-hover:text-slate-900 transition-colors",
-                              col.className
+                              col.className,
                             )}
                             title={row[col.accessor]}
                           >
@@ -506,7 +953,10 @@ export default function DashboardPage() {
                 <span className="hidden sm:inline">Download IP Payment</span>
                 <span className="sm:hidden">Download</span>
               </Button>
-              <Badge variant="secondary" className="bg-white border-emerald-200 text-emerald-700 shrink-0">
+              <Badge
+                variant="secondary"
+                className="bg-white border-emerald-200 text-emerald-700 shrink-0"
+              >
                 {expenseSummary.length} IPs
               </Badge>
             </div>
@@ -517,14 +967,30 @@ export default function DashboardPage() {
             <Table className="w-full text-sm border-collapse">
               <TableHeader className="bg-slate-50/80">
                 <TableRow className="border-b border-slate-200 hover:bg-transparent">
-                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap text-center w-14">S.No</TableHead>
-                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[200px]">IP</TableHead>
-                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">IP (CSR)</TableHead>
-                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">HO(CSR) 60%</TableHead>
-                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">HO(CSR) 75%</TableHead>
-                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">Transport Expense</TableHead>
-                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">IP Payment Total</TableHead>
-                  <TableHead className="h-11 px-4 text-xs font-semibold text-emerald-800 uppercase tracking-wider whitespace-nowrap text-right bg-emerald-50/50">Net Total</TableHead>
+                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap text-center w-14">
+                    S.No
+                  </TableHead>
+                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap min-w-[200px]">
+                    IP
+                  </TableHead>
+                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">
+                    IP (CSR)
+                  </TableHead>
+                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">
+                    HO(CSR) 60%
+                  </TableHead>
+                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">
+                    HO(CSR) 75%
+                  </TableHead>
+                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">
+                    Transport Expense
+                  </TableHead>
+                  <TableHead className="h-11 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap text-right">
+                    IP Payment Total
+                  </TableHead>
+                  <TableHead className="h-11 px-4 text-xs font-semibold text-emerald-800 uppercase tracking-wider whitespace-nowrap text-right bg-emerald-50/50">
+                    Net Total
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -532,51 +998,103 @@ export default function DashboardPage() {
                   Array.from({ length: 3 }).map((_, i) => (
                     <TableRow key={i} className="animate-pulse">
                       {Array.from({ length: 8 }).map((_, j) => (
-                        <TableCell key={j} className="p-3"><div className="h-4 bg-slate-100 rounded w-full"></div></TableCell>
+                        <TableCell key={j} className="p-3">
+                          <div className="h-4 bg-slate-100 rounded w-full"></div>
+                        </TableCell>
                       ))}
                     </TableRow>
                   ))
                 ) : expenseSummary.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="h-32 text-center text-slate-400">No expense data found.</TableCell>
+                    <TableCell
+                      colSpan={8}
+                      className="h-32 text-center text-slate-400"
+                    >
+                      No expense data found.
+                    </TableCell>
                   </TableRow>
                 ) : (
                   <>
                     {/* Totals Row */}
                     <TableRow className="bg-slate-50/80 font-semibold border-y-2 border-slate-200 hover:bg-slate-100/50 text-slate-800">
                       <TableCell className="text-center"></TableCell>
-                      <TableCell className="font-bold text-emerald-900">Total</TableCell>
-                      <TableCell className="text-right font-mono">
-                        {formatValue(expenseSummary.reduce((s, r) => s + r.ipCsr, 0), "currency")}
+                      <TableCell className="font-bold text-emerald-900">
+                        Total
                       </TableCell>
                       <TableCell className="text-right font-mono">
-                        {formatValue(expenseSummary.reduce((s, r) => s + r.hoCsr60, 0), "currency")}
+                        {formatValue(
+                          expenseSummary.reduce((s, r) => s + r.ipCsr, 0),
+                          "currency",
+                        )}
                       </TableCell>
                       <TableCell className="text-right font-mono">
-                        {formatValue(expenseSummary.reduce((s, r) => s + r.hoCsr75, 0), "currency")}
+                        {formatValue(
+                          expenseSummary.reduce((s, r) => s + r.hoCsr60, 0),
+                          "currency",
+                        )}
                       </TableCell>
                       <TableCell className="text-right font-mono">
-                        {formatValue(expenseSummary.reduce((s, r) => s + r.transportExpense, 0), "currency")}
+                        {formatValue(
+                          expenseSummary.reduce((s, r) => s + r.hoCsr75, 0),
+                          "currency",
+                        )}
                       </TableCell>
                       <TableCell className="text-right font-mono">
-                        {formatValue(expenseSummary.reduce((s, r) => s + r.ipPaymentTotal, 0), "currency")}
+                        {formatValue(
+                          expenseSummary.reduce(
+                            (s, r) => s + r.transportExpense,
+                            0,
+                          ),
+                          "currency",
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        {formatValue(
+                          expenseSummary.reduce(
+                            (s, r) => s + r.ipPaymentTotal,
+                            0,
+                          ),
+                          "currency",
+                        )}
                       </TableCell>
                       <TableCell className="text-right font-mono font-bold text-emerald-700 bg-emerald-50">
-                        {formatValue(expenseSummary.reduce((s, r) => s + r.netTotal, 0), "currency")}
+                        {formatValue(
+                          expenseSummary.reduce((s, r) => s + r.netTotal, 0),
+                          "currency",
+                        )}
                       </TableCell>
                     </TableRow>
 
                     {/* Data Rows */}
                     {expenseSummary.map((row) => (
-                      <TableRow key={row.ipName} className="hover:bg-slate-50/70 transition-colors border-b border-slate-100/70 last:border-none">
-                        <TableCell className="text-center text-slate-500 py-3">{row.sNo}</TableCell>
-                        <TableCell className="font-medium text-slate-700 py-3">{row.ipName}</TableCell>
-                        <TableCell className="text-right font-mono text-slate-600 py-3">{formatValue(row.ipCsr, "currency")}</TableCell>
-                        <TableCell className="text-right font-mono text-slate-600 py-3">{formatValue(row.hoCsr60, "currency")}</TableCell>
-                        <TableCell className="text-right font-mono text-slate-600 py-3">{formatValue(row.hoCsr75, "currency")}</TableCell>
-                        <TableCell className="text-right font-mono text-slate-600 py-3">{formatValue(row.transportExpense, "currency")}</TableCell>
-                        <TableCell className="text-right font-mono text-slate-700 font-medium py-3">{formatValue(row.ipPaymentTotal, "currency")}</TableCell>
-                        <TableCell className="text-right font-mono font-semibold text-emerald-700 bg-emerald-50/30 py-3">{formatValue(row.netTotal, "currency")}</TableCell>
+                      <TableRow
+                        key={row.ipName}
+                        className="hover:bg-slate-50/70 transition-colors border-b border-slate-100/70 last:border-none"
+                      >
+                        <TableCell className="text-center text-slate-500 py-3">
+                          {row.sNo}
+                        </TableCell>
+                        <TableCell className="font-medium text-slate-700 py-3">
+                          {row.ipName}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-slate-600 py-3">
+                          {formatValue(row.ipCsr, "currency")}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-slate-600 py-3">
+                          {formatValue(row.hoCsr60, "currency")}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-slate-600 py-3">
+                          {formatValue(row.hoCsr75, "currency")}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-slate-600 py-3">
+                          {formatValue(row.transportExpense, "currency")}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-slate-700 font-medium py-3">
+                          {formatValue(row.ipPaymentTotal, "currency")}
+                        </TableCell>
+                        <TableCell className="text-right font-mono font-semibold text-emerald-700 bg-emerald-50/30 py-3">
+                          {formatValue(row.netTotal, "currency")}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </>
