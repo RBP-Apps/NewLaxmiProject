@@ -31,6 +31,13 @@ export default function InvoicingPage() {
   const [historyItems, setHistoryItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [formData, setFormData] = useState({
+
+    supply_no: "",
+  supply_date: "",
+  supply_link: "",
+
+
+
     raisoni_invoice_no: "",
     invoice_date: "",
     raisoni_invoice_link: "",
@@ -73,19 +80,6 @@ export default function InvoicingPage() {
     return [...new Set(values)].sort();
   };
 
-  // const filteredPendingItems = pendingItems.filter((item) =>
-  //   Object.values(item).some((value) =>
-  //     String(value).toLowerCase().includes(searchTerm.toLowerCase())
-  //   )
-  // );
-
-  // const filteredHistoryItems = historyItems.filter((item) =>
-  //   Object.values(item).some((value) =>
-  //     String(value).toLowerCase().includes(searchTerm.toLowerCase())
-  //   )
-  // );
-
-  // Helper to construct preview URLs
 
   const filteredPendingItems = pendingItems.filter((item) => {
     const matchesSearch = Object.values(item).some((value) =>
@@ -224,6 +218,9 @@ export default function InvoicingPage() {
       planned_6: item.planned_6 || "",
       actual_6: item.actual_6 || new Date().toISOString().split('T')[0],
       delay_6: item.delay_6 || "",
+      supply_no: item.supply_no || "",
+  supply_date: item.supply_date || "",
+  supply_link: item.supply_link || "",
       raisoni_invoice_no: item.raisoni_invoice_no || "",
       invoice_date: item.invoice_date || "",
       raisoni_invoice_link: item.raisoni_invoice_link || "",
@@ -284,15 +281,48 @@ export default function InvoicingPage() {
 
 
 
-  const handleFileUpload = (e, fieldName) => {
-    if (e.target.files && e.target.files[0]) {
-      setFormData({
-        ...formData,
-        [fieldName]: e.target.files[0],
-        [fieldName.replace('file_', '')]: e.target.files[0].name // Store filename as string representation for now
-      });
-    }
-  };
+  // const handleFileUpload = (e, fieldName) => {
+  //   if (e.target.files && e.target.files[0]) {
+  //     setFormData({
+  //       ...formData,
+  //       [fieldName]: e.target.files[0],
+  //       [fieldName.replace('file_', '')]: e.target.files[0].name // Store filename as string representation for now
+  //     });
+  //   }
+  // };
+
+  const handleFileUpload = async (e, fieldName) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const filePath = `insurance/${Date.now()}_${file.name}`;
+
+  const { error } = await supabase.storage
+    .from("Image_bucket")
+    .upload(filePath, file);
+
+  if (error) {
+    console.error("Upload error:", error);
+    alert("File upload failed");
+    return;
+  }
+
+  // ✅ public URL get karo
+  const { data } = supabase.storage
+    .from("Image_bucket")
+    .getPublicUrl(filePath);
+
+  const publicUrl = data.publicUrl;
+
+  // ✅ formData me save karo (IMPORTANT)
+  setFormData((prev) => ({
+    ...prev,
+    [fieldName.replace("file_", "")]: publicUrl,
+  }));
+};
+
+
+
 
   const handleSubmit = async () => {
     if (!selectedItem && (!isBulk || selectedRows.length === 0)) return;
@@ -313,6 +343,11 @@ export default function InvoicingPage() {
         const rowUpdate = {
           actual_6: formData.actual_6 || new Date().toISOString().split('T')[0],
           delay_6: formData.delay_6 || null,
+          supply_no: formData.supply_no || null,
+  supply_date: formData.supply_date || null,
+  supply_link: formData.supply_link || null,
+
+
           raisoni_invoice_no: formData.raisoni_invoice_no || null,
           invoice_date: formData.invoice_date || null,
           raisoni_invoice_link: formData.raisoni_invoice_link || null,
@@ -839,6 +874,18 @@ export default function InvoicingPage() {
                       <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         District
                       </TableHead>
+
+
+
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Supply No
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Supply Date
+                      </TableHead>
+                      <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                        Supply Link
+                      </TableHead>
                       <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Raisoni Invoice No
                       </TableHead>
@@ -848,6 +895,10 @@ export default function InvoicingPage() {
                       <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Raisoni Link
                       </TableHead>
+
+
+
+
                       <TableHead className="h-12 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         Laxmi Link
                       </TableHead>
@@ -935,6 +986,19 @@ export default function InvoicingPage() {
                           <TableCell className="text-slate-600 text-sm">
                             {item.district}
                           </TableCell>
+
+
+                          <TableCell className="font-medium text-blue-700 bg-blue-50/50 text-sm">
+                            {item.supply_no || "-"}
+                          </TableCell>
+                          <TableCell className="text-slate-600 text-sm">
+                            {item.supply_date || "-"}
+                          </TableCell>
+                          <TableCell>
+                            {item.supply_link ? (
+                              <a href={item.supply_link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-sm font-medium">View</a>
+                            ) : "-"}
+                          </TableCell>
                           <TableCell className="font-medium text-blue-700 bg-blue-50/50 text-sm">
                             {item.raisoni_invoice_no || "-"}
                           </TableCell>
@@ -946,6 +1010,9 @@ export default function InvoicingPage() {
                               <a href={item.raisoni_invoice_link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-sm font-medium">View</a>
                             ) : "-"}
                           </TableCell>
+
+
+
                           <TableCell>
                             {item.laxmi_invoice_link ? (
                               <a href={item.laxmi_invoice_link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-sm font-medium">View</a>
@@ -1124,6 +1191,55 @@ export default function InvoicingPage() {
 
                   {/* Form Fields */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 scale-95 origin-top">
+
+
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                        Supply No
+                      </Label>
+                      <Input
+                        value={formData.supply_no}
+  onChange={(e) =>
+    setFormData({ ...formData, supply_no: e.target.value })
+  }
+                        placeholder="Enter Supply number"
+                        className="border-slate-200 focus:border-blue-500 focus-visible:ring-blue-500/20 bg-slate-50 hover:bg-white transition-colors h-11"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                        Supply Date
+                      </Label>
+                      <Input
+                        type="date"
+  value={formData.supply_date}
+  onChange={(e) =>
+    setFormData({ ...formData, supply_date: e.target.value })
+  }
+                        className="border-slate-200 focus:border-blue-500 focus-visible:ring-blue-500/20 bg-slate-50 hover:bg-white transition-colors h-11"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                        Supply Link
+                      </Label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                          <Upload className="h-4 w-4 text-slate-400" />
+                        </div>
+                        <Input
+                          type="file"
+  onChange={(e) => handleFileUpload(e, 'file_supply_link')}
+                          className="border-slate-200 focus:border-blue-500 focus-visible:ring-blue-500/20 bg-slate-50 hover:bg-white transition-colors h-11 pl-10 pt-[0.6rem] cursor-pointer file:cursor-pointer file:bg-blue-50 file:text-blue-700 file:border-0 file:rounded-md file:px-2 file:py-1 file:text-xs file:font-semibold"
+                        />
+                      </div>
+                    </div>
+
+
+
                     <div className="space-y-2">
                       <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
@@ -1171,6 +1287,15 @@ export default function InvoicingPage() {
                         />
                       </div>
                     </div>
+
+
+
+
+
+
+
+
+
                     <div className="space-y-2">
                       <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
