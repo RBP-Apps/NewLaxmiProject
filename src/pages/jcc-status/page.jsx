@@ -1238,6 +1238,7 @@ export default function JccStatusPage() {
                                             </Label>
                                             <Input
                                                 type="file"
+                                                multiple   
                                                 onChange={(e) => handleFileUpload(e, 'file_jcrLink')}
                                                 className="w-full h-10 px-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-slate-50 hover:bg-white transition-colors file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100 cursor-pointer"
                                             />

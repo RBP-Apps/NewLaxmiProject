@@ -32,7 +32,7 @@ export default function InvoicingPage() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [formData, setFormData] = useState({
 
-    supply_no: "",
+    // supply_no: "",
   supply_date: "",
   supply_link: "",
 
@@ -218,7 +218,7 @@ export default function InvoicingPage() {
       planned_6: item.planned_6 || "",
       actual_6: item.actual_6 || new Date().toISOString().split('T')[0],
       delay_6: item.delay_6 || "",
-      supply_no: item.supply_no || "",
+      // supply_no: item.supply_no || "",
   supply_date: item.supply_date || "",
   supply_link: item.supply_link || "",
       raisoni_invoice_no: item.raisoni_invoice_no || "",
@@ -343,7 +343,7 @@ export default function InvoicingPage() {
         const rowUpdate = {
           actual_6: formData.actual_6 || new Date().toISOString().split('T')[0],
           delay_6: formData.delay_6 || null,
-          supply_no: formData.supply_no || null,
+          // supply_no: formData.supply_no || null,
   supply_date: formData.supply_date || null,
   supply_link: formData.supply_link || null,
 
@@ -988,9 +988,7 @@ export default function InvoicingPage() {
                           </TableCell>
 
 
-                          <TableCell className="font-medium text-blue-700 bg-blue-50/50 text-sm">
-                            {item.supply_no || "-"}
-                          </TableCell>
+                          
                           <TableCell className="text-slate-600 text-sm">
                             {item.supply_date || "-"}
                           </TableCell>
@@ -1193,7 +1191,7 @@ export default function InvoicingPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 scale-95 origin-top">
 
 
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                       <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
                         Supply No
@@ -1206,7 +1204,7 @@ export default function InvoicingPage() {
                         placeholder="Enter Supply number"
                         className="border-slate-200 focus:border-blue-500 focus-visible:ring-blue-500/20 bg-slate-50 hover:bg-white transition-colors h-11"
                       />
-                    </div>
+                    </div> */}
                     <div className="space-y-2">
                       <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
