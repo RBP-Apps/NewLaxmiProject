@@ -147,10 +147,14 @@ export default function LoginPage() {
         {/* Top Accent Line */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-600" />
 
-        <CardHeader className="space-y-3 sm:space-y-4 text-center pt-6 pb-6 sm:pt-8 sm:pb-8">
-          <div className="mx-auto bg-white p-4 rounded-2xl shadow-lg shadow-blue-500/10 mb-1 border border-blue-50">
-            <ShieldCheck className="w-8 h-8 text-blue-600" />
-          </div>
+        <CardHeader className="space-y-3 sm:space-y-4 text-center pt-2 pb-6 sm:pt-8 sm:pb-8">
+          <div className="mx-auto  p-4 mb-1">
+    <img 
+      src="/Logo.PNG" 
+      alt="logo" 
+      className="w-32 h-20 object-contain mx-auto"
+    />
+  </div>
           <div className="space-y-2">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-800">
               Laxmi
